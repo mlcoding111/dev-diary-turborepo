@@ -2,15 +2,15 @@ name: CI
 
 on:
   push:
-    branches: ["main"]	
+    branches: ["main"]
 
 jobs:
   build:
     name: Build and Test
     runs-on: ubuntu-latest
-    env: 
+    env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -23,8 +23,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Build
-        run: pnpm build
-      - name: Run tests
-        run: pnpm test
+        run: pnpm run build
       - name: Test
         run: pnpm run test
