@@ -16,7 +16,13 @@ const appRouter = t.router({
       title: z.string(),
       description: z.string(),
       price: z.number(),
-    })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
+    })).mutation(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any),
+    getProducts: publicProcedure.output(z.object({
+      id: z.string(),
+      title: z.string(),
+      description: z.string(),
+      price: z.number(),
+    }).array()).query(async () => "PLACEHOLDER_DO_NOT_REMOVE" as any)
   })
 });
 export type AppRouter = typeof appRouter;
