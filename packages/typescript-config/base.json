@@ -13,6 +13,7 @@
     "strictPropertyInitialization": false,
     "noUncheckedIndexedAccess": true,
     "resolveJsonModule": true,
+    "preserveSymlinks": true,
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2022"

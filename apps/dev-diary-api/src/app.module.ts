@@ -4,6 +4,7 @@ import { TRPcModule } from './trpc/trpc.module';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ProductsController } from './products/product.controller';
+import { GlobalValidationInterceptor } from './interceptors/validator.interceptor';
 
 @Module({
   imports: [ProductsModule],
@@ -12,6 +13,10 @@ import { ProductsController } from './products/product.controller';
     {
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: GlobalValidationInterceptor,
     },
   ],
 })

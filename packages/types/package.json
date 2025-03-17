@@ -9,8 +9,7 @@
     },
     "exports": {
         ".": {
-            "require": "./src/index.ts",
-            "default": "./dist/index.js"
+            "require": "./src/index.ts"
         }
     },
     "devDependencies": {
