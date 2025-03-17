@@ -1,7 +1,7 @@
 import { Input, Mutation, Query, Router } from 'nestjs-trpc';
 import { ProductsService } from './products.service';
-import { productSchema } from './product.schema';
-import { type Product } from '@repo/types';
+// import { productSchema } from './product.schema';
+// import { type Product } from '@repo/types';
 
 @Router({ alias: 'products' })
 export class ProductRouter {

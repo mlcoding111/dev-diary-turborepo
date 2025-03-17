@@ -1,16 +1,21 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { type Product } from '@repo/types';
+// import { type Product } from '@repo/types';
 import { Validate } from 'src/decorators/validation.decorator';
-import { z, ZodSchema } from 'zod';
-import { productSchema, type TProduct } from '@repo/types';
+import { z } from 'zod';
+// import { productSchema, type TProduct } from '@repo/types';
+import {
+  productSchema,
+  type TProduct,
+  type TCreateProduct,
+} from '@repo/types/schema';
 
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  createProduct(@Body() createProductRequest: Product) {
+  createProduct(@Body() createProductRequest: TCreateProduct): TProduct {
     // type Test = z.infer<typeof productSchema>;
     // const zodSchema: ZodSchema<Test> = productSchema;
     return this.productsService.createProduct(createProductRequest);
@@ -20,7 +25,7 @@ export class ProductsController {
     output: z.array(productSchema),
   })
   @Get()
-  getProducts() {
+  getProducts(): TProduct[] {
     return this.productsService.getProducts();
   }
 }
