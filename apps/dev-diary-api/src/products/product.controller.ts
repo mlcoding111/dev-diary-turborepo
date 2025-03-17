@@ -16,8 +16,6 @@ export class ProductsController {
 
   @Post()
   createProduct(@Body() createProductRequest: TCreateProduct): TProduct {
-    // type Test = z.infer<typeof productSchema>;
-    // const zodSchema: ZodSchema<Test> = productSchema;
     return this.productsService.createProduct(createProductRequest);
   }
 
