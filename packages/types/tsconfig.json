@@ -3,6 +3,9 @@
     "compilerOptions": {
         "outDir": "./dist",
         "strict": false,
+        "paths": {
+            "@repo/types": ["./src/index.ts"]
+        }
     },
     "include": ["src"],
     "exclude": ["node_modules", "dist"]
