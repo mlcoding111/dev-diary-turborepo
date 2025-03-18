@@ -198,10 +198,6 @@ importers:
         version: 8.26.0(eslint@9.22.0)(typescript@5.8.2)
 
   packages/types:
-    dependencies:
-      zod:
-        specifier: ^3.24.2
-        version: 3.24.2
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -221,6 +217,9 @@ importers:
       typescript:
         specifier: 5.8.2
         version: 5.8.2
+      zod:
+        specifier: ^3.24.2
+        version: 3.24.2
 
   packages/typescript-config: {}
 
