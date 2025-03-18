@@ -17,6 +17,8 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "preserveSymlinks": true
+    "preserveSymlinks": true,
+    "strict": true,
+    "noImplicitReturns": true
   }
 }

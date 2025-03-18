@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-// import type { Product, TProduct } from '@repo/types';
-import { type TProduct, type TCreateProduct } from '@repo/types/schema';
+import type { TProduct, TCreateProduct } from '@repo/types/schema';
 
 @Injectable()
 export class ProductsService {

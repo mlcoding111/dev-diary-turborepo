@@ -15,6 +15,10 @@ type validationPayload = {
   output?: ZodSchema;
   input?: ZodSchema;
 };
+
+const methodIsPostPutOrPatch = (method: string) =>
+  method === 'POST' || method === 'PUT' || method === 'PATCH';
+
 @Injectable()
 export class GlobalValidationInterceptor implements NestInterceptor {
   constructor(private readonly reflector: Reflector) {}
@@ -25,25 +29,25 @@ export class GlobalValidationInterceptor implements NestInterceptor {
       context.getHandler(),
     );
 
-    console.log('Validator');
-
     // Get request type
     const request: Request = context.switchToHttp().getRequest();
     const { method, url } = request;
 
+    console.log(`Validating: ${method} ${url}`);
+    // todo: add custom error class
     if (method === 'GET' && !schema?.output) {
       throw new BadRequestException({
-        message: 'Response data validation failed',
+        message: 'Output schema is required for GET requests',
       });
     }
 
-    if (method === 'POST' && !schema.input) {
+    // todo: add custom error class
+    if (methodIsPostPutOrPatch(method) && !schema?.input) {
       throw new BadRequestException({
-        message: 'Request data validation failed',
+        message: 'Input schema is required for POST requests',
       });
     }
 
-    console.log(`${method} ${url}`);
     if (!schema) return next.handle();
 
     return next.handle().pipe(
@@ -54,18 +58,22 @@ export class GlobalValidationInterceptor implements NestInterceptor {
           if (!result.success) {
             throw new BadRequestException({
               message: 'Request data input validation failed',
-              issues: result.error.format(),
+              issues: result.error.flatten(),
             });
           }
         }
 
+        // If output parsing is not a success, either return a detailed error.
+        // But, if the output is not matching the expected schema, we should simply return an error to avoid leaking sensitive information.
+        // Todo: add custom error class
         if (schema.output) {
           const result = schema.output.safeParse(data);
           if (!result.success) {
-            throw new BadRequestException({
-              message: 'Response data output validation failed',
-              issues: result.error.format(),
-            });
+            throw new Error('Response data output validation failed');
+            // throw new BadRequestException({
+            //   message: 'Response data output validation failed',
+            //   issues: result.error.flatten(),
+            // });
           }
         }
 

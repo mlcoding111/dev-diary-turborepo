@@ -11,7 +11,5 @@ export const productSchema = z.object({
 export const createProductSchema = productSchema.omit({ id: true });
 
 export type TProduct = z.infer<typeof productSchema>;
-export type TCreateProduct = z.infer<typeof createProductSchema>;
-
-// omit some fields
-export type TProductSerialized = Omit<TProduct, 'id' | 'createdAt' | 'updatedAt'>;
+export type TCreateProduct = Omit<z.infer<typeof productSchema>, 'id'>;
+export type TSerializedProduct = Omit<z.infer<typeof productSchema>, 'description' | 'price'>;
