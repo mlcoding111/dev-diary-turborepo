@@ -77,6 +77,7 @@ export class GlobalValidationInterceptor implements NestInterceptor {
           }
         }
 
+        // @lint-ignore: no-unsafe-return
         return data;
       }),
     );
