@@ -16,14 +16,10 @@ export class TransformInterceptor<T>
     context: ExecutionContext,
     next: CallHandler<T>,
   ): Observable<TApiResponseSuccess<T>> {
-    const ctx = context.switchToHttp();
-    const request = ctx.getRequest<Request>();
-    return next
-      .handle()
-      .pipe(map((data) => this.formatResponse(data, request)));
+    return next.handle().pipe(map((data) => this.formatResponse(data)));
   }
 
-  private formatResponse(data: T, request: Request): TApiResponseSuccess<T> {
+  private formatResponse(data: T): TApiResponseSuccess<T> {
     return {
       success: true,
       data,
