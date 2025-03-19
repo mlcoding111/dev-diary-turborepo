@@ -8,6 +8,7 @@ import {
 } from '@repo/types/schema';
 import z from 'zod';
 import type { TProduct, TSerializedProduct } from '@repo/types/schema';
+import { ApiExceptionError } from 'src/core/utils/api/exception/ApiError.exception';
 
 @Controller('products')
 export class ProductsController {
@@ -26,6 +27,12 @@ export class ProductsController {
   })
   @Get()
   getProducts(): TSerializedProduct[] {
+    throw new ApiExceptionError({
+      message: 'test',
+      error_code: 'TEST_ERROR',
+      status_code: 500,
+      data: null,
+    });
     // This would throw and error if the output is not matching the expected schema.
     // const transformedProducts = this.productsService
     //   .getProducts()

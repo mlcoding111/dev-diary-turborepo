@@ -12,6 +12,10 @@
         "./schema": {
             "types": "./src/schema/product-schema.ts",
             "default": "./dist/schema/product-schema.js"
+        },
+        "./api": {
+            "types": "./src/types/api.ts",
+            "default": "./dist/types/api.js"
         }
     },
     "devDependencies": {

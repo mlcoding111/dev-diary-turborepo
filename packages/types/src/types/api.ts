@@ -1,8 +1,25 @@
 export type TApiResponse<T> = {
 	success: boolean;
-	http_status_code: number;
-    error_code?: string;
+	status_code: number;
 	message: string;
 	data: T;
 	metadata?: Record<string, any>;
+};
+
+// Payload when calling the ApiError constructor
+export type TExceptionErrorPayload = Pick<TApiResponse<null>, 'data' | 'message' | 'metadata' | 'status_code'> & {
+	error_code: string;
+};
+
+export type TExceptionErrorResponse = TApiResponse<null> & {
+	success: false;
+	error_code: string;
+};
+
+export type TSuccessResponse<T> = TApiResponse<T> & {
+	success: true;
+};
+
+export type TExceptionError = TExceptionErrorResponse & {
+	statusCode: 500;
 };
