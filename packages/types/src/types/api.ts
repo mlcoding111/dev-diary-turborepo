@@ -6,18 +6,26 @@ export type TApiResponse<T> = {
 	metadata?: Record<string, any>;
 };
 
-// Payload when calling the ApiError constructor
-export type TExceptionErrorPayload = Pick<TApiResponse<null>, 'data' | 'message' | 'metadata' | 'status_code'> & {
+export type TExceptionErrorPayload = Pick<
+	TApiResponse<null>,
+	"data" | "message" | "metadata" | "status_code"
+> & {
 	error_code: string;
 };
 
-export type TExceptionErrorResponse = TApiResponse<null> & {
+export type TExceptionErrorResponse = Omit<TApiResponse<null>, "data"> & {
 	success: false;
 	error_code: string;
 	path: string;
+	stack?: string | null | undefined;
+	timestamp: string;
 };
 
-export type TSuccessResponse<T> = TApiResponse<T> & {
+export type TInternalErrorPayload = Pick<TApiResponse<null>, "metadata"> & {
+	message?: string;
+};
+
+export type TApiResponseSuccess<T> = TApiResponse<T> & {
 	success: true;
 };
 

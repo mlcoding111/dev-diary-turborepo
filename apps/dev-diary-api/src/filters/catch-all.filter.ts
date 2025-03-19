@@ -7,45 +7,59 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
-import { TApiResponse } from '@repo/types/api';
 import { ApiException } from '../core/utils/api/exception/ApiError.exception';
+import { TExceptionErrorResponse } from '@repo/types/api';
 
 @Catch()
 export class CatchEverythingFilter implements ExceptionFilter {
   constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
-    // In certain situations `httpAdapter` might not be available in the
-    // constructor method, thus we should resolve it here.
     const { httpAdapter } = this.httpAdapterHost;
-
     const ctx = host.switchToHttp();
 
-    const errorIsHttpException =
-      exception instanceof HttpException || exception instanceof ApiException;
+    const isHttpException = this.isHttpException(exception);
+    const httpStatus = isHttpException
+      ? exception.getStatus()
+      : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const errorIsInternalServerError =
-      exception instanceof InternalServerErrorException;
-
-    // get the instance of exception
-    const exceptionInstance =
-      errorIsHttpException || errorIsInternalServerError
-        ? exception
-        : new InternalServerErrorException();
-
-    console.log('Exception instance', exceptionInstance.getResponse());
-
-    const httpStatus =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
-
-    const responseBody = {
+    const responseBody: TExceptionErrorResponse = {
+      success: false,
+      message: this.getErrorMessage(exception) || 'Internal Server Error',
       status_code: httpStatus,
       timestamp: new Date().toISOString(),
-      path: httpAdapter.getRequestUrl(ctx.getRequest()),
+      error_code: 'INTERNAL_SERVER_ERROR',
+      path: httpAdapter.getRequestUrl(ctx.getRequest()) as string,
+      stack: this.getStack(exception),
     };
 
     httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);
+  }
+
+  private isHttpException(exception: unknown): exception is HttpException {
+    return (
+      exception instanceof HttpException || exception instanceof ApiException
+    );
+  }
+
+  private isCustomException(
+    exception: unknown,
+  ): exception is ApiException | InternalServerErrorException {
+    return (
+      exception instanceof ApiException ||
+      exception instanceof InternalServerErrorException
+    );
+  }
+
+  private getErrorMessage(exception: unknown): string {
+    return exception instanceof Error || exception instanceof ApiException
+      ? exception.message
+      : 'Internal Server Error';
+  }
+
+  private getStack(exception: unknown): string | null | undefined {
+    return exception instanceof ApiException || exception instanceof Error
+      ? exception.stack
+      : null;
   }
 }

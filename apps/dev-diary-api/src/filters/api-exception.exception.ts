@@ -1,4 +1,4 @@
-import { HttpException, InternalServerErrorException } from '@nestjs/common';
+import { HttpException } from '@nestjs/common';
 
 export type TExceptionError = {
   status_code: number;
@@ -28,11 +28,5 @@ export class ApiException extends HttpException {
 
     this.error_code = error_code;
     this.meta_data = meta_data;
-  }
-}
-
-export class InternalServerError extends InternalServerErrorException {
-  constructor(message: string) {
-    super(message);
   }
 }

@@ -6,4 +6,4 @@ export interface IProduct {
 	price: number;
 }
 
-export interface ISerializedProduct extends Omit<IProduct, 'price'> {}
+export interface ISerializedProduct extends Omit<IProduct, "price"> {}
