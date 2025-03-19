@@ -25,7 +25,7 @@ export type TInternalErrorPayload = Pick<TApiResponse<null>, "metadata"> & {
 	message?: string;
 };
 
-export type TApiResponseSuccess<T> = TApiResponse<T> & {
+export type TApiResponseSuccess<T> = Omit<TApiResponse<T>, "status_code"> & {
 	success: true;
 };
 

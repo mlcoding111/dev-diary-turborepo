@@ -9,6 +9,6 @@ export class InternalServerError extends InternalServerErrorException {
       metadata,
     });
 
-    this.metadata = metadata as Record<string, any>;
+    this.metadata = metadata;
   }
 }

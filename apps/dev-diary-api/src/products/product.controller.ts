@@ -24,7 +24,7 @@ export class ProductsController {
   }
 
   @Validate({
-    output: z.array(productSchema),
+    output: productSchema,
   })
   @Get()
   getProducts(): TSerializedProduct[] {
@@ -50,6 +50,7 @@ export class ProductsController {
     //     id: product.id,
     //     name: product.name,
     //     title: product.title,
+    //     test: 'yop',
     //   }));
     // return transformedProducts;
     return this.productsService.getProducts();
