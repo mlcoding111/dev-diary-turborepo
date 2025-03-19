@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ZodSchema } from 'zod';
 import { VALIDATION_SCHEMA } from '../decorators/validation.decorator';
+import { ValidationError } from '../core/utils/api/exception/ValidationError.exception';
 
 // Define the structure for validation schemas
 type validationPayload = {
@@ -59,9 +60,12 @@ export class GlobalValidationInterceptor implements NestInterceptor {
         if (schema.input) {
           const result = schema.input.safeParse(data);
           if (!result.success) {
-            throw new BadRequestException({
+            throw new ValidationError({
               message: 'Request data input validation failed',
-              issues: result.error.flatten(),
+              fields: result.error.flatten(),
+              data: null,
+              status_code: 400,
+              error_code: 'VALIDATION_ERROR',
             });
           }
         }

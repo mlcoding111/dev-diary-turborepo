@@ -25,6 +25,8 @@ export class CatchEverythingFilter implements ExceptionFilter {
 
     const isCustomException = this.isCustomException(exception);
 
+    console.log('CatchEverythingFilter');
+
     const responseBody: TExceptionErrorResponse = {
       success: false,
       message: this.getErrorMessage(exception) || 'Internal Server Error',
