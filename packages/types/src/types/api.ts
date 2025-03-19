@@ -14,6 +14,7 @@ export type TExceptionErrorPayload = Pick<TApiResponse<null>, 'data' | 'message'
 export type TExceptionErrorResponse = TApiResponse<null> & {
 	success: false;
 	error_code: string;
+	path: string;
 };
 
 export type TSuccessResponse<T> = TApiResponse<T> & {

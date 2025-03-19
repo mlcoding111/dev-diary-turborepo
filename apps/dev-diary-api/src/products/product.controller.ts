@@ -8,7 +8,7 @@ import {
 } from '@repo/types/schema';
 import z from 'zod';
 import type { TProduct, TSerializedProduct } from '@repo/types/schema';
-import { ApiExceptionError } from 'src/core/utils/api/exception/ApiError.exception';
+import { ApiException } from 'src/core/utils/api/exception/ApiError.exception';
 
 @Controller('products')
 export class ProductsController {
@@ -27,7 +27,7 @@ export class ProductsController {
   })
   @Get()
   getProducts(): TSerializedProduct[] {
-    throw new ApiExceptionError({
+    throw new ApiException({
       message: 'test',
       error_code: 'TEST_ERROR',
       status_code: 500,

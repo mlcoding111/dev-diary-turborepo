@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { TApiResponse } from '@repo/types/api';
-import { ApiExceptionError } from '../core/utils/api/exception/ApiError.exception';
+import { ApiException } from '../core/utils/api/exception/ApiError.exception';
 
 @Catch()
 export class CatchEverythingFilter implements ExceptionFilter {
@@ -21,19 +21,27 @@ export class CatchEverythingFilter implements ExceptionFilter {
 
     const ctx = host.switchToHttp();
 
+    const errorIsHttpException =
+      exception instanceof HttpException || exception instanceof ApiException;
+
+    const errorIsInternalServerError =
+      exception instanceof InternalServerErrorException;
+
     // get the instance of exception
     const exceptionInstance =
-      exception instanceof HttpException
+      errorIsHttpException || errorIsInternalServerError
         ? exception
         : new InternalServerErrorException();
-    console.log('Exception instance', exceptionInstance.stack);
+
+    console.log('Exception instance', exceptionInstance.getResponse());
+
     const httpStatus =
       exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
     const responseBody = {
-      statusCode: httpStatus,
+      status_code: httpStatus,
       timestamp: new Date().toISOString(),
       path: httpAdapter.getRequestUrl(ctx.getRequest()),
     };

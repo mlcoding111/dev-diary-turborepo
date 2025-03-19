@@ -4,7 +4,7 @@ import {
   TExceptionErrorResponse,
 } from '@repo/types/api';
 
-export class ApiExceptionError
+export class ApiException
   extends HttpException
   implements TExceptionErrorResponse
 {
@@ -15,6 +15,7 @@ export class ApiExceptionError
   readonly message: string;
   readonly timestamp: string;
   readonly data: null;
+  readonly path: string;
 
   constructor({
     message = '',
@@ -37,6 +38,10 @@ export class ApiExceptionError
     this.metadata = metadata;
     this.status_code = status_code;
     this.message = message;
+  }
+
+  getStatus(): number {
+    return this.status_code;
   }
 }
 
