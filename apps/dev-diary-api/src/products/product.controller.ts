@@ -23,6 +23,9 @@ export class ProductsController {
     return this.productsService.createProduct(createProductRequest);
   }
 
+  @Validate({
+    output: productSchema,
+  })
   @Get()
   getProducts(): TSerializedProduct[] {
     // throw new Error('This is a test');
@@ -41,15 +44,15 @@ export class ProductsController {
     // });
 
     // This would throw and error if the output is not matching the expected schema.
-    const transformedProducts = this.productsService
-      .getProducts()
-      .map((product) => ({
-        id: product.id,
-        name: product.name,
-        title: product.title,
-        test: 'yop',
-      }));
-    return transformedProducts;
+    // const transformedProducts = this.productsService
+    //   .getProducts()
+    //   .map((product) => ({
+    //     id: product.id,
+    //     name: product.name,
+    //     title: product.title,
+    //     test: 'yop',
+    //   }));
+    // return transformedProducts;
     return this.productsService.getProducts();
   }
 }

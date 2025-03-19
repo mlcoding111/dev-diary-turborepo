@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import type { TProduct, TCreateProduct } from '@repo/types/schema';
+import type {
+  TProduct,
+  TCreateProduct,
+  TSerializedProduct,
+} from '@repo/types/schema';
 
 @Injectable()
 export class ProductsService {
-  private readonly products: TProduct[] = [];
+  private readonly products: TSerializedProduct[] = [];
 
   createProduct(productData: TCreateProduct): TProduct {
     const product: TProduct = {
@@ -14,7 +18,7 @@ export class ProductsService {
     return product;
   }
 
-  getProducts(): TProduct[] {
+  getProducts(): TSerializedProduct[] {
     return this.products;
   }
 }
