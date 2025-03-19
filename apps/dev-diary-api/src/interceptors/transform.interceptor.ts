@@ -21,8 +21,6 @@ export class TransformInterceptor<T>
   ): Observable<Response<T>> {
     const ctx = context.switchToHttp();
     const request = ctx.getRequest<Request>();
-
-    console.log('Transform body', request.body);
     return next.handle().pipe(map((data) => ({ data })));
   }
 }
