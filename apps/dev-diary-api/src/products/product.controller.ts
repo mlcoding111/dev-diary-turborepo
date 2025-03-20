@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, HttpException, HttpStatus, InternalServerErrorException } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { Validate } from 'src/decorators/validation.decorator';
 import {
@@ -6,11 +6,8 @@ import {
   createProductSchema,
   productSchema,
 } from '@repo/types/schema';
-import z from 'zod';
 import type { TProduct, TSerializedProduct } from '@repo/types/schema';
 import { ApiException } from 'src/core/utils/api/exception/ApiError.exception';
-import { InternalServerError } from 'src/core/utils/api/exception/InternalServerError.exception';
-
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
@@ -28,12 +25,19 @@ export class ProductsController {
   })
   @Get()
   getProducts(): TSerializedProduct[] {
+    // throw new Error('User Not Found');
+    // throw new HttpException('User Not Found', HttpStatus.NOT_FOUND);
     throw new ApiException({
-      message: 'test',
-      error_code: 'TEST_ERROR',
-      status_code: 401,
-      data: null,
+      status_code: HttpStatus.NOT_FOUND,
+      error_code: 'USER_NOT_FOUND',
+
+      // Optional
+      message: 'User Not Found',
+      data: {
+        test: 'test',
+      },
     });
+
     return this.productsService.getProducts();
   }
   // @Validate({
