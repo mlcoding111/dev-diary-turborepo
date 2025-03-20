@@ -9,8 +9,8 @@ interface TExceptionErrorWithFieldsPayload extends TExceptionErrorPayload {
 }
 
 export class ValidationError extends ApiException {
-  constructor(data: TExceptionErrorWithFieldsPayload) {
-    super(data);
+  constructor(payload: TExceptionErrorWithFieldsPayload) {
+    super(payload);
   }
 }
 // export class ValidationError

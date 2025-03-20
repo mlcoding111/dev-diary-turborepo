@@ -22,6 +22,12 @@ export type TApiResponseInternalError = Omit<TApiResponseError, "data"> & {
 	data?: TErrorDataType;
 };
 
+export type TApiResponseValidationError = Omit<TApiResponseInternalError, "data"> & {
+	data: TErrorDataType & {
+		fields: Record<string, any>;
+	};
+};
+
 export type TExceptionErrorPayload = Pick<
 	TApiResponseError,
 	 "message" | "metadata" | "status_code"
