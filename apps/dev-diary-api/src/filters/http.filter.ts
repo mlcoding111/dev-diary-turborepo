@@ -7,7 +7,7 @@ import {
 import { HttpAdapterHost } from '@nestjs/core';
 import { ApiException } from '../core/utils/api/exception/ApiError.exception';
 import { ValidationError } from 'src/core/utils/api/exception/ValidationError.exception';
-import { TApiResponseError, TErrorDataType } from '@repo/types/api';
+import { TApiResponseError } from '@repo/types/api';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -27,10 +27,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
       message: exception.message,
       status_code: status,
       timestamp: new Date().toISOString(),
-      error_code: isCustomException 
+      error_code: isCustomException
         ? (exception as ApiException).getErrorCode()
-        : 'INTERNAL_SERVER_ERROR',
-      path: httpAdapter.getRequestUrl(ctx.getRequest()),
+        : 'UNKNOWN_ERROR',
+      path: httpAdapter.getRequestUrl(ctx.getRequest()) as string,
       data: isCustomException ? (exception as ApiException).getData() : null,
     };
 
