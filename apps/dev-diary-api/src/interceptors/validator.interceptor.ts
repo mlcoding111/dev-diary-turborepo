@@ -65,8 +65,7 @@ export class GlobalValidationInterceptor implements NestInterceptor {
           if (!result.success) {
             throw new ValidationError({
               message: 'Request data input validation failed',
-              fields: result.error.flatten(),
-              data: null,
+              data: result.error.flatten(),
               status_code: 400,
               error_code: 'VALIDATION_ERROR',
             });

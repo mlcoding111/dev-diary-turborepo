@@ -13,7 +13,7 @@ export const productSchemaSerialized = productSchema.omit({
   price: true,
 }).strict();
 
-export const createProductSchema = productSchema.omit({ id: true });
+export const createProductSchema = productSchema.omit({ id: true }).strict();
 
 export type TProduct = z.infer<typeof productSchema>;
 export type TCreateProduct = Omit<z.infer<typeof productSchema>, 'id'>;
