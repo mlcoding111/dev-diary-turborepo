@@ -8,6 +8,11 @@ export const productSchema = z.object({
   price: z.number().min(0),
 });
 
+export const productSchemaSerialized = productSchema.omit({
+  description: true,
+  price: true,
+}).strict();
+
 export const createProductSchema = productSchema.omit({ id: true });
 
 export type TProduct = z.infer<typeof productSchema>;

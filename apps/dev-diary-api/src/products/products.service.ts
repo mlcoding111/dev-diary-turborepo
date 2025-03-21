@@ -18,7 +18,13 @@ export class ProductsService {
     return product;
   }
 
-  getProducts(): TSerializedProduct[] {
-    return this.products;
+  getProducts(): any[] {
+    return this.products.map((product) => ({
+      xd: 'xd',
+      id: product.id,
+      name: product.name,
+      title: product.title,
+    }));
+    // return this.products;
   }
 }
