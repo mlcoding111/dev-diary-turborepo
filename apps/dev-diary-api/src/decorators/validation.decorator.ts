@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { ZodSchema } from 'zod';
+import { ZodSchema, ZodObject } from 'zod';
 
 export const VALIDATION_SCHEMA = 'validation_schema';
 
@@ -7,8 +7,8 @@ export const Validate = ({
   output,
   input,
 }: {
-  output?: ZodSchema;
-  input?: ZodSchema;
+  output?: ZodSchema | ZodObject<any, any>;
+  input?: ZodSchema | ZodObject<any, any>;
 }) =>
   SetMetadata(VALIDATION_SCHEMA, {
     output,

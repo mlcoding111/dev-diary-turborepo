@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { ApiException } from '../core/utils/api/exception/ApiError.exception';
-import { TExceptionErrorResponse } from '@repo/types/api';
+import { TApiResponseInternalError } from '@repo/types/api';
 
 @Catch()
 export class CatchEverythingFilter implements ExceptionFilter {
@@ -23,18 +23,17 @@ export class CatchEverythingFilter implements ExceptionFilter {
       ? exception.getStatus()
       : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const isCustomException = this.isCustomException(exception);
+    console.log('CatchEverythingFilter');
 
-    const responseBody: TExceptionErrorResponse = {
+    const responseBody: TApiResponseInternalError = {
       success: false,
       message: this.getErrorMessage(exception) || 'Internal Server Error',
       status_code: httpStatus,
       timestamp: new Date().toISOString(),
-      error_code: isCustomException
-        ? (exception as ApiException).error_code
-        : 'INTERNAL_SERVER_ERROR',
+      error_code: 'INTERNAL_SERVER_ERROR',
       path: httpAdapter.getRequestUrl(ctx.getRequest()) as string,
       stack: this.getStack(exception),
+      data: null,
     };
 
     httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);

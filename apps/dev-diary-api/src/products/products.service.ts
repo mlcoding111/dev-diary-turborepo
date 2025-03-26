@@ -18,7 +18,7 @@ export class ProductsService {
     return product;
   }
 
-  getProducts(): TSerializedProduct[] {
+  getProducts(): any[] {
     return this.products;
   }
 }

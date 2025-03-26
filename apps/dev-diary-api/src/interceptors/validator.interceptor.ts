@@ -10,6 +10,8 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ZodSchema } from 'zod';
 import { VALIDATION_SCHEMA } from '../decorators/validation.decorator';
+import { ValidationError } from '../core/utils/api/exception/ValidationError.exception';
+import { ApiException } from 'src/core/utils/api/exception/ApiError.exception';
 
 // Define the structure for validation schemas
 type validationPayload = {
@@ -58,10 +60,14 @@ export class GlobalValidationInterceptor implements NestInterceptor {
         // Validate request data if input schema exists
         if (schema.input) {
           const result = schema.input.safeParse(data);
+          console.log(result.error);
+          console.log('data', data);
           if (!result.success) {
-            throw new BadRequestException({
+            throw new ValidationError({
               message: 'Request data input validation failed',
-              issues: result.error.flatten(),
+              data: result.error.flatten(),
+              status_code: 400,
+              error_code: 'VALIDATION_ERROR',
             });
           }
         }
@@ -69,8 +75,15 @@ export class GlobalValidationInterceptor implements NestInterceptor {
         // Validate response data if output schema exists
         if (schema.output) {
           const result = schema.output.safeParse(data);
+          console.log('This is the data', data);
+          console.log('This is the error', result?.error?.format());
           if (!result.success) {
-            throw new Error('Response data output validation failed for:');
+            throw new ApiException({
+              message: 'Response data output validation failed for:',
+              data: result?.error?.format(),
+              status_code: 400,
+              error_code: 'VALIDATION_ERROR',
+            });
           }
         }
 

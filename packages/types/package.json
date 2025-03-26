@@ -16,6 +16,14 @@
         "./api": {
             "types": "./src/types/api.ts",
             "default": "./dist/types/api.js"
+        },
+        "./error-codes": {
+            "types": "./src/types/error-codes.ts",
+            "default": "./dist/types/error-codes.js"
+        },
+        "./utils": {
+            "types": "./src/utils/index.ts",
+            "default": "./dist/utils/index.js"
         }
     },
     "devDependencies": {
