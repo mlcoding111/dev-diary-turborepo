@@ -9,7 +9,6 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ZodSchema } from 'zod';
 import { VALIDATION_SCHEMA } from '../decorators/validation.decorator';
-import { ValidationError } from '../core/utils/api/exception/ValidationError.exception';
 import { ApiException } from 'src/core/utils/api/exception/ApiError.exception';
 
 // Define the structure for validation schemas
@@ -60,7 +59,7 @@ export class GlobalValidationInterceptor implements NestInterceptor {
         if (schema.input) {
           const result = schema.input.safeParse(data);
           if (!result.success) {
-            throw new ValidationError({
+            throw new ApiException({
               message: `Request data input validation failed for: ${url}`,
               data: result.error.flatten(),
               status_code: 400,
