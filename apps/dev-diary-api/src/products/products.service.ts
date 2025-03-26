@@ -19,12 +19,6 @@ export class ProductsService {
   }
 
   getProducts(): any[] {
-    return this.products.map((product) => ({
-      xd: 'xd',
-      id: product.id,
-      name: product.name,
-      title: product.title,
-    }));
-    // return this.products;
+    return this.products;
   }
 }

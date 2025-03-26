@@ -24,7 +24,7 @@ export class ProductsController {
 
   @Post()
   @Validate({
-    input: createProductSchema,
+    input: productSchema.omit({ id: true }),
   })
   createProduct(
     @Body() createProductRequest: TCreateProduct,
@@ -41,20 +41,32 @@ export class ProductsController {
   })
   @Get()
   getProducts(): TSerializedProduct[] {
+    // TODO: Replace with serialized
+    const serializedProducts = this.productsService
+      .getProducts()
+      .map((product: TSerializedProduct) => ({
+        id: product.id,
+        name: product.name,
+        title: product.title,
+      }));
+
+    return serializedProducts;
+
+    // Errors examples:
+
     // throw new Error('User Not Found');
+
     // throw new HttpException('User Not Found', HttpStatus.NOT_FOUND);
+
     // throw new ApiException({
     //   status_code: HttpStatus.NOT_FOUND,
     //   error_code: 'USER_NOT_FOUND',
-
     //   // Optional
     //   message: 'User Not Found',
     //   data: {
     //     test: 'test',
     //   },
     // });
-
-    return this.productsService.getProducts();
   }
   // @Validate({
   //   output: productSchema,
