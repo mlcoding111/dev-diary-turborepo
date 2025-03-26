@@ -62,7 +62,7 @@ export class GlobalValidationInterceptor implements NestInterceptor {
           const result = schema.input.safeParse(data);
           if (!result.success) {
             throw new ValidationError({
-              message: 'Request data input validation failed',
+              message: `Request data input validation failed for: ${url}`,
               data: result.error.flatten(),
               status_code: 400,
               error_code: 'VALIDATION_ERROR',
@@ -75,7 +75,7 @@ export class GlobalValidationInterceptor implements NestInterceptor {
           const result = schema.output.safeParse(data);
           if (!result.success) {
             throw new ApiException({
-              message: 'Response data output validation failed for:',
+              message: `Response data output validation failed for: ${url}`,
               data: result?.error?.format(),
               status_code: 400,
               error_code: 'VALIDATION_ERROR',
