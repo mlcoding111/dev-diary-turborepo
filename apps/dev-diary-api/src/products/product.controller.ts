@@ -24,7 +24,7 @@ export class ProductsController {
 
   @Post()
   @Validate({
-    input: productSchema.omit({ id: true }),
+    input: createProductSchema,
   })
   createProduct(
     @Body() createProductRequest: TCreateProduct,
