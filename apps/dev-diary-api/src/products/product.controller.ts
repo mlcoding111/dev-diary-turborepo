@@ -8,9 +8,14 @@ import {
 } from '@repo/types/schema';
 import type { TSerializedProduct } from '@repo/types/schema';
 import z from 'zod';
+import { ConfigService } from '@nestjs/config';
+
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post()
   @Validate({
@@ -27,6 +32,8 @@ export class ProductsController {
   })
   @Get()
   getProducts(): TSerializedProduct[] {
+    // console.log all the config from the config service
+    console.log('PG_HOST', this.configService.get('PG_HOST'));
     // TODO: Replace with serializer
     const serializedProducts = this.productsService
       .getProducts()

@@ -6,9 +6,18 @@ import { ProductsController } from './products/product.controller';
 import { GlobalValidationInterceptor } from './interceptors/validator.interceptor';
 import { CatchEverythingFilter } from './filters/catch-all.filter';
 import { HttpExceptionFilter } from './filters/http.filter';
+import { ConfigModule } from '@nestjs/config';
+import { DatabaseModule } from './modules/database/database.module';
 
 @Module({
-  imports: [ProductsModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      // envFilePath: '.env',
+    }),
+    ProductsModule,
+    DatabaseModule,
+  ],
   controllers: [ProductsController],
   providers: [
     {
