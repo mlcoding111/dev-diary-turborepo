@@ -5,6 +5,7 @@ import {
   HttpException,
   HttpStatus,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { ApiException } from '../core/utils/api/exception/ApiError.exception';
@@ -35,6 +36,8 @@ export class CatchEverythingFilter implements ExceptionFilter {
       stack: this.getStack(exception),
       data: null,
     };
+
+    Logger.error(responseBody.message, responseBody, responseBody.error_code);
 
     httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);
   }

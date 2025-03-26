@@ -8,6 +8,7 @@ import { HttpAdapterHost } from '@nestjs/core';
 import { ApiException } from '../core/utils/api/exception/ApiError.exception';
 import { ValidationError } from 'src/core/utils/api/exception/ValidationError.exception';
 import { TApiResponseError } from '@repo/types/api';
+import { Logger } from '@nestjs/common';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -16,8 +17,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const { httpAdapter } = this.httpAdapterHost;
     const ctx = host.switchToHttp();
     const status = exception.getStatus();
-
-    console.log('HttpExceptionFilter');
 
     const isCustomException =
       exception instanceof ApiException || exception instanceof ValidationError;
@@ -33,7 +32,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       path: httpAdapter.getRequestUrl(ctx.getRequest()) as string,
       data: isCustomException ? (exception as ApiException).getData() : null,
     };
-
+    Logger.error(exception.message, responseBody, responseBody.error_code);
     httpAdapter.reply(ctx.getResponse(), responseBody, status);
   }
 }

@@ -54,7 +54,7 @@ export class ProductsController {
 
     // Errors examples:
 
-    // throw new Error('User Not Found');
+    throw new Error('User Not Found');
 
     // throw new HttpException('User Not Found', HttpStatus.NOT_FOUND);
 

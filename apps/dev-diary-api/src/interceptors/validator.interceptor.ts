@@ -60,8 +60,6 @@ export class GlobalValidationInterceptor implements NestInterceptor {
         // Validate request data if input schema exists
         if (schema.input) {
           const result = schema.input.safeParse(data);
-          console.log(result.error);
-          console.log('data', data);
           if (!result.success) {
             throw new ValidationError({
               message: 'Request data input validation failed',
@@ -75,8 +73,6 @@ export class GlobalValidationInterceptor implements NestInterceptor {
         // Validate response data if output schema exists
         if (schema.output) {
           const result = schema.output.safeParse(data);
-          console.log('This is the data', data);
-          console.log('This is the error', result?.error?.format());
           if (!result.success) {
             throw new ApiException({
               message: 'Response data output validation failed for:',
