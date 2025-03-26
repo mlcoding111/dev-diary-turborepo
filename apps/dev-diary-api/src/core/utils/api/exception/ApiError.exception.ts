@@ -39,7 +39,7 @@ export class ApiException extends HttpException implements TApiResponseError {
     this.error_code = error_code;
     this.metadata = metadata ?? {};
     this.status_code = status_code;
-    this.message = message || ErrorCode[error_code as keyof typeof ErrorCode];
+    this.message = message || ErrorCode[error_code];
   }
 
   getStatus(): number {
