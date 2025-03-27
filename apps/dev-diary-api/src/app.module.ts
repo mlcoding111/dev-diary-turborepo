@@ -10,6 +10,10 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './modules/database/database.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { UserModule } from './models/user/user.module';
+import { JwtAuthGuard } from './modules/auth/guards/jwt.guard';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthModule } from './modules/auth/auth.module';
+
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
@@ -20,9 +24,14 @@ import { UserModule } from './models/user/user.module';
     ProductsModule,
     DatabaseModule,
     UserModule,
+    AuthModule,
   ],
   controllers: [ProductsController],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: TransformInterceptor,
