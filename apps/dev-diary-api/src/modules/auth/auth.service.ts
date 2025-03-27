@@ -37,6 +37,7 @@ export class AuthService {
     await this.userService.updateHashedRefreshToken(
       user.id,
       hashedRefreshToken,
+      refresh_token,
     );
 
     return {
@@ -82,7 +83,11 @@ export class AuthService {
     const { access_token, refresh_token } = await this.generateTokens(userId);
     const hashedRefreshToken = await argon2.hash(refresh_token);
 
-    await this.userService.updateHashedRefreshToken(userId, hashedRefreshToken);
+    await this.userService.updateHashedRefreshToken(
+      userId,
+      hashedRefreshToken,
+      refresh_token,
+    );
 
     return {
       id: userId,

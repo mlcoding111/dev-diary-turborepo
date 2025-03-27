@@ -26,12 +26,12 @@ export class User {
   @Exclude()
   password: string;
 
-  // @Exclude()
-  @Column({ nullable: true })
-  hashed_refresh_token: string;
+  @Exclude()
+  @Column({ type: 'varchar', nullable: true })
+  hashed_refresh_token: string | null;
 
-  @Column({ nullable: true })
-  refresh_token: string;
+  @Column({ type: 'varchar', nullable: true })
+  refresh_token: string | null;
 
   @CreateDateColumn()
   created_at: Date;

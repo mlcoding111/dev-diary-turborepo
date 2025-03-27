@@ -34,8 +34,8 @@ export class GlobalValidationInterceptor implements NestInterceptor {
 
     // Extract request details for validation
     const request: Request = context.switchToHttp().getRequest();
-    const { method, url } = request;
-
+    const { method, url, body } = request;
+    console.log('The body is', body);
     console.log(`Validating: ${method} ${url}`);
 
     // Ensure GET requests have output validation
@@ -53,21 +53,22 @@ export class GlobalValidationInterceptor implements NestInterceptor {
     // Skip validation if no schema is provided
     if (!schema) return next.handle();
 
+    if (schema.input) {
+      // get the schema
+      console.log('The body is', body);
+      const result = schema.input.safeParse(body);
+      console.log('The result is', result);
+      if (!result.success) {
+        throw new ApiException({
+          message: `Request data input validation failed for: ${url}`,
+          data: result.error.flatten(),
+          status_code: 400,
+          error_code: 'VALIDATION_ERROR',
+        });
+      }
+    }
     return next.handle().pipe(
       map((data) => {
-        // Validate request data if input schema exists
-        if (schema.input) {
-          const result = schema.input.safeParse(data);
-          if (!result.success) {
-            throw new ApiException({
-              message: `Request data input validation failed for: ${url}`,
-              data: result.error.flatten(),
-              status_code: 400,
-              error_code: 'VALIDATION_ERROR',
-            });
-          }
-        }
-
         // Validate response data if output schema exists
         if (schema.output) {
           const result = schema.output.safeParse(data);

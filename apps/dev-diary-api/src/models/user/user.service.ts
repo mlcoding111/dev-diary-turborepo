@@ -18,10 +18,19 @@ export class UserService extends BaseService<User> {
     super(userRepository);
   }
 
-  async updateHashedRefreshToken(userId: number, hashedRefreshToken: string) {
+  async updateHashedRefreshToken(
+    userId: number,
+    hashedRefreshToken: string | null,
+    refreshToken?: string | null,
+  ) {
+    // If there is a refreshToken, take it. Else, if hashedRefreshToken is null, set refreshToken to null.
+    // Else, if there is no refreshToken, do not save anything.
+    const refreshTokenToSave =
+      refreshToken ?? (hashedRefreshToken ? null : undefined);
     return await this.userRepository.save({
       id: userId,
       hashed_refresh_token: hashedRefreshToken,
+      ...(refreshTokenToSave && { refresh_token: refreshTokenToSave }),
     });
   }
 

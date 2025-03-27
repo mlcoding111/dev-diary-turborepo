@@ -1,4 +1,12 @@
-import { Controller, Request, Post, UseGuards, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Request,
+  Post,
+  UseGuards,
+  BadRequestException,
+  ClassSerializerInterceptor,
+  UseInterceptors,
+} from '@nestjs/common';
 import { LocalAuthGuard } from './guards/local.guard';
 import { Public } from './decorators/public.decorator';
 import { AuthService } from './auth.service';
@@ -11,16 +19,24 @@ import type {
   TRegisterUser,
   TUserLoginOutput,
   TUserLoginOutputSerialized,
+  TUserLoginInput,
 } from '@repo/types/schema';
 import { Body } from '@nestjs/common';
-import { registerUserSchema, userLoginOutputSchema } from '@repo/types/schema';
+import {
+  registerUserSchema,
+  userLoginOutputSchemaSerialized,
+} from '@repo/types/schema';
 import { User } from '@/entities/user.entity';
+import { UserRepository } from '@/models/user/user.repository';
+
 @Public()
 @Controller()
+@UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private configService: ConfigService,
+    private userRepository: UserRepository,
   ) {}
 
   @Validate({
@@ -28,31 +44,52 @@ export class AuthController {
       email: z.string().email(),
       password: z.string().min(6),
     }),
+    output: userLoginOutputSchemaSerialized,
   })
   @UseGuards(LocalAuthGuard)
   @Post('auth/login')
-  async login(@Request() req) {
-    console.log('login', req.user);
-    return await this.authService.login(req.user);
+  async login(
+    @Body() body: TUserLoginInput,
+  ): Promise<TUserLoginOutputSerialized> {
+    const user: User | null = await this.userRepository.findOneBy({
+      email: body.email,
+    });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+    const loggedUser: TUserLoginOutput = await this.authService.login(user);
+    const serializedUser = new User(user);
+    return {
+      user: serializedUser,
+      access_token: loggedUser.access_token,
+      refresh_token: loggedUser.refresh_token,
+    };
   }
 
   @Validate({
     input: registerUserSchema,
-    output: userLoginOutputSchema,
+    output: userLoginOutputSchemaSerialized,
   })
   @Post('auth/register')
   async register(
     @Body() body: TRegisterUser,
   ): Promise<TUserLoginOutputSerialized> {
-    const user = await this.authService.register(body);
+    const user: User = await this.authService.register(body);
     const loggedUser: TUserLoginOutput = await this.authService.login(user);
     if (!loggedUser) {
       throw new BadRequestException('Failed to login');
     }
-    const serializedUser = new User(loggedUser.user);
-    // const serializedUser = new User(loggedUser.user);
-    console.log('loggedUser', loggedUser);
-    return loggedUser;
+    // get the user
+    const userData = await this.userRepository.findOneBy({ id: user.id });
+    if (!userData) {
+      throw new BadRequestException('User not found');
+    }
+    const serializedUser = new User(userData);
+    return {
+      user: serializedUser,
+      access_token: loggedUser.access_token,
+      refresh_token: loggedUser.refresh_token,
+    };
   }
 
   // @UseGuards(RefreshAuthGuard)

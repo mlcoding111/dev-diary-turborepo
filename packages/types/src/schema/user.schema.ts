@@ -15,7 +15,6 @@ export const userSchema = z.object({
 export const userSchemaSerialized = userSchema.omit({
   password: true,
   hashed_refresh_token: true,
-  refresh_token: true,
 }).strict();
 
 export const createUserSchema = userSchema.omit({
