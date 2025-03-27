@@ -18,22 +18,6 @@ export class UserService {
 //     });
 //   }
 
-//   async findAll(): Promise<User[]> {
-//     return this.usersRepository.find();
-//   }
-
-//   async findOne(id: number): Promise<User | undefined> {
-//     return this.usersRepository.findOne({ where: { id } });
-//   }
-
-//   async findOneByEmail(email: string): Promise<User | undefined> {
-//     return this.usersRepository.findOne({ where: { email } });
-//   }
-
-//   async create(user: User): Promise<User> {
-//     return this.usersRepository.save(user);
-//   }
-
 //   // Update user
 //   async update(id: number, user: User): Promise<User> {
 //     const updatedUser = await this.usersRepository.findOne({ where: { id } });
@@ -43,10 +27,6 @@ export class UserService {
 //     return await this.usersRepository.save(savedUser);
 //   }
 
-//   // Delete user
-//   async delete(id: number): Promise<DeleteResult> {
-//     return await this.usersRepository.delete(id);
-//   }
 
 //   async getUserFromHeadersToken(req: Request): Promise<User | null> {
 //     const authHeader = req.headers.authorization;
