@@ -1,4 +1,4 @@
-import { TErrorCode } from '../utils/error-codes';
+import { TErrorCode } from './error-codes';
 
 export type TApiResponse<T> = {
 	success: boolean;
