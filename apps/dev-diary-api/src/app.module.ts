@@ -9,7 +9,7 @@ import { HttpExceptionFilter } from './filters/http.filter';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './modules/database/database.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { UserModule } from './models/user.module';
+import { UserModule } from './models/user/user.module';
 @Module({
   imports: [
     EventEmitterModule.forRoot(),

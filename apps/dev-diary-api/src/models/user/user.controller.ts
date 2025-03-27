@@ -16,7 +16,7 @@ import { Validate } from 'src/decorators/validation.decorator';
 // import { UserSerializer } from './serializers/user.serializer';
 // import { DeleteResult } from 'typeorm';
 import { z } from 'zod';
-import { UserRepository } from './user.repository';
+import { UserRepository } from '../user/user.repository';
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {

@@ -11,7 +11,7 @@ import {
   TransactionStartEvent,
   UpdateEvent,
 } from 'typeorm';
-import { User } from '../entities/user.entity';
+import { User } from '../../entities/user.entity';
 import {
   AfterQueryEvent,
   BeforeQueryEvent,
