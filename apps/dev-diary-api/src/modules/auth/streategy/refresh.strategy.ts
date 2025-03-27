@@ -1,8 +1,7 @@
 import { Strategy, ExtractJwt, StrategyOptions } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
-import type { ConfigService, ConfigType } from '@nestjs/config';
-import { refreshJwtConfig } from '@/config/refresh-jwt.config';
+import type { ConfigService } from '@nestjs/config';
 import { AuthJwtPayload } from '../types/jwt-payload';
 import { Request } from 'express';
 import { AuthService } from '../auth.service';
@@ -14,7 +13,6 @@ export class RefreshJwtStrategy extends PassportStrategy(
 ) {
   constructor(
     private readonly configService: ConfigService,
-    private refreshJwtConfiguration: ConfigType<typeof refreshJwtConfig>,
     private authService: AuthService,
   ) {
     const options: StrategyOptions = {

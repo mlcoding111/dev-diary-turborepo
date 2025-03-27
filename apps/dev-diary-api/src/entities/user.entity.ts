@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
+import type { TCreateUser as TCreateUserType } from '@repo/types/schema';
 
 @Entity()
 export class User {
@@ -42,7 +43,9 @@ export class User {
   }
 }
 
-export type UserSerialized = Omit<
-  User,
-  'password' | 'hashed_refresh_token' | 'refresh_token'
+export type UserType = InstanceType<typeof User>;
+
+// Make sure it satisfies the TCreateUserType
+export type TCreateUser = Partial<
+  Omit<User, 'id' | 'created_at' | 'updated_at'>
 >;

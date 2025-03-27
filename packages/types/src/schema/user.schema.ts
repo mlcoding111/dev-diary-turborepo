@@ -24,5 +24,6 @@ export const createUserSchema = userSchema.omit({
 
 export type TCreateUser = Omit<z.infer<typeof userSchema>, 'id' | 'created_at' | 'updated_at'>;
 export type TSerializedUser = z.infer<typeof userSchemaSerialized>;
+export type TUser = z.infer<typeof userSchema>;
 
 // Ensure type correctness with TSerializedUser and TCreateUser

@@ -23,8 +23,8 @@ import { AuthModule } from './modules/auth/auth.module';
     }),
     ProductsModule,
     DatabaseModule,
-    UserModule,
     AuthModule,
+    UserModule,
   ],
   controllers: [ProductsController],
   providers: [

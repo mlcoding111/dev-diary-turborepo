@@ -1,5 +1,5 @@
 
-import { Controller, Request, Post, UseGuards, Get } from '@nestjs/common';
+import { Controller, Request, Post, UseGuards } from '@nestjs/common';
 import { LocalAuthGuard } from './guards/local.guard';
 import { Public } from './decorators/public.decorator';
 import { AuthService } from './auth.service';
@@ -17,20 +17,20 @@ export class AuthController {
     return await this.authService.login(req.user);
   }
 
-  @Post('auth/register')
-  async register(@Request() req) {
-    return this.authService.register(req.body);
-  }
+  // @Post('auth/register')
+  // async register(@Request() req) {
+  //   return await this.authService.register(req.body);
+  // }
 
-  @UseGuards(RefreshAuthGuard)
-  @Post('auth/refresh')
-  async refreshToken(@Request() req) {
-    return this.authService.refreshToken(req.user.id);
-  }
+  // @UseGuards(RefreshAuthGuard)
+  // @Post('auth/refresh')
+  // async refreshToken(@Request() req) {
+  //   return await this.authService.refreshToken(req.user.id);
+  // }
 
-  @UseGuards(JwtAuthGuard)
-  @Post('auth/logout')
-  async logout(@Request() req) {
-    return this.authService.logout(req.user.id);
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Post('auth/logout')
+  // async logout(@Request() req) {
+  //   return await this.authService.logout(req.user.id);
+  // }
 }
