@@ -39,7 +39,6 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
    * Called after entity is loaded.
    */
   afterLoad(entity: User) {
-    console.log('afterLoad');
     this.eventEmitter.emit('entity.afterLoad.user', entity);
   }
 
@@ -54,7 +53,6 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
    * Called after query execution.
    */
   afterQuery(event: AfterQueryEvent<User>) {
-    console.log('afterQuery');
     this.eventEmitter.emit('entity.afterQuery.user', event);
   }
 

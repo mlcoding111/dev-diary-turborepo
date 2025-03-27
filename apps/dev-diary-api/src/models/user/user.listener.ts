@@ -8,6 +8,6 @@ export class UserListener {
   @OnEvent('entity.afterQuery.user')
   handleOrderCreatedEvent(event: AfterQueryEvent<User>) {
     // handle and process "OrderCreatedEvent" event
-    console.log('A user was queried');
+    console.log('User Query Result: ', event.success);
   }
 }
