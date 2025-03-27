@@ -12,13 +12,25 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Validate } from 'src/decorators/validation.decorator';
-// import { User } from '../entities/user.entity';
-// import { UserSerializer } from './serializers/user.serializer';
-// import { DeleteResult } from 'typeorm';
 import { z } from 'zod';
 import { userSchemaSerialized, type TSerializedUser } from '@repo/types/schema';
 import { UserRepository } from '../user/user.repository';
 import { User } from 'src/entities/user.entity';
+
+const MOCK_USERS: User[] = [
+  {
+    id: 1,
+    first_name: 'John',
+    last_name: 'Doe',
+    email: 'john.doe@example.com',
+    hashed_refresh_token: 'hashed_refresh_token',
+    refresh_token: 'refresh_token',
+    created_at: new Date(),
+    updated_at: new Date(),
+    password: 'password',
+  },
+];
+
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
@@ -31,14 +43,10 @@ export class UserController {
     output: z.array(userSchemaSerialized),
   })
   @Get()
-  async findAll(): Promise<TSerializedUser[]> {
-    const users = await this.userRepository.find();
-    const serializedUsers = users.map((user) => new User(user));
-
-    console.log('USERS', users);
-    console.log('SERIALIZED USERS', serializedUsers);
-
-    return serializedUsers;
+  findAll(): TSerializedUser[] {
+    // const users = await this.userRepository.find();
+    // const serializedUsers = users.map((user) => new User(user));
+    return MOCK_USERS.map((user) => new User(user));
   }
 
   //   @Get(':id')
