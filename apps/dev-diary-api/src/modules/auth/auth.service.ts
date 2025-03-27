@@ -12,7 +12,7 @@ import * as argon2 from 'argon2';
 import { UserRepository } from '@/models/user/user.repository';
 import { UserService } from '@/models/user/user.service';
 import type { User } from '@/entities/user.entity';
-import type { TRegisterUser } from '@repo/types/schema';
+import type { TRegisterUser, TUserLoginOutput } from '@repo/types/schema';
 @Injectable()
 export class AuthService {
   constructor(
@@ -30,11 +30,7 @@ export class AuthService {
     return null;
   }
 
-  async login(user: User): Promise<{
-    user: User;
-    access_token: string;
-    refresh_token: string;
-  }> {
+  async login(user: User): Promise<TUserLoginOutput> {
     const { access_token, refresh_token } = await this.generateTokens(user.id);
     const hashedRefreshToken = await argon2.hash(refresh_token);
 

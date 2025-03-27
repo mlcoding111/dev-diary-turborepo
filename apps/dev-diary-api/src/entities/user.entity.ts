@@ -26,6 +26,7 @@ export class User {
   @Exclude()
   password: string;
 
+  // @Exclude()
   @Column({ nullable: true })
   hashed_refresh_token: string;
 

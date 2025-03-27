@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const userSchema = z.object({
+export const userSchema = z.object({
   id: z.number(),
   first_name: z.string(),
   last_name: z.string(),
@@ -14,6 +14,8 @@ const userSchema = z.object({
 
 export const userSchemaSerialized = userSchema.omit({
   password: true,
+  hashed_refresh_token: true,
+  refresh_token: true,
 }).strict();
 
 export const createUserSchema = userSchema.omit({
