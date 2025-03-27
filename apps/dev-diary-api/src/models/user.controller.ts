@@ -1,27 +1,44 @@
 import {
   Controller,
   Get,
-//   Post,
-//   Body,
-//   Param,
-//   NotFoundException,
-//   Put,
-//   Delete,
+  //   Post,
+  //   Body,
+  //   Param,
+  //   NotFoundException,
+  //   Put,
+  //   Delete,
   UseInterceptors,
   ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { UserService } from './user.service';
+import { Validate } from 'src/decorators/validation.decorator';
 // import { User } from '../entities/user.entity';
 // import { UserSerializer } from './serializers/user.serializer';
 // import { DeleteResult } from 'typeorm';
-
+import { z } from 'zod';
+import { UserRepository } from './user.repository';
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
-  constructor(private readonly usersService: UserService) {}
+  constructor(
+    private readonly usersService: UserService,
+    private readonly userRepository: UserRepository,
+  ) {}
 
+  @Validate({
+    output: z.array(
+      z.object({
+        id: z.number(),
+        first_name: z.string(),
+        last_name: z.string(),
+        email: z.string(),
+        password: z.string(),
+      }),
+    ),
+  })
   @Get()
   async findAll(): Promise<any[]> {
+    await this.userRepository.find();
     return await new Promise((resolve) => {
       resolve([
         {
