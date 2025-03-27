@@ -45,7 +45,6 @@ export class UserController {
   @Get()
   findAll(): TSerializedUser[] {
     // const users = await this.userRepository.find();
-    // const serializedUsers = users.map((user) => new User(user));
     return MOCK_USERS.map((user) => new User(user));
   }
 
