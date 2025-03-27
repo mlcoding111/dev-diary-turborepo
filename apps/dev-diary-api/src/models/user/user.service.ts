@@ -4,13 +4,17 @@ import { UserRepository } from './user.repository';
 // import { ApiException } from '@/core/exceptions/api.exception';
 // import { HttpStatus } from '@nestjs/common';
 // import { Request } from 'express';
+import { BaseService } from '../../core/utils/service/base.service';
+import { User } from '../../entities/user.entity';
 
 @Injectable()
-export class UserService {
+export class UserService extends BaseService<User> {
   constructor(
-    private usersRepository: UserRepository,
+    private readonly userRepository: UserRepository,
     // private jwtService: JwtService,
-  ) {}
+  ) {
+    super(userRepository);
+  }
 
 //   async updateHashedRefreshToken(userId: number, hashedRefreshToken: string) {
 //     return await this.usersRepository.update(userId, {
