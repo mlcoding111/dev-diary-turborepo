@@ -58,9 +58,9 @@ export class AuthService {
     if (userExists) {
       throw new BadRequestException('User already exists');
     }
-    const userData = this.userRepository.create(user);
+    const savedUser = await this.userRepository.save(user);
 
-    return userData;
+    return savedUser;
   }
 
   async generateTokens(userId: number): Promise<{

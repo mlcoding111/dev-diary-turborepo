@@ -24,7 +24,6 @@ export class RefreshJwtStrategy extends PassportStrategy(
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       //   jwtFromRequest: ExtractJwt.fromBodyField("refresh"),
       ignoreExpiration: false,
-      // secretOrKey: 'dsadas',
       secretOrKey: configService.get<string>('refresh-jwt.secret') as string,
       passReqToCallback: true,
     };

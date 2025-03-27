@@ -34,6 +34,7 @@ export class ProductsController {
   getProducts(): TSerializedProduct[] {
     // console.log all the config from the config service
     console.log('PG_HOST', this.configService.get('PG_HOST'));
+    console.log('refresh-jwt', this.configService.get('refresh-jwt'));
     // TODO: Replace with serializer
     const serializedProducts = this.productsService
       .getProducts()
