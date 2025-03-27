@@ -75,18 +75,27 @@ export class UserController {
     return await this.userRepository.save(user);
   }
 
-  //   @Put(':id')
-  //   async update(@Param('id') id: number, @Body() user: User): Promise<User> {
-  //     return await this.usersService.update(id, user);
-  //   }
+  @Put(':id')
+  async update(@Param('id') id: number, @Body() user: User): Promise<User> {
+    const userToUpdate = await this.userRepository.findOne({ where: { id } });
 
-  //   @Delete(':id')
-  //   async delete(@Param('id') id: number): Promise<DeleteResult> {
-  //     const user = await this.usersService.findOne(id);
-  //     if (!user) {
-  //       throw new NotFoundException('User not found');
-  //     }
+    // User does not exist
+    if (!userToUpdate) {
+      throw new NotFoundException('User not found');
+    }
 
-  //     return await this.usersService.delete(id);
-  //   }
+    return await this.userRepository.mergeAndUpdate(userToUpdate, user);
+  }
+
+  @Delete(':id')
+  async delete(@Param('id') id: number): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return await this.userRepository.remove(user);
+  }
 }
