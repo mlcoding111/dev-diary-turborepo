@@ -8,15 +8,18 @@ import { CatchEverythingFilter } from './filters/catch-all.filter';
 import { HttpExceptionFilter } from './filters/http.filter';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './modules/database/database.module';
-
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { UserModule } from './models/user/user.module';
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       // envFilePath: '.env',
     }),
     ProductsModule,
     DatabaseModule,
+    UserModule,
   ],
   controllers: [ProductsController],
   providers: [
