@@ -1,14 +1,15 @@
 import {
   Controller,
   Get,
-  //   Post,
-  //   Body,
-  //   Param,
+  Post,
+  Body,
+  Param,
   //   NotFoundException,
-  //   Put,
-  //   Delete,
+  Put,
+  Delete,
   UseInterceptors,
   ClassSerializerInterceptor,
+  NotFoundException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Validate } from 'src/decorators/validation.decorator';
@@ -34,46 +35,67 @@ const MOCK_USERS: User[] = [
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
+  private static readonly serializedUserSchema =
+    userSchemaSerialized as z.ZodSchema<TSerializedUser>;
+
   constructor(
     private readonly usersService: UserService,
     private readonly userRepository: UserRepository,
   ) {}
 
   @Validate({
-    output: z.array(userSchemaSerialized),
+    output: z.array(UserController.serializedUserSchema),
   })
   @Get()
-  findAll(): TSerializedUser[] {
+  findAll(): User[] {
     // const users = await this.userRepository.find();
     return MOCK_USERS.map((user) => new User(user));
   }
 
-  //   @Get(':id')
-  //   async findOne(@Param('id') id: number): Promise<User> {
-  //     const user: User = await this.usersService.findOne(id);
-  //     if (!user) {
-  //       throw new NotFoundException('User not found');
-  //     }
-  //     return new User(user);
-  //   }
+  @Validate({
+    output: UserController.serializedUserSchema,
+  })
+  @Get(':id')
+  async findOne(@Param('id') id: number): Promise<User> {
+    const user: User | null = await this.userRepository.findOne({
+      where: { id },
+    });
 
-  //   @Post()
-  //   async create(@Body() user: User): Promise<User> {
-  //     return await this.usersService.create(user);
-  //   }
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return new User(user);
+  }
 
-  //   @Put(':id')
-  //   async update(@Param('id') id: number, @Body() user: User): Promise<User> {
-  //     return await this.usersService.update(id, user);
-  //   }
+  @Validate({
+    output: UserController.serializedUserSchema,
+  })
+  @Post()
+  async create(@Body() user: User): Promise<User> {
+    return await this.userRepository.save(user);
+  }
 
-  //   @Delete(':id')
-  //   async delete(@Param('id') id: number): Promise<DeleteResult> {
-  //     const user = await this.usersService.findOne(id);
-  //     if (!user) {
-  //       throw new NotFoundException('User not found');
-  //     }
+  @Put(':id')
+  async update(@Param('id') id: number, @Body() user: User): Promise<User> {
+    const userToUpdate = await this.userRepository.findOne({ where: { id } });
 
-  //     return await this.usersService.delete(id);
-  //   }
+    // User does not exist
+    if (!userToUpdate) {
+      throw new NotFoundException('User not found');
+    }
+
+    return await this.userRepository.mergeAndUpdate(userToUpdate, user);
+  }
+
+  @Delete(':id')
+  async delete(@Param('id') id: number): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return await this.userRepository.remove(user);
+  }
 }

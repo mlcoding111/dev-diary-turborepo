@@ -4,34 +4,22 @@ import { UserRepository } from './user.repository';
 // import { ApiException } from '@/core/exceptions/api.exception';
 // import { HttpStatus } from '@nestjs/common';
 // import { Request } from 'express';
+import { BaseService } from '../../core/utils/service/base.service';
+import { User } from '../../entities/user.entity';
 
 @Injectable()
-export class UserService {
+export class UserService extends BaseService<User> {
   constructor(
-    private usersRepository: UserRepository,
+    private readonly userRepository: UserRepository,
     // private jwtService: JwtService,
-  ) {}
+  ) {
+    super(userRepository);
+  }
 
 //   async updateHashedRefreshToken(userId: number, hashedRefreshToken: string) {
 //     return await this.usersRepository.update(userId, {
 //       hashed_refresh_token: hashedRefreshToken,
 //     });
-//   }
-
-//   async findAll(): Promise<User[]> {
-//     return this.usersRepository.find();
-//   }
-
-//   async findOne(id: number): Promise<User | undefined> {
-//     return this.usersRepository.findOne({ where: { id } });
-//   }
-
-//   async findOneByEmail(email: string): Promise<User | undefined> {
-//     return this.usersRepository.findOne({ where: { email } });
-//   }
-
-//   async create(user: User): Promise<User> {
-//     return this.usersRepository.save(user);
 //   }
 
 //   // Update user
@@ -43,10 +31,6 @@ export class UserService {
 //     return await this.usersRepository.save(savedUser);
 //   }
 
-//   // Delete user
-//   async delete(id: number): Promise<DeleteResult> {
-//     return await this.usersRepository.delete(id);
-//   }
 
 //   async getUserFromHeadersToken(req: Request): Promise<User | null> {
 //     const authHeader = req.headers.authorization;
