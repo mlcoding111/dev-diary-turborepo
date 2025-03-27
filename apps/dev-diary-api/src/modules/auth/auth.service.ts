@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { refreshJwtConfig } from '@/config/refresh-jwt.config';
-import type { ConfigService, ConfigType } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { AuthJwtPayload } from './types/jwt-payload';
 import * as argon2 from 'argon2';
 import { UserRepository } from '@/models/user/user.repository';
@@ -18,8 +18,8 @@ export class AuthService {
   constructor(
     private userRepository: UserRepository,
     private userService: UserService,
+    private configService: ConfigService,
     private jwtService: JwtService,
-    private readonly configService: ConfigService,
   ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {
