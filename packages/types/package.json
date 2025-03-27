@@ -10,8 +10,8 @@
     },
     "exports": {
         "./schema": {
-            "types": "./src/schema/product-schema.ts",
-            "default": "./dist/schema/product-schema.js"
+            "types": "./src/schema/index.ts",
+            "default": "./dist/schema/index.js"
         },
         "./api": {
             "types": "./src/types/api.ts",

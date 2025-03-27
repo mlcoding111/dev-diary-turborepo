@@ -16,7 +16,9 @@ import { Validate } from 'src/decorators/validation.decorator';
 // import { UserSerializer } from './serializers/user.serializer';
 // import { DeleteResult } from 'typeorm';
 import { z } from 'zod';
+import { userSchemaSerialized, type TSerializedUser } from '@repo/types/schema';
 import { UserRepository } from '../user/user.repository';
+import { User } from 'src/entities/user.entity';
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
@@ -26,32 +28,17 @@ export class UserController {
   ) {}
 
   @Validate({
-    output: z.array(
-      z.object({
-        id: z.number(),
-        first_name: z.string(),
-        last_name: z.string(),
-        email: z.string(),
-        password: z.string(),
-      }),
-    ),
+    output: z.array(userSchemaSerialized),
   })
   @Get()
-  async findAll(): Promise<any[]> {
-    await this.userRepository.find();
-    return await new Promise((resolve) => {
-      resolve([
-        {
-          id: 1,
-          first_name: 'John',
-          last_name: 'Doe',
-          email: 'john.doe@example.com',
-          password: 'password',
-          hashed_refresh_token: 'hashed_refresh_token',
-          refresh_token: 'refresh_token',
-        },
-      ]);
-    });
+  async findAll(): Promise<TSerializedUser[]> {
+    const users = await this.userRepository.find();
+    const serializedUsers = users.map((user) => new User(user));
+
+    console.log('USERS', users);
+    console.log('SERIALIZED USERS', serializedUsers);
+
+    return serializedUsers;
   }
 
   //   @Get(':id')
