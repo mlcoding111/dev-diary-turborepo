@@ -7,6 +7,9 @@ import { JwtAuthGuard } from './guards/jwt.guard';
 import { Validate } from '@/decorators/validation.decorator';
 import { z } from 'zod';
 import { ConfigService } from '@nestjs/config';
+import type { TRegisterUser } from '@repo/types/schema';
+import { Body } from '@nestjs/common';
+import { registerUserSchema } from '@repo/types/schema';
 @Public()
 @Controller()
 export class AuthController {
@@ -29,17 +32,12 @@ export class AuthController {
   }
 
   @Validate({
-    input: z.object({
-      email: z.string().email(),
-      password: z.string().min(6),
-    }),
+    input: registerUserSchema,
   })
   @Post('auth/register')
-  async register(@Request() req) {
-    // get config service all keys
-    const keys = this.configService.get('jwt');
-    console.log('keys', keys);
-    return await this.authService.register(req.body);
+  async register(@Body() body: TRegisterUser) {
+    const user = await this.authService.register(body);
+    return await this.authService.login(user);
   }
 
   // @UseGuards(RefreshAuthGuard)

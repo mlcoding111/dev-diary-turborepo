@@ -12,7 +12,7 @@ import * as argon2 from 'argon2';
 import { UserRepository } from '@/models/user/user.repository';
 import { UserService } from '@/models/user/user.service';
 import type { User } from '@/entities/user.entity';
-import { TCreateUser } from '@/entities/user.entity';
+import type { TRegisterUser } from '@repo/types/schema';
 @Injectable()
 export class AuthService {
   constructor(
@@ -50,7 +50,7 @@ export class AuthService {
     };
   }
 
-  async register(user: TCreateUser): Promise<User> {
+  async register(user: TRegisterUser): Promise<User> {
     // check if user already exists
     const userExists = await this.userRepository.findOneBy({
       email: user.email,
@@ -58,7 +58,7 @@ export class AuthService {
     if (userExists) {
       throw new BadRequestException('User already exists');
     }
-    const savedUser = await this.userRepository.save(user);
+    const savedUser: User = await this.userRepository.save(user);
 
     return savedUser;
   }
@@ -70,7 +70,7 @@ export class AuthService {
     const payload: any = { sub: userId };
 
     const [access_token, refresh_token] = await Promise.all([
-      this.jwtService.signAsync(payload),
+      this.jwtService.signAsync(payload, this.configService.get('jwt')),
       this.jwtService.signAsync(payload, this.configService.get('refresh-jwt')),
     ]);
 
