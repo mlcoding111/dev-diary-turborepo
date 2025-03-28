@@ -1,22 +1,16 @@
 import {
   BadRequestException,
   Injectable,
-  Inject,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { refreshJwtConfig } from '@/config/refresh-jwt.config';
 import { ConfigService } from '@nestjs/config';
 import { AuthJwtPayload } from './types/jwt-payload';
 import * as argon2 from 'argon2';
 import { UserRepository } from '@/models/user/user.repository';
 import { UserService } from '@/models/user/user.service';
 import type { User } from '@/entities/user.entity';
-import type {
-  TRegisterUser,
-  TUserLoginOutput,
-  TUserLoginOutputSerialized,
-} from '@repo/types/schema';
+import type { TRegisterUser, TUserLoginOutput } from '@repo/types/schema';
 @Injectable()
 export class AuthService {
   constructor(

@@ -6,7 +6,6 @@ import {
   BadRequestException,
   ClassSerializerInterceptor,
   UseInterceptors,
-  Param,
 } from '@nestjs/common';
 import { LocalAuthGuard } from './guards/local.guard';
 import { Public } from './decorators/public.decorator';
