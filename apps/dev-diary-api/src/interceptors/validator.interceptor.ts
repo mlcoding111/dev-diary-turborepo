@@ -36,7 +36,6 @@ export class GlobalValidationInterceptor implements NestInterceptor {
     // Extract request details for validation
     const request: Request = context.switchToHttp().getRequest();
     const { method, url, body } = request;
-    console.log('The body is', body);
     console.log(`Validating: ${method} ${url}`);
 
     if (!schema?.bypass) {
@@ -58,9 +57,7 @@ export class GlobalValidationInterceptor implements NestInterceptor {
 
     if (schema.input) {
       // get the schema
-      console.log('The body is', body);
       const result = schema.input.safeParse(body);
-      console.log('The result is', result);
       if (!result.success) {
         throw new ApiException({
           message: `Request data input validation failed for: ${url}`,

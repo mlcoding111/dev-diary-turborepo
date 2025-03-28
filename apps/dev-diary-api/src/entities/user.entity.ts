@@ -6,7 +6,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import type { TCreateUser as TCreateUserType } from '@repo/types/schema';
 
 @Entity()
 export class User {

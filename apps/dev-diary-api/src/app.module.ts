@@ -12,6 +12,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { UserModule } from './models/user/user.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { ClsModule } from 'nestjs-cls';
 import { AuthModule } from './modules/auth/auth.module';
 import { jwtConfig, refreshJwtConfig, databaseConfig } from './config';
 
@@ -22,6 +23,10 @@ import { jwtConfig, refreshJwtConfig, databaseConfig } from './config';
       isGlobal: true,
       // envFilePath: '.env',
       load: [jwtConfig, refreshJwtConfig, databaseConfig],
+    }),
+    ClsModule.forRoot({
+      global: true,
+      middleware: { mount: true },
     }),
     ProductsModule,
     DatabaseModule,
