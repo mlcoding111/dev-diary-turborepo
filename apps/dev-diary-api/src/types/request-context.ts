@@ -1,6 +1,6 @@
 import { ClsStore } from 'nestjs-cls';
-import { User } from '@/entities/user.entity';
+import { TSerializedUser } from '@repo/types/schema';
 
 export interface IClsStore extends ClsStore {
-  user: User;
+  user: TSerializedUser;
 }
