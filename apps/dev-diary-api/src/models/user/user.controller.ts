@@ -4,7 +4,6 @@ import {
   Post,
   Body,
   Param,
-  //   NotFoundException,
   Put,
   Delete,
   UseInterceptors,
@@ -35,8 +34,6 @@ export class UserController {
   @Get()
   async findAll(): Promise<User[]> {
     const users = await this.userRepository.find();
-    const user = this.clsService.get('user');
-    console.log('Request from userFindAll user', user);
     return users.map((user) => this.serializeUser(user));
   }
 
