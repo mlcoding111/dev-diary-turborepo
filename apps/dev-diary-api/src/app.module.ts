@@ -15,6 +15,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ClsModule } from 'nestjs-cls';
 import { AuthModule } from './modules/auth/auth.module';
 import { jwtConfig, refreshJwtConfig, databaseConfig } from './config';
+import { RequestContextModule } from './modules/request/request-context.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { jwtConfig, refreshJwtConfig, databaseConfig } from './config';
       global: true,
       middleware: { mount: true },
     }),
+    RequestContextModule,
     ProductsModule,
     DatabaseModule,
     AuthModule,

@@ -1,6 +1,5 @@
 import {
   Controller,
-  Request,
   Post,
   UseGuards,
   BadRequestException,
@@ -27,7 +26,7 @@ import {
 } from '@repo/types/schema';
 import { User } from '@/entities/user.entity';
 import { UserRepository } from '@/models/user/user.repository';
-
+import { RequestContextService } from '@/modules/request/request-context.service';
 @Public()
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)
@@ -35,6 +34,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private userRepository: UserRepository,
+    private readonly clsService: RequestContextService,
   ) {}
 
   @Validate({
@@ -95,14 +95,16 @@ export class AuthController {
   })
   @UseGuards(RefreshAuthGuard)
   @Post('auth/refresh')
-  async refreshToken(@Request() req) {
-    return await this.authService.refreshToken(req.user.id);
+  async refreshToken() {
+    const user = this.clsService.get('user');
+    return await this.authService.refreshToken(user.id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('auth/logout')
-  async logout(@Request() req) {
-    return await this.authService.logout(req.user.id);
+  async logout() {
+    const user = this.clsService.get('user');
+    return await this.authService.logout(user.id);
   }
 
   // TODO: Implement this
