@@ -1,6 +1,6 @@
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { AuthService } from '@/modules/auth/auth.service';
 import { User } from '@/entities/user.entity';
 
@@ -19,7 +19,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     );
 
     if (!user) {
-      throw new UnauthorizedException();
+      throw new BadRequestException('Invalid credentials');
     }
     return user;
   }

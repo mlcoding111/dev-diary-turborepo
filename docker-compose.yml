@@ -1,0 +1,49 @@
+version: '3.9'
+
+services:
+  # api:
+  #   container_name: dev-diary-api
+  #   build:
+  #     context: .
+  #     dockerfile: apps/dev-diary-api/Dockerfile
+  #   env_file: 
+  #     - apps/dev-diary-api/.env
+  #   environment:
+  #     - JWT_SECRET=2375dcbd7137b5064b6cc56871a1b1c1f9eb96aab0cdab6c3fb037b7d562199288f63970c637a451f062f897b2450624aea7260adce620386f8a49678ffe41f676d1b607959216b2597bb09b319dd4e4a107ec1fc38cfd9f2984d7b4c5c200e7d1a26fa1e7fecdf732219a51a7e6677bf3ada258635bde3eb3888d672451baf8b6fe30fa05cd12a5eabffff32f3f617b0e6b46a5ccffa13634a455ad4c7490bf0f5d50da0f1ff54abdcb1d83cfef1cebedca47e0de72143c04338c50b8394bce0702b89c8a9e8735e95b5d4fa128584d31c43ccfbae9901313fb900bf7000ab5b6fb694e2d7490ea5d6dff1b453d44033332998149d1f75ab073507bba2e02ca
+  #     - JWT_SECRET_EXPIRES_IN=1h
+  #     - REFRESH_JWT_SECRET=2375dcbd7137b5064b6cc56871a1b1c1f9eb96aab0cdab6c3fb037b7d562199288f63970c637a451f062f897b2450624aea7260adce620386f8a49678ffe41f676d1b607959216b2597bb09b319dd4e4a107ec1fc38cfd9f2984d7b4c5c200e7d1a26fa1e7fecdf732219a51a7e6677bf3ada258635bde3eb3888d672451baf8b6fe30fa05cd12a5eabffff32f3f617b0e6b46a5ccffa13634a455ad4c7490bf0f5d50da0f1ff54abdcb1d83cfef1cebedca47e0de72143c04338c50b8394bce0702b89c8a9e8735e95b5d4fa128584d31c43ccfbae9901313fb900bf7000ab5b6fb694e2d7490ea5d6dff1b453d44033332998149d1f75ab073507bba2e02ca
+  #     - REFRESH_JWT_SECRET_EXPIRES_IN=7d
+  #     - NODE_ENV=development
+  #     - DB_TYPE=postgres
+  #     - PG_USER=postgres
+  #     - PG_PASSWORD=qweasd
+  #     - PG_DB=postgres
+  #     - PG_HOST=db
+  #     - PG_PORT=5432
+  #   volumes:
+  #     - .:/usr/src/app
+  #     - /usr/src/app/node_modules
+  #   command: pnpm run dev
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - db
+  #   restart: unless-stopped
+
+  db:
+    image: postgres:latest
+    hostname: db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    container_name: postgres_db
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=qweasd
+      - POSTGRES_DB=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+volumes:
+  pg_data:

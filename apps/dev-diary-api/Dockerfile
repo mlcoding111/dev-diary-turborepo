@@ -12,7 +12,6 @@ WORKDIR /app
 COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY --from=pruner /app/turbo.json ./turbo.json
-
 RUN npm install -g pnpm
 RUN pnpm install --frozen-lockfile
 
@@ -26,8 +25,8 @@ RUN pnpm run build
 FROM node:lts-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+RUN npm install -g pnpm
 COPY --from=builder /app/ .
-COPY --from=pruner /app/.env .env
 
 CMD ["node", "apps/dev-diary-api/dist/main"]
 

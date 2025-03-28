@@ -46,7 +46,6 @@ export class AuthService {
       refresh_token,
     };
   }
-
   async register(user: TRegisterUser): Promise<User> {
     // check if user already exists
     const userExists = await this.userRepository.findOneBy({
