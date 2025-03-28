@@ -1,14 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from './user.repository';
-// import { JwtService } from '@nestjs/jwt';
-// import { ApiException } from '@/core/exceptions/api.exception';
-// import { HttpStatus } from '@nestjs/common';
-// import { Request } from 'express';
 import { BaseService } from '../../core/utils/service/base.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../../entities/user.entity';
 import { AuthJwtPayload } from '@/modules/auth/types/jwt-payload';
-import { TUser } from '@repo/types/schema';
 @Injectable()
 export class UserService extends BaseService<User> {
   constructor(

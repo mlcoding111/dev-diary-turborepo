@@ -15,6 +15,7 @@ import { ApiException } from 'src/core/utils/api/exception/ApiError.exception';
 type validationPayload = {
   output?: ZodSchema; // Schema for validating response data
   input?: ZodSchema; // Schema for validating request data
+  bypass?: boolean;
 };
 
 // Helper function to check if the HTTP method requires input validation
@@ -38,20 +39,22 @@ export class GlobalValidationInterceptor implements NestInterceptor {
     console.log('The body is', body);
     console.log(`Validating: ${method} ${url}`);
 
-    // Ensure GET requests have output validation
-    if (method === 'GET' && !schema?.output) {
-      throw new Error('Output schema is required for GET requests');
-    }
+    if (!schema?.bypass) {
+      // Ensure GET requests have output validation
+      if (method === 'GET' && !schema?.output) {
+        throw new Error('Output schema is required for GET requests');
+      }
 
-    // Ensure POST/PUT/PATCH requests have input validation
-    if (methodIsPostPutOrPatch(method) && !schema?.input) {
-      throw new Error(
-        'Input schema is required for POST, PUT, and PATCH requests',
-      );
+      // Ensure POST/PUT/PATCH requests have input validation
+      if (methodIsPostPutOrPatch(method) && !schema?.input) {
+        throw new Error(
+          'Input schema is required for POST, PUT, and PATCH requests',
+        );
+      }
     }
 
     // Skip validation if no schema is provided
-    if (!schema) return next.handle();
+    if (!schema || schema.bypass) return next.handle();
 
     if (schema.input) {
       // get the schema

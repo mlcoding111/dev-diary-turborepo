@@ -18,20 +18,6 @@ import { userSchemaSerialized, type TSerializedUser } from '@repo/types/schema';
 import { UserRepository } from '../user/user.repository';
 import { User } from 'src/entities/user.entity';
 
-const MOCK_USERS: User[] = [
-  {
-    id: 1,
-    first_name: 'John',
-    last_name: 'Doe',
-    email: 'john.doe@example.com',
-    hashed_refresh_token: 'hashed_refresh_token',
-    refresh_token: 'refresh_token',
-    created_at: new Date(),
-    updated_at: new Date(),
-    password: 'password',
-  },
-];
-
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
@@ -47,9 +33,9 @@ export class UserController {
     output: z.array(UserController.serializedUserSchema),
   })
   @Get()
-  findAll(): User[] {
-    // const users = await this.userRepository.find();
-    return MOCK_USERS.map((user) => new User(user));
+  async findAll(): Promise<User[]> {
+    const users = await this.userRepository.find();
+    return users.map((user) => this.serializeUser(user));
   }
 
   @Validate({
@@ -97,5 +83,9 @@ export class UserController {
     }
 
     return await this.userRepository.remove(user);
+  }
+
+  private serializeUser(user: User): User {
+    return new User(user);
   }
 }

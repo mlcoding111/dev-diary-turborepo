@@ -6,6 +6,7 @@ import {
   BadRequestException,
   ClassSerializerInterceptor,
   UseInterceptors,
+  Param,
 } from '@nestjs/common';
 import { LocalAuthGuard } from './guards/local.guard';
 import { Public } from './decorators/public.decorator';
@@ -14,7 +15,6 @@ import { RefreshAuthGuard } from './guards/refresh-auth.guard';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { Validate } from '@/decorators/validation.decorator';
 import { z } from 'zod';
-import { ConfigService } from '@nestjs/config';
 import type {
   TRegisterUser,
   TUserLoginOutput,
@@ -35,7 +35,6 @@ import { UserRepository } from '@/models/user/user.repository';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private configService: ConfigService,
     private userRepository: UserRepository,
   ) {}
 
@@ -92,15 +91,35 @@ export class AuthController {
     };
   }
 
-  // @UseGuards(RefreshAuthGuard)
-  // @Post('auth/refresh')
-  // async refreshToken(@Request() req) {
-  //   return await this.authService.refreshToken(req.user.id);
-  // }
+  @Validate({
+    bypass: true,
+  })
+  @UseGuards(RefreshAuthGuard)
+  @Post('auth/refresh')
+  async refreshToken(@Request() req) {
+    console.log('id', req.user.id);
+    return await this.authService.refreshToken(req.user.id);
+  }
 
-  // @UseGuards(JwtAuthGuard)
-  // @Post('auth/logout')
-  // async logout(@Request() req) {
-  //   return await this.authService.logout(req.user.id);
-  // }
+  @UseGuards(JwtAuthGuard)
+  @Post('auth/logout')
+  async logout(@Request() req) {
+    return await this.authService.logout(req.user.id);
+  }
+
+  // TODO: Implement this
+  private async serializeUserLoginOutput(
+    user: TUserLoginOutput,
+  ): Promise<TUserLoginOutputSerialized> {
+    const userData = await this.userRepository.findOneBy({ id: user.user.id });
+    if (!userData) {
+      throw new BadRequestException('User not found');
+    }
+    const serializedUser = new User(userData);
+    return {
+      user: serializedUser,
+      access_token: user.access_token,
+      refresh_token: user.refresh_token,
+    };
+  }
 }
