@@ -15,6 +15,7 @@ import { ApiException } from 'src/core/utils/api/exception/ApiError.exception';
 type validationPayload = {
   output?: ZodSchema; // Schema for validating response data
   input?: ZodSchema; // Schema for validating request data
+  bypass?: boolean;
 };
 
 // Helper function to check if the HTTP method requires input validation
@@ -34,40 +35,43 @@ export class GlobalValidationInterceptor implements NestInterceptor {
 
     // Extract request details for validation
     const request: Request = context.switchToHttp().getRequest();
-    const { method, url } = request;
-
+    const { method, url, body } = request;
+    console.log('The body is', body);
     console.log(`Validating: ${method} ${url}`);
 
-    // Ensure GET requests have output validation
-    if (method === 'GET' && !schema?.output) {
-      throw new Error('Output schema is required for GET requests');
-    }
+    if (!schema?.bypass) {
+      // Ensure GET requests have output validation
+      if (method === 'GET' && !schema?.output) {
+        throw new Error('Output schema is required for GET requests');
+      }
 
-    // Ensure POST/PUT/PATCH requests have input validation
-    if (methodIsPostPutOrPatch(method) && !schema?.input) {
-      throw new Error(
-        'Input schema is required for POST, PUT, and PATCH requests',
-      );
+      // Ensure POST/PUT/PATCH requests have input validation
+      if (methodIsPostPutOrPatch(method) && !schema?.input) {
+        throw new Error(
+          'Input schema is required for POST, PUT, and PATCH requests',
+        );
+      }
     }
 
     // Skip validation if no schema is provided
-    if (!schema) return next.handle();
+    if (!schema || schema.bypass) return next.handle();
 
+    if (schema.input) {
+      // get the schema
+      console.log('The body is', body);
+      const result = schema.input.safeParse(body);
+      console.log('The result is', result);
+      if (!result.success) {
+        throw new ApiException({
+          message: `Request data input validation failed for: ${url}`,
+          data: result.error.flatten(),
+          status_code: 400,
+          error_code: 'VALIDATION_ERROR',
+        });
+      }
+    }
     return next.handle().pipe(
       map((data) => {
-        // Validate request data if input schema exists
-        if (schema.input) {
-          const result = schema.input.safeParse(data);
-          if (!result.success) {
-            throw new ApiException({
-              message: `Request data input validation failed for: ${url}`,
-              data: result.error.flatten(),
-              status_code: 400,
-              error_code: 'VALIDATION_ERROR',
-            });
-          }
-        }
-
         // Validate response data if output schema exists
         if (schema.output) {
           const result = schema.output.safeParse(data);
