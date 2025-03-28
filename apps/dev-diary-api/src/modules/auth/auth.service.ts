@@ -12,7 +12,11 @@ import * as argon2 from 'argon2';
 import { UserRepository } from '@/models/user/user.repository';
 import { UserService } from '@/models/user/user.service';
 import type { User } from '@/entities/user.entity';
-import type { TRegisterUser, TUserLoginOutput, TUserLoginOutputSerialized } from '@repo/types/schema';
+import type {
+  TRegisterUser,
+  TUserLoginOutput,
+  TUserLoginOutputSerialized,
+} from '@repo/types/schema';
 @Injectable()
 export class AuthService {
   constructor(
@@ -63,7 +67,7 @@ export class AuthService {
     access_token: string;
     refresh_token: string;
   }> {
-    const payload: any = { sub: userId };
+    const payload: AuthJwtPayload = { sub: userId };
 
     const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(payload, this.configService.get('jwt')),

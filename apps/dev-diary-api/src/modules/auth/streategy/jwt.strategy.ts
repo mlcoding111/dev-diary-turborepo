@@ -14,6 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
   // TODO: To Type
   validate(payload: any): { userId: string; username: string } {
+    console.log('THE PAYLOAD', payload);
     return { userId: payload.sub, username: payload.username };
   }
 }
