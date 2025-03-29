@@ -4,19 +4,18 @@ import {
   Post,
   Body,
   Param,
-  //   NotFoundException,
   Put,
   Delete,
   UseInterceptors,
   ClassSerializerInterceptor,
   NotFoundException,
 } from '@nestjs/common';
-import { UserService } from './user.service';
 import { Validate } from 'src/decorators/validation.decorator';
 import { z } from 'zod';
 import { userSchemaSerialized, type TSerializedUser } from '@repo/types/schema';
 import { UserRepository } from '../user/user.repository';
 import { User } from 'src/entities/user.entity';
+import { ClsService } from 'nestjs-cls';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -25,8 +24,8 @@ export class UserController {
     userSchemaSerialized as z.ZodSchema<TSerializedUser>;
 
   constructor(
-    private readonly usersService: UserService,
     private readonly userRepository: UserRepository,
+    private readonly clsService: ClsService,
   ) {}
 
   @Validate({

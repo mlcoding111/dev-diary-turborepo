@@ -29,7 +29,10 @@ export class AuthService {
   }
 
   async login(user: User): Promise<TUserLoginOutput> {
-    const { access_token, refresh_token } = await this.generateTokens(user.id);
+    const { access_token, refresh_token } = await this.generateTokens(
+      user.id,
+      user.email,
+    );
     const hashedRefreshToken = await argon2.hash(refresh_token);
 
     await this.userService.updateHashedRefreshToken(
@@ -57,11 +60,14 @@ export class AuthService {
     return savedUser;
   }
 
-  async generateTokens(userId: number): Promise<{
+  async generateTokens(
+    userId: number,
+    email: string,
+  ): Promise<{
     access_token: string;
     refresh_token: string;
   }> {
-    const payload: AuthJwtPayload = { sub: userId };
+    const payload: AuthJwtPayload = { sub: userId, email };
 
     const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(payload, this.configService.get('jwt')),
@@ -77,7 +83,10 @@ export class AuthService {
   async refreshToken(
     userId: number,
   ): Promise<{ id: number; access_token: string; refresh_token: string }> {
-    const { access_token, refresh_token } = await this.generateTokens(userId);
+    const { access_token, refresh_token } = await this.generateTokens(
+      userId,
+      '',
+    );
     const hashedRefreshToken = await argon2.hash(refresh_token);
 
     await this.userService.updateHashedRefreshToken(
