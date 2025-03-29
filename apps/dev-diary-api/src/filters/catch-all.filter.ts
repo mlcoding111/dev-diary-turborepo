@@ -24,8 +24,6 @@ export class CatchEverythingFilter implements ExceptionFilter {
       ? exception.getStatus()
       : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    console.log('CatchEverythingFilter');
-
     const responseBody: TApiResponseInternalError = {
       success: false,
       message: this.getErrorMessage(exception) || 'Internal Server Error',
