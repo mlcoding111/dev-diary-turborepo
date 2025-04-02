@@ -1,6 +1,7 @@
 import {
   CallHandler,
   ExecutionContext,
+  HttpStatus,
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
@@ -10,12 +11,14 @@ import { map } from 'rxjs/operators';
 import { ZodSchema } from 'zod';
 import { VALIDATION_SCHEMA } from '../decorators/validation.decorator';
 import { ApiException } from 'src/core/utils/api/exception/ApiError.exception';
+import { paginationSchema } from '@repo/types/schema';
 
 // Define the structure for validation schemas
 type validationPayload = {
   output?: ZodSchema; // Schema for validating response data
   input?: ZodSchema; // Schema for validating request data
   bypass?: boolean;
+  pagination?: boolean;
 };
 
 // Helper function to check if the HTTP method requires input validation
@@ -67,16 +70,29 @@ export class GlobalValidationInterceptor implements NestInterceptor {
         });
       }
     }
+
     return next.handle().pipe(
       map((data) => {
+        const dataToValidate = schema.pagination ? data.data : data;
+        if (schema.pagination) {
+          const result = paginationSchema.safeParse(data.metadata);
+          if (!result.success) {
+            throw new ApiException({
+              message: `Metadata validation failed for: ${url}`,
+              data: result.error.flatten(),
+              error_code: 'VALIDATION_ERROR',
+              status_code: HttpStatus.BAD_REQUEST,
+            });
+          }
+        }
         // Validate response data if output schema exists
         if (schema.output) {
-          const result = schema.output.safeParse(data);
+          const result = schema.output.safeParse(dataToValidate);
           if (!result.success) {
             throw new ApiException({
               message: `Response data output validation failed for: ${url}`,
               data: result?.error?.format(),
-              status_code: 400,
+              status_code: HttpStatus.BAD_REQUEST,
               error_code: 'VALIDATION_ERROR',
             });
           }

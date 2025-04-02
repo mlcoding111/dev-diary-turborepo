@@ -6,11 +6,18 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
+import { IBaseEntity } from '@/core/entity/base.entity';
 
 @Entity()
-export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class User implements IBaseEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 
   @Column()
   first_name: string;
@@ -31,12 +38,6 @@ export class User {
 
   @Column({ type: 'varchar', nullable: true })
   refresh_token: string | null;
-
-  @CreateDateColumn()
-  created_at: Date;
-
-  @UpdateDateColumn()
-  updated_at: Date;
 
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);

@@ -1,0 +1,32 @@
+import { z } from 'zod';
+import { baseSchema, baseCreateSchema, baseUpdateSchema } from './base.schema';
+
+export const {{modelName}}Schema = baseSchema.extend({
+  // Add fields here
+});
+
+export const {{modelName}}SchemaSerialized = {{modelName}}Schema.omit({
+  // Add fields here
+}).strict();
+
+export const create{{className}}Schema = {{modelName}}Schema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+}).strict();
+
+export const update{{className}}Schema = {{modelName}}Schema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+}).strict();
+
+export type TCreate{{className}} = z.infer<typeof create{{className}}Schema>;
+export type TUpdate{{className}} = z.infer<typeof update{{className}}Schema>;
+export type TSerialized{{className}} = z.infer<typeof {{modelName}}SchemaSerialized>;
+export type T{{className}} = z.infer<typeof {{modelName}}Schema>;
+
+
+
+
+

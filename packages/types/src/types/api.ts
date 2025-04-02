@@ -4,7 +4,7 @@ export type TApiResponse<T> = {
 	success: boolean;
 	status_code: number;
 	message?: string;
-	data: T | null;
+	data: T | null | T[];
 	metadata?: Record<string, any>;
 };
 

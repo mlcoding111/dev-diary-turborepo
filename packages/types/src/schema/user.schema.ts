@@ -1,16 +1,15 @@
 import { z } from 'zod';
+import { baseSchema } from './base.schema';
 
-export const userSchema = z.object({
-  id: z.number(),
+export const userSchema = baseSchema.extend({
   first_name: z.string(),
   last_name: z.string(),
   email: z.string(),
   password: z.string(),
   hashed_refresh_token: z.string().nullable(),
   refresh_token: z.string().nullable(),
-  created_at: z.date(),
-  updated_at: z.date(),
 });
+
 
 export const userSchemaSerialized = userSchema.omit({
   password: true,

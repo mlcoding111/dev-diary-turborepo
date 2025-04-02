@@ -61,7 +61,7 @@ export class AuthService {
   }
 
   async generateTokens(
-    userId: number,
+    userId: string,
     email: string,
   ): Promise<{
     access_token: string;
@@ -81,8 +81,8 @@ export class AuthService {
   }
 
   async refreshToken(
-    userId: number,
-  ): Promise<{ id: number; access_token: string; refresh_token: string }> {
+    userId: string,
+  ): Promise<{ id: string; access_token: string; refresh_token: string }> {
     const { access_token, refresh_token } = await this.generateTokens(
       userId,
       '',
@@ -103,9 +103,9 @@ export class AuthService {
   }
 
   async validateRefreshToken(
-    userId: number,
+    userId: string,
     refreshToken: string,
-  ): Promise<{ id: number }> {
+  ): Promise<{ id: string }> {
     const user = await this.userRepository.findOneBy({
       id: userId,
     });
@@ -126,7 +126,7 @@ export class AuthService {
     return { id: userId };
   }
 
-  async logout(userId: number) {
+  async logout(userId: string) {
     await this.userService.updateHashedRefreshToken(userId, '');
   }
 }
