@@ -135,7 +135,7 @@ const formatFiles = () => {
     }
   }
 };
-    
+
 const main = async () => {
   await generateFiles();
   formatFiles();
