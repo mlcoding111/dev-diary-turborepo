@@ -5,9 +5,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { IBaseEntity } from '@/core/entity/base.entity';
 
 @Entity()
-export class {{className}} {
+export class {{className}} implements IBaseEntity {
   @PrimaryGeneratedColumn()
   id: string;
 
