@@ -24,7 +24,7 @@ export class ProjectController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Project> {
+  async findOne(@Param('id') id: string): Promise<Project> {
     const project = await this.projectRepository.findOne({ where: { id } });
     if (!project) {
       throw new NotFoundException('Project not found');
@@ -39,7 +39,7 @@ export class ProjectController {
 
   @Put(':id')
   async update(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Body() project: Project,
   ): Promise<Project> {
     const projectToUpdate = await this.projectRepository.findOne({
@@ -55,7 +55,7 @@ export class ProjectController {
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: number): Promise<Project> {
+  async delete(@Param('id') id: string): Promise<Project> {
     const project = await this.projectRepository.findOne({ where: { id } });
     if (!project) {
       throw new NotFoundException('Project not found');

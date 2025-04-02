@@ -15,7 +15,7 @@ export class UserService extends BaseService<User> {
   }
 
   async updateHashedRefreshToken(
-    userId: number,
+    userId: string,
     hashedRefreshToken: string | null,
     refreshToken?: string | null,
   ) {

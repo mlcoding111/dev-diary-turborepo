@@ -9,7 +9,7 @@ import { IBaseEntity } from '@/core/entity/base.entity';
 @Entity()
 export class Project implements IBaseEntity {
   @PrimaryGeneratedColumn()
-  id: number;
+  id: string;
 
   @CreateDateColumn()
   created_at: Date;

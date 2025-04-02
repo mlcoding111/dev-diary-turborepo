@@ -41,7 +41,7 @@ export class UserController {
     output: UserController.serializedUserSchema,
   })
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<User> {
+  async findOne(@Param('id') id: string): Promise<User> {
     const user: User | null = await this.userRepository.findOne({
       where: { id },
     });
@@ -61,7 +61,7 @@ export class UserController {
   }
 
   @Put(':id')
-  async update(@Param('id') id: number, @Body() user: User): Promise<User> {
+  async update(@Param('id') id: string, @Body() user: User): Promise<User> {
     const userToUpdate = await this.userRepository.findOne({ where: { id } });
 
     // User does not exist
@@ -73,7 +73,7 @@ export class UserController {
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: number): Promise<User> {
+  async delete(@Param('id') id: string): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id },
     });
