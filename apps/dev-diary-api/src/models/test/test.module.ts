@@ -9,12 +9,7 @@ import { TestListener } from './test.listener';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Test])],
-  providers: [
-    TestService,
-    TestRepository,
-    TestSubscriber,
-    TestListener,
-  ],
+  providers: [TestService, TestRepository, TestSubscriber, TestListener],
   controllers: [TestController],
   exports: [TestService, TestRepository],
 })

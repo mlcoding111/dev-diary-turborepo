@@ -3,6 +3,7 @@
 import fs from 'fs';
 import path from 'path';
 import Mustache from 'mustache';
+import { execSync } from 'child_process';
 
 // 🛠️ Configuration: Define output directories
 const CONFIG = {
@@ -50,12 +51,10 @@ if (!modelName) {
   process.exit(1);
 }
 
-console.log('MODEL NAME', modelName);
-
 const className = toPascalCase(modelName);
 const modelDir = path.join(CONFIG.outputDirs.models, toSlugCase(modelName));
 const modelNameCamelCase = toLowerCamelCase(modelName);
-console.log('MODEL NAME CAMEL CASE', modelNameCamelCase);
+
 const entityDir = CONFIG.outputDirs.entities;
 
 // Ensure directories exist
@@ -99,7 +98,21 @@ files.forEach(({ name, outputDir }) => {
       modelNameCamelCase,
     });
     fs.writeFileSync(outputPath, content);
-    console.log(`✅ Generated: ${outputPath}`);
+
+    console.log(`generated ${outputPath}`);
+
+    // Convert Windows paths to Unix format (fix for Prettier)
+    const formattedPath = outputPath.replace(/\\/g, '/');
+
+    // Run Prettier
+    try {
+      execSync(`pnpm prettier --write "${formattedPath}"`, {
+        stdio: 'inherit',
+      });
+      console.log(`🎨 Formatted: ${formattedPath}`);
+    } catch (error) {
+      console.error(`⚠️ Prettier failed on ${formattedPath}:`, error);
+    }
   }
 });
 

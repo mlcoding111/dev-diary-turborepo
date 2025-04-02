@@ -16,9 +16,7 @@ import { TestRepository } from './test.repository';
 @Controller('tests')
 @UseInterceptors(ClassSerializerInterceptor)
 export class TestController {
-  constructor(
-    private readonly testRepository: TestRepository,
-  ) {}
+  constructor(private readonly testRepository: TestRepository) {}
 
   @Get()
   async findAll(): Promise<Test[]> {
