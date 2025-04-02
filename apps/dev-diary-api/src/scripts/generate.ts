@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import Mustache from 'mustache';
 import { execSync } from 'child_process';
 
-// 🛠️ Configuration: Define output directories
 const CONFIG = {
   outputDirs: {
     models: path.join(__dirname, '../../src/models'),
@@ -21,7 +20,6 @@ const toPascalCase = (str: string) =>
     .join('');
 
 const toKebabCase = (str: string) => str.replace(/_/g, '-');
-// Convert "my_model" → "my-model"
 const toSlugCase = (str: string) => str.replace(/_/g, '-').replace(/\s+/g, '-');
 const toLowerCamelCase = (str: string) =>
   str.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toLowerCase());
@@ -54,14 +52,17 @@ if (!modelName) {
 const className = toPascalCase(modelName);
 const modelDir = path.join(CONFIG.outputDirs.models, toSlugCase(modelName));
 const modelNameCamelCase = toLowerCamelCase(modelName);
-
 const entityDir = CONFIG.outputDirs.entities;
 
-// Ensure directories exist
-if (!fs.existsSync(modelDir)) fs.mkdirSync(modelDir, { recursive: true });
-if (!fs.existsSync(entityDir)) fs.mkdirSync(entityDir, { recursive: true });
+// Ensure directories exist asynchronously
+const ensureDirs = async () => {
+  await Promise.all([
+    fs.mkdir(modelDir, { recursive: true }),
+    fs.mkdir(entityDir, { recursive: true }),
+  ]);
+};
 
-// 🎯 Files to Generate (custom paths)
+// 🎯 Files to Generate
 const files = [
   { name: 'service.ts', outputDir: modelDir },
   { name: 'controller.ts', outputDir: modelDir },
@@ -69,51 +70,75 @@ const files = [
   { name: 'repository.ts', outputDir: modelDir },
   { name: 'listener.ts', outputDir: modelDir },
   { name: 'module.ts', outputDir: modelDir },
-  { name: 'entity.ts', outputDir: entityDir }, // Entity stored separately
+  { name: 'entity.ts', outputDir: entityDir },
 ];
 
-// 🔥 Generate Files (skipping ignored ones)
-files.forEach(({ name, outputDir }) => {
-  if (onlyFiles.length > 0 && !onlyFiles.includes(name.replace('.ts', ''))) {
-    console.log(`🚫 Skipping (not in --only): ${name}`);
-    return;
-  }
+const generatedFiles: string[] = [];
 
-  if (ignoredFiles.some((ignored) => name.includes(ignored))) {
-    console.log(`🚫 Skipping (in --ignore): ${name}`);
-    return;
-  }
+// 🔥 Generate Files
+const generateFiles = async () => {
+  await ensureDirs();
 
-  const templatePath = path.join(
-    __dirname,
-    `../templates/${toSlugCase(name)}.mustache`,
+  await Promise.all(
+    files.map(async ({ name, outputDir }) => {
+      if (
+        onlyFiles.length > 0 &&
+        !onlyFiles.includes(name.replace('.ts', ''))
+      ) {
+        console.log(`🚫 Skipping (not in --only): ${name}`);
+        return;
+      }
+
+      if (ignoredFiles.some((ignored) => name.includes(ignored))) {
+        console.log(`🚫 Skipping (in --ignore): ${name}`);
+        return;
+      }
+
+      const templatePath = path.join(
+        __dirname,
+        `../templates/${toSlugCase(name)}.mustache`,
+      );
+      const outputPath = path.join(
+        outputDir,
+        `${toKebabCase(modelName)}.${name}`,
+      );
+
+      try {
+        const template = await fs.readFile(templatePath, 'utf-8');
+        const content = Mustache.render(template, {
+          modelName,
+          className,
+          modelNameCamelCase,
+        });
+        await fs.writeFile(outputPath, content);
+
+        console.log(`✅ Generated: ${outputPath}`);
+        generatedFiles.push(outputPath);
+      } catch (error) {
+        console.error(`❌ Error generating ${outputPath}:`, error);
+      }
+    }),
   );
-  const outputPath = path.join(outputDir, `${toKebabCase(modelName)}.${name}`);
+};
 
-  if (fs.existsSync(templatePath)) {
-    const template = fs.readFileSync(templatePath, 'utf-8');
-    const content = Mustache.render(template, {
-      modelName,
-      className,
-      modelNameCamelCase,
-    });
-    fs.writeFileSync(outputPath, content);
-
-    console.log(`generated ${outputPath}`);
-
-    // Convert Windows paths to Unix format (fix for Prettier)
-    const formattedPath = outputPath.replace(/\\/g, '/');
-
-    // Run Prettier
+// 🎨 Format Generated Files in One Command
+const formatFiles = () => {
+  if (generatedFiles.length > 0) {
     try {
-      execSync(`pnpm prettier --write "${formattedPath}"`, {
-        stdio: 'inherit',
-      });
-      console.log(`🎨 Formatted: ${formattedPath}`);
+      const formattedPaths = generatedFiles
+        .map((file) => `"${file}"`)
+        .join(' ');
+      execSync(`pnpm prettier --write ${formattedPaths}`, { stdio: 'inherit' });
+      console.log(`🎨 Formatting completed successfully!`);
     } catch (error) {
-      console.error(`⚠️ Prettier failed on ${formattedPath}:`, error);
+      console.error('⚠️ Prettier failed:', error);
     }
   }
-});
+};
+    
+const main = async () => {
+  await generateFiles();
+  formatFiles();
+};
 
-console.log('\n🚀 Model generation complete! 🎉');
+main();
