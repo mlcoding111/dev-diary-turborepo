@@ -9,13 +9,13 @@ import { HttpExceptionFilter } from './filters/http.filter';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './modules/database/database.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { UserModule } from './models/user/user.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { ClsModule } from 'nestjs-cls';
 import { AuthModule } from './modules/auth/auth.module';
 import { jwtConfig, refreshJwtConfig, databaseConfig } from './config';
 import { RequestContextModule } from './modules/request/request-context.module';
+import modelsModule from './models';
 
 @Module({
   imports: [
@@ -33,7 +33,7 @@ import { RequestContextModule } from './modules/request/request-context.module';
     ProductsModule,
     DatabaseModule,
     AuthModule,
-    UserModule,
+    ...modelsModule,
   ],
   controllers: [ProductsController],
   providers: [

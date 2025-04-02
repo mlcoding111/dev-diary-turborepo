@@ -20,7 +20,8 @@ import {
   PaginatedResult,
   type PaginationOptions,
 } from '@/core/utils/service/base.service';
-import { {{modelName}}SchemaSerialized, type TSerialized{{className}}, create{{className}}Schema, update{{className}}Schema } from '@repo/types/schema';
+import { {{modelName}}SchemaSerialized, create{{className}}Schema, update{{className}}Schema } from '@repo/types/schema';
+import type { TSerialized{{className}} } from '@repo/types/schema';
 @Controller('{{modelName}}s')
 @UseInterceptors(ClassSerializerInterceptor)
 export class {{className}}Controller {

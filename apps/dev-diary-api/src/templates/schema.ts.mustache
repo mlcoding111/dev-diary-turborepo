@@ -9,13 +9,17 @@ export const {{modelName}}SchemaSerialized = {{modelName}}Schema.omit({
   // Add fields here
 }).strict();
 
-export const create{{className}}Schema = baseCreateSchema.extend({
-  // Add fields here
-});
+export const create{{className}}Schema = {{modelName}}Schema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+}).strict();
 
-export const update{{className}}Schema = baseUpdateSchema.extend({
-  // Add fields here
-});
+export const update{{className}}Schema = {{modelName}}Schema.omit({
+  id: true,
+  created_at: true,
+  updated_at: true,
+}).strict();
 
 export type TCreate{{className}} = z.infer<typeof create{{className}}Schema>;
 export type TUpdate{{className}} = z.infer<typeof update{{className}}Schema>;

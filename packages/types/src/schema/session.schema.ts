@@ -11,13 +11,21 @@ export const sessionSchemaSerialized = sessionSchema
   })
   .strict();
 
-export const createSessionSchema = baseCreateSchema.extend({
-  // Add fields here
-});
+export const createSessionSchema = sessionSchema
+  .omit({
+    id: true,
+    created_at: true,
+    updated_at: true,
+  })
+  .strict();
 
-export const updateSessionSchema = baseUpdateSchema.extend({
-  // Add fields here
-});
+export const updateSessionSchema = sessionSchema
+  .omit({
+    id: true,
+    created_at: true,
+    updated_at: true,
+  })
+  .strict();
 
 export type TCreateSession = z.infer<typeof createSessionSchema>;
 export type TUpdateSession = z.infer<typeof updateSessionSchema>;

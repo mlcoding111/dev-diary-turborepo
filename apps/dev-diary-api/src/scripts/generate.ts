@@ -11,6 +11,7 @@ const CONFIG = {
     entities: path.join(__dirname, '../../src/entities'),
     schemas: path.join(__dirname, '../../../../packages/types/src/schema'),
   },
+  moduleFile: path.join(__dirname, '../models/index.ts'),
 };
 
 // 🚀 Convert "my_model" → "MyModel"
@@ -54,6 +55,9 @@ const className = toPascalCase(modelName);
 const modelDir = path.join(CONFIG.outputDirs.models, toSlugCase(modelName));
 const modelNameCamelCase = toLowerCamelCase(modelName);
 const entityDir = CONFIG.outputDirs.entities;
+
+const moduleFileName = `${toKebabCase(modelName)}.module.ts`;
+const moduleImportPath = `./${toKebabCase(modelName)}/${moduleFileName.replace('.ts', '')}`;
 
 // Ensure directories exist asynchronously
 const ensureDirs = async () => {
@@ -140,8 +144,48 @@ const formatFiles = () => {
   }
 };
 
+// 📌 Update `app.module.ts`
+const updateModuleExports = async () => {
+  const filePath = CONFIG.moduleFile;
+
+  try {
+    let fileContent = await fs.readFile(filePath, 'utf-8');
+
+    // Import statement
+    const importStatement = `import { ${className}Module } from '${moduleImportPath}';`;
+    if (!fileContent.includes(importStatement)) {
+      fileContent = `${importStatement}\n${fileContent}`;
+    }
+
+    // Update exported array
+    const exportRegex = /export\s+default\s+\[([\s\S]*?)\];/;
+    const match = fileContent.match(exportRegex);
+
+    if (match) {
+      const existingModules = match[1]?.trim();
+      if (!existingModules?.includes(`${className}Module`)) {
+        const updatedModules = `${existingModules}, ${className}Module`;
+        fileContent = fileContent.replace(
+          exportRegex,
+          `export default [${updatedModules}];`,
+        );
+      }
+    } else {
+      console.error('⚠️ Could not find the export default array.');
+      return;
+    }
+
+    // Write back the updated file
+    await fs.writeFile(filePath, fileContent, 'utf-8');
+    console.log(`🔄 Successfully added ${className}Module to app.module.ts`);
+  } catch (error) {
+    console.error(`❌ Error updating app.module.ts:`, error);
+  }
+};
+
 const main = async () => {
   await generateFiles();
+  await updateModuleExports();
   formatFiles();
 };
 
