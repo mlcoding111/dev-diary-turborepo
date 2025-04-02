@@ -40,7 +40,7 @@ export class UserController {
   @Get()
   async findAll(
     @Query() query: PaginationOptions,
-  ): Promise<PaginatedResult<User>> {
+  ): Promise<PaginatedResult<TSerializedUser>> {
     return await this.userService.paginate(query);
   }
 
@@ -48,43 +48,38 @@ export class UserController {
     output: UserController.serializedUserSchema,
   })
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<User> {
-    return await this.getUser(id);
+  async findOne(@Param('id') id: string): Promise<TSerializedUser> {
+    const user = await this.getUser(id);
+
+    return this.serializeUser(user);
   }
 
   @Validate({
     output: UserController.serializedUserSchema,
   })
   @Post()
-  async create(@Body() user: User): Promise<User> {
+  async create(@Body() user: User): Promise<TSerializedUser> {
     return await this.userRepository.save(user);
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() user: User): Promise<User> {
-    const userToUpdate = await this.userRepository.findOne({ where: { id } });
-
-    // User does not exist
-    if (!userToUpdate) {
-      throw new NotFoundException('User not found');
-    }
+  async update(
+    @Param('id') id: string,
+    @Body() user: User,
+  ): Promise<TSerializedUser> {
+    const userToUpdate = await this.getUser(id);
 
     return await this.userRepository.mergeAndUpdate(userToUpdate, user);
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { id },
-    });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+  async delete(@Param('id') id: string): Promise<TSerializedUser> {
+    const user = await this.getUser(id);
 
     return await this.userRepository.remove(user);
   }
 
-  private serializeUser(user: User): User {
+  private serializeUser(user: User): TSerializedUser {
     return new User(user);
   }
 
@@ -97,6 +92,6 @@ export class UserController {
       throw new NotFoundException('User not found');
     }
 
-    return new User(user);
+    return user;
   }
 }
