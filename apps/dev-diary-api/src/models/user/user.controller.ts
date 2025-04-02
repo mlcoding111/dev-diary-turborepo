@@ -21,7 +21,6 @@ import {
   PaginatedResult,
   type PaginationOptions,
 } from '@/core/utils/service/base.service';
-// import { UserSerializer } from '@/serializers/user.serializer';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -49,7 +48,7 @@ export class UserController {
     output: UserController.serializedUserSchema,
   })
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<{ first_name: string }> {
+  async findOne(@Param('id') id: string): Promise<User> {
     const user: User | null = await this.userRepository.findOne({
       where: { id },
     });
@@ -59,20 +58,6 @@ export class UserController {
     }
     return new User(user);
   }
-  // @Validate({
-  //   output: UserController.serializedUserSchema,
-  // })
-  // @Get(':id')
-  // async findOne(@Param('id') id: string): Promise<{ first_name: string }> {
-  //   const user: User | null = await this.userRepository.findOne({
-  //     where: { id },
-  //   });
-
-  //   if (!user) {
-  //     throw new NotFoundException('User not found');
-  //   }
-  //   return new User(user);
-  // }
 
   @Validate({
     output: UserController.serializedUserSchema,
