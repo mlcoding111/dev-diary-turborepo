@@ -49,14 +49,7 @@ export class UserController {
   })
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<User> {
-    const user: User | null = await this.userRepository.findOne({
-      where: { id },
-    });
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    return new User(user);
+    return await this.getUser(id);
   }
 
   @Validate({
@@ -92,6 +85,18 @@ export class UserController {
   }
 
   private serializeUser(user: User): User {
+    return new User(user);
+  }
+
+  private async getUser(id: string): Promise<User> {
+    const user: User | null = await this.userRepository.findOne({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
     return new User(user);
   }
 }
