@@ -1,0 +1,14 @@
+import { Repository } from 'typeorm';
+import { {{className}} } from '../../entities/{{modelName}}.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable } from '@nestjs/common';
+import { BaseRepository } from '../../core/utils/repository/base.repository';
+
+@Injectable()
+export class {{className}}Repository extends BaseRepository<{{className}}> {
+  constructor(
+    @InjectRepository({{className}}) private readonly {{modelNameCamelCase}}Repository: Repository<{{className}}>,
+  ) {
+    super({{modelNameCamelCase}}Repository);
+  }
+}

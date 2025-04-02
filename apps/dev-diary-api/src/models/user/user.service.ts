@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from './user.repository';
-import { BaseService } from '../../core/utils/service/base.service';
+import { BaseService } from '@/core/utils/service/base.service';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '../../entities/user.entity';
+import { User } from '@/entities/user.entity';
+
 import { AuthJwtPayload } from '@/modules/auth/types/jwt-payload';
 @Injectable()
 export class UserService extends BaseService<User> {

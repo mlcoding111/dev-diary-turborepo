@@ -1,0 +1,25 @@
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+
+@Entity()
+export class {{className}} {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
+
+  constructor(partial: Partial<{{className}}>) {
+    Object.assign(this, partial);
+  }
+}
+
+export type {{className}}Type = InstanceType<typeof {{className}}>;
