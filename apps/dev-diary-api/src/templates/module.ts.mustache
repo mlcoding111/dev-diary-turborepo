@@ -1,0 +1,21 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { {{className}} } from '../../entities/{{modelName}}.entity';
+import { {{className}}Service } from './{{modelName}}.service';
+import { {{className}}Controller } from './{{modelName}}.controller';
+import { {{className}}Repository } from './{{modelName}}.repository';
+import { {{className}}Subscriber } from './{{modelName}}.subscriber';
+import { {{className}}Listener } from './{{modelName}}.listener';
+
+@Module({
+  imports: [TypeOrmModule.forFeature([{{className}}])],
+  providers: [
+    {{className}}Service,
+    {{className}}Repository,
+    {{className}}Subscriber,
+    {{className}}Listener,
+  ],
+  controllers: [{{className}}Controller],
+  exports: [{{className}}Service, {{className}}Repository],
+})
+export class {{className}}Module {}
