@@ -10,7 +10,7 @@ import { IBaseEntity } from '@/core/entity/base.entity';
 
 @Entity()
 export class User implements IBaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @CreateDateColumn()
