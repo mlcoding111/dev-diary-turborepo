@@ -1,0 +1,59 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+  NotFoundException,
+} from '@nestjs/common';
+import { {{className}} } from '../../entities/{{modelName}}.entity';
+import { {{className}}Repository } from './{{modelName}}.repository';
+
+@Controller('{{modelName}}s')
+@UseInterceptors(ClassSerializerInterceptor)
+export class {{className}}Controller {
+  constructor(
+    private readonly {{modelNameCamelCase}}Repository: {{className}}Repository,
+  ) {}
+
+  @Get()
+  async findAll(): Promise<{{className}}[]> {
+    return await this.{{modelNameCamelCase}}Repository.find();
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: number): Promise<{{className}}> {
+    const {{modelNameCamelCase}} = await this.{{modelNameCamelCase}}Repository.findOne({ where: { id } });
+    if (!{{modelNameCamelCase}}) {
+      throw new NotFoundException('{{className}} not found');
+    }
+    return {{modelNameCamelCase}};
+  }
+
+  @Post()
+  async create(@Body() {{modelNameCamelCase}}: {{className}}): Promise<{{className}}> {
+    return await this.{{modelNameCamelCase}}Repository.save({{modelNameCamelCase}});
+  }
+
+  @Put(':id')
+  async update(@Param('id') id: number, @Body() {{modelNameCamelCase}}: {{className}}): Promise<{{className}}> {
+    const {{modelNameCamelCase}}ToUpdate = await this.{{modelNameCamelCase}}Repository.findOne({ where: { id } });
+    if (!{{modelNameCamelCase}}ToUpdate) {
+      throw new NotFoundException('{{className}} not found');
+    }
+    return await this.{{modelNameCamelCase}}Repository.mergeAndUpdate({{modelNameCamelCase}}ToUpdate, {{modelNameCamelCase}});
+  }
+
+  @Delete(':id')
+  async delete(@Param('id') id: number): Promise<{{className}}> {
+    const {{modelNameCamelCase}} = await this.{{modelNameCamelCase}}Repository.findOne({ where: { id } });
+    if (!{{modelNameCamelCase}}) {
+      throw new NotFoundException('{{className}} not found');
+    }
+    return await this.{{modelNameCamelCase}}Repository.remove({{modelNameCamelCase}});
+  }
+}

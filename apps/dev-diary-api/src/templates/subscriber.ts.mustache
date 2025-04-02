@@ -1,0 +1,110 @@
+import {
+  DataSource,
+  EntitySubscriberInterface,
+  EventSubscriber,
+  InsertEvent,
+  RecoverEvent,
+  RemoveEvent,
+  SoftRemoveEvent,
+  TransactionCommitEvent,
+  TransactionRollbackEvent,
+  TransactionStartEvent,
+  UpdateEvent,
+} from 'typeorm';
+import { {{className}} } from '@/entities/{{modelName}}.entity';
+import {
+  AfterQueryEvent,
+  BeforeQueryEvent,
+} from 'typeorm/subscriber/event/QueryEvent';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { InjectDataSource } from '@nestjs/typeorm';
+
+@EventSubscriber()
+export class {{className}}Subscriber implements EntitySubscriberInterface<{{className}}> {
+  constructor(
+    @InjectDataSource() readonly dataSource: DataSource,
+    private readonly eventEmitter: EventEmitter2,
+  ) {
+    dataSource.subscribers.push(this);
+  }
+
+  listenTo() {
+    return {{className}};
+  }
+
+  afterLoad(entity: {{className}}) {
+    this.eventEmitter.emit('entity.afterLoad.{{modelName}}', entity);
+  }
+
+  beforeQuery(event: BeforeQueryEvent<{{className}}>) {
+    this.eventEmitter.emit('entity.beforeQuery.{{modelName}}', event);
+  }
+
+  afterQuery(event: AfterQueryEvent<{{className}}>) {
+    this.eventEmitter.emit('entity.afterQuery.{{modelName}}', event);
+  }
+
+  beforeInsert(event: InsertEvent<{{className}}>) {
+    this.eventEmitter.emit('entity.beforeInsert.{{modelName}}', event);
+  }
+
+  afterInsert(event: InsertEvent<{{className}}>) {
+    this.eventEmitter.emit('entity.afterInsert.{{modelName}}', event);
+  }
+
+  beforeUpdate(event: UpdateEvent<{{className}}>) {
+    this.eventEmitter.emit('entity.beforeUpdate.{{modelName}}', event);
+  }
+
+  afterUpdate(event: UpdateEvent<{{className}}>) {
+    this.eventEmitter.emit('entity.afterUpdate.{{modelName}}', event);
+  }
+
+  beforeRemove(event: RemoveEvent<{{className}}>) {
+    this.eventEmitter.emit('entity.beforeRemove.{{modelName}}', event);
+  }
+
+  afterRemove(event: RemoveEvent<{{className}}>) {
+    this.eventEmitter.emit('entity.afterRemove.{{modelName}}', event);
+  }
+
+  beforeSoftRemove(event: SoftRemoveEvent<{{className}}>) {
+    this.eventEmitter.emit('entity.beforeSoftRemove.{{modelName}}', event);
+  }
+
+  afterSoftRemove(event: SoftRemoveEvent<{{className}}>) {
+    this.eventEmitter.emit('entity.afterSoftRemove.{{modelName}}', event);
+  }
+
+  beforeRecover(event: RecoverEvent<{{className}}>) {
+    this.eventEmitter.emit('entity.beforeRecover.{{modelName}}', event);
+  }
+
+  afterRecover(event: RecoverEvent<{{className}}>) {
+    this.eventEmitter.emit('entity.afterRecover.{{modelName}}', event);
+  }
+
+  beforeTransactionStart(event: TransactionStartEvent) {
+    this.eventEmitter.emit('entity.beforeTransactionStart.{{modelName}}', event);
+  }
+
+  afterTransactionStart(event: TransactionStartEvent) {
+    this.eventEmitter.emit('entity.afterTransactionStart.{{modelName}}', event);
+  }
+
+  beforeTransactionCommit(event: TransactionCommitEvent) {
+    this.eventEmitter.emit('entity.beforeTransactionCommit.{{modelName}}', event);
+  }
+
+  afterTransactionCommit(event: TransactionCommitEvent) {
+    this.eventEmitter.emit('entity.afterTransactionCommit.{{modelName}}', event);
+  }
+
+  beforeTransactionRollback(event: TransactionRollbackEvent) {
+    this.eventEmitter.emit('entity.beforeTransactionRollback.{{modelName}}', event);
+  }
+
+  afterTransactionRollback(event: TransactionRollbackEvent) {
+    this.eventEmitter.emit('entity.afterTransactionRollback.{{modelName}}', event);
+  }
+}

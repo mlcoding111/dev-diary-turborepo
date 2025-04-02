@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class {{className}} {
+export class Test {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -17,9 +17,9 @@ export class {{className}} {
   @UpdateDateColumn()
   updated_at: Date;
 
-  constructor(partial: Partial<{{className}}>) {
+  constructor(partial: Partial<Test>) {
     Object.assign(this, partial);
   }
 }
 
-export type {{className}}Type = InstanceType<typeof {{className}}>;
+export type TestType = InstanceType<typeof Test>;

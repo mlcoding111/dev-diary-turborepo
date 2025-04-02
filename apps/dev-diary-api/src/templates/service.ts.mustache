@@ -1,1 +1,14 @@
-// This is the service file
+import { Injectable } from "@nestjs/common";
+import { BaseService } from '@/core/utils/service/base.service';
+import { {{className}} } from '@/entities/{{modelName}}.entity';
+import { {{className}}Repository } from "./{{modelName}}.repository";
+
+@Injectable()
+export class {{className}}Service extends BaseService<{{className}}> {
+  constructor(
+    private readonly {{modelNameCamelCase}}Repository: {{className}}Repository
+    ) {
+        super({{modelNameCamelCase}}Repository)
+    }
+    
+}
