@@ -47,6 +47,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     });
 
     this.clsService.set('user', serializedUser);
+    this.clsService.set('request', request);
 
     return canActivate;
   }

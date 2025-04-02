@@ -6,23 +6,30 @@ import {
   Param,
   Put,
   Delete,
+  Query,
   UseInterceptors,
   ClassSerializerInterceptor,
   NotFoundException,
 } from '@nestjs/common';
 import { {{className}} } from '@/entities/{{modelName}}.entity';
 import { {{className}}Repository } from './{{modelName}}.repository';
+import { {{className}}Service } from './{{modelName}}.service';
+import {
+  PaginatedResult,
+  type PaginationOptions,
+} from '@/core/utils/service/base.service';
 
 @Controller('{{modelName}}s')
 @UseInterceptors(ClassSerializerInterceptor)
 export class {{className}}Controller {
   constructor(
     private readonly {{modelNameCamelCase}}Repository: {{className}}Repository,
+    private readonly {{modelNameCamelCase}}Service: {{className}}Service,
   ) {}
 
   @Get()
-  async findAll(): Promise<{{className}}[]> {
-    return await this.{{modelNameCamelCase}}Repository.find();
+  async findAll(@Query() query: PaginationOptions): Promise<PaginatedResult<{{className}}>> {
+    return await this.{{modelNameCamelCase}}Service.paginate(query);
   }
 
   @Get(':id')

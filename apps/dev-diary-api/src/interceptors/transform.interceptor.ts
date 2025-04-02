@@ -13,13 +13,13 @@ import { omit } from 'lodash';
 
 @Injectable()
 export class TransformInterceptor<T>
-  implements NestInterceptor<T, TApiResponseSuccess<any>>
+  implements NestInterceptor<T, TApiResponseSuccess<T>>
 {
   constructor(private readonly reflector: Reflector) {}
   intercept(
     context: ExecutionContext,
     next: CallHandler<T>,
-  ): Observable<TApiResponseSuccess<any>> {
+  ): Observable<TApiResponseSuccess<T>> {
     // const isPaginated = this.reflector.get<boolean>(
     //   'pagination',
     //   context.getHandler(),
@@ -29,8 +29,8 @@ export class TransformInterceptor<T>
   }
 
   private formatResponse(
-    data: T | T[] | PaginationResult<T>,
-  ): TApiResponseSuccess<any> {
+    data: T | PaginationResult<T>,
+  ): TApiResponseSuccess<T> {
     // Check if data has the structure of a PaginationResult
     if (
       data &&
@@ -48,7 +48,7 @@ export class TransformInterceptor<T>
     }
     return {
       success: true,
-      data: data,
+      data: data as T,
       message: 'success',
       metadata: {},
     };

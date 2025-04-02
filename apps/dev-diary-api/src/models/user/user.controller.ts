@@ -9,15 +9,20 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { Validate } from 'src/decorators/validation.decorator';
 import { z } from 'zod';
 import { userSchemaSerialized, type TSerializedUser } from '@repo/types/schema';
 import { UserRepository } from '../user/user.repository';
 import { User } from 'src/entities/user.entity';
-import { ClsService } from 'nestjs-cls';
 import { UserService } from './user.service';
-import { PaginatedResult } from '@/core/utils/service/base.service';
+import {
+  PaginatedResult,
+  type PaginationOptions,
+} from '@/core/utils/service/base.service';
+// import { UserSerializer } from '@/serializers/user.serializer';
+
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
@@ -26,7 +31,6 @@ export class UserController {
 
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly clsService: ClsService,
     private readonly userService: UserService,
   ) {}
 
@@ -35,15 +39,17 @@ export class UserController {
     pagination: true,
   })
   @Get()
-  async findAll(): Promise<PaginatedResult<User>> {
-    return await this.userService.paginate();
+  async findAll(
+    @Query() query: PaginationOptions,
+  ): Promise<PaginatedResult<User>> {
+    return await this.userService.paginate(query);
   }
 
   @Validate({
     output: UserController.serializedUserSchema,
   })
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<User> {
+  async findOne(@Param('id') id: string): Promise<{ first_name: string }> {
     const user: User | null = await this.userRepository.findOne({
       where: { id },
     });
@@ -53,6 +59,20 @@ export class UserController {
     }
     return new User(user);
   }
+  // @Validate({
+  //   output: UserController.serializedUserSchema,
+  // })
+  // @Get(':id')
+  // async findOne(@Param('id') id: string): Promise<{ first_name: string }> {
+  //   const user: User | null = await this.userRepository.findOne({
+  //     where: { id },
+  //   });
+
+  //   if (!user) {
+  //     throw new NotFoundException('User not found');
+  //   }
+  //   return new User(user);
+  // }
 
   @Validate({
     output: UserController.serializedUserSchema,
