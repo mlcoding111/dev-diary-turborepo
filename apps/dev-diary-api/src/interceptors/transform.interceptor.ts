@@ -7,6 +7,7 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { TApiResponseSuccess } from '@repo/types/api';
+import { PaginatedResult } from '@/core/utils/service/base.service';
 
 @Injectable()
 export class TransformInterceptor<T>
@@ -22,7 +23,7 @@ export class TransformInterceptor<T>
   private formatResponse(data: T): TApiResponseSuccess<T> {
     return {
       success: true,
-      data,
+      data: data,
       message: 'success',
       metadata: {},
     };

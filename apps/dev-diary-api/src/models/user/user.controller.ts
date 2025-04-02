@@ -16,7 +16,8 @@ import { userSchemaSerialized, type TSerializedUser } from '@repo/types/schema';
 import { UserRepository } from '../user/user.repository';
 import { User } from 'src/entities/user.entity';
 import { ClsService } from 'nestjs-cls';
-
+import { UserService } from './user.service';
+import { PaginatedResult } from '@/core/utils/service/base.service';
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
@@ -26,15 +27,16 @@ export class UserController {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly clsService: ClsService,
+    private readonly userService: UserService,
   ) {}
 
   @Validate({
     output: z.array(UserController.serializedUserSchema),
+    pagination: true,
   })
   @Get()
-  async findAll(): Promise<User[]> {
-    const users = await this.userRepository.find();
-    return users.map((user) => this.serializeUser(user));
+  async findAll(): Promise<PaginatedResult<User>> {
+    return await this.userService.paginate();
   }
 
   @Validate({

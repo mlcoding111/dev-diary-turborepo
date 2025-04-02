@@ -8,13 +8,16 @@ export const Validate = ({
   output,
   input,
   bypass,
+  pagination,
 }: {
   output?: ZodSchema<unknown>;
   input?: ZodSchema<unknown>;
   bypass?: boolean;
+  pagination?: boolean;
 }) =>
   SetMetadata(VALIDATION_SCHEMA, {
     output,
     input,
     bypass,
+    pagination,
   });

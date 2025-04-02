@@ -12,7 +12,7 @@ export interface PaginationOptions {
 
 export interface PaginatedResult<T> {
   data: T[];
-  meta: {
+  metadata: {
     total: number;
     page: number;
     limit: number;
@@ -69,7 +69,7 @@ export class BaseService<T extends ObjectLiteral> {
 
     return {
       data,
-      meta: {
+      metadata: {
         total,
         page,
         limit,
