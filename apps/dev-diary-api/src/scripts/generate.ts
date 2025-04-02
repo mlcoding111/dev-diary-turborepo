@@ -131,7 +131,9 @@ const formatFiles = () => {
         .map((file) => `"${file}"`)
         .join(' ');
       execSync(`pnpm prettier --write ${formattedPaths}`, { stdio: 'inherit' });
-      console.log(`🎨 Formatting completed successfully!`);
+      console.log(
+        `🎨 Formatting of (${generatedFiles.length}) files completed successfully!`,
+      );
     } catch (error) {
       console.error('⚠️ Prettier failed:', error);
     }
