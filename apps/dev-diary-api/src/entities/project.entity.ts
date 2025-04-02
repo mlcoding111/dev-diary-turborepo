@@ -1,12 +1,21 @@
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
-import { BaseEntity } from '@/core/entity/base.entity';
-import { User } from './user.entity';
-// import { Session } from './session.entity';
-
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { IBaseEntity } from '@/core/entity/base.entity';
 @Entity()
-export class Project extends BaseEntity<Project> {
-  @Column()
-  name: string;
+export class Project implements IBaseEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 
   @Column()
   slug: string;
