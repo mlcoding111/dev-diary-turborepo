@@ -1,7 +1,6 @@
 // Every service should extend this class
 
 import { ObjectLiteral, Repository, FindOptionsWhere } from 'typeorm';
-import { PaginationResult } from './pagination';
 
 export interface PaginationOptions {
   page?: number;
@@ -23,12 +22,32 @@ export interface PaginatedResult<T> {
   };
 }
 
-export class BaseService<T extends ObjectLiteral> {
-  constructor(private readonly repository: Repository<T>) {}
+export class PaginationResult<T> implements PaginatedResult<T> {
+  data: T[];
+  metadata: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    _isPaginated: boolean;
+  };
 
-  async findAll(): Promise<T[]> {
-    return await this.repository.find();
+  constructor(
+    data: T[],
+    metadata: Omit<PaginatedResult<T>['metadata'], '_isPaginated'>,
+  ) {
+    this.data = data;
+    this.metadata = {
+      ...metadata,
+      _isPaginated: true,
+    };
   }
+}
+
+export class PaginationService<T extends ObjectLiteral> {
+  constructor(private readonly repository: Repository<T>) {}
 
   /**
    * Paginate results from the repository
@@ -67,14 +86,17 @@ export class BaseService<T extends ObjectLiteral> {
 
     // Calculate metadata
     const totalPages = Math.ceil(total / limit);
-    const newData = new PaginationResult(data, {
-      total,
-      page,
-      limit,
-      totalPages,
-      hasNextPage: page < totalPages,
-      hasPreviousPage: page > 1,
-    });
-    return newData;
+
+    return {
+      data,
+      metadata: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
   }
 }

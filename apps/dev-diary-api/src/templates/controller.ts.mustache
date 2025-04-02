@@ -6,54 +6,87 @@ import {
   Param,
   Put,
   Delete,
+  Query,
   UseInterceptors,
   ClassSerializerInterceptor,
   NotFoundException,
 } from '@nestjs/common';
 import { {{className}} } from '@/entities/{{modelName}}.entity';
 import { {{className}}Repository } from './{{modelName}}.repository';
-
+import { {{className}}Service } from './{{modelName}}.service';
+import { Validate } from 'src/decorators/validation.decorator';
+import { z } from 'zod';
+import {
+  PaginatedResult,
+  type PaginationOptions,
+} from '@/core/utils/service/base.service';
+import { {{modelName}}SchemaSerialized, create{{className}}Schema, update{{className}}Schema } from '@repo/types/schema';
+import type { TSerialized{{className}} } from '@repo/types/schema';
 @Controller('{{modelName}}s')
 @UseInterceptors(ClassSerializerInterceptor)
 export class {{className}}Controller {
+  private static readonly serialized{{className}}Schema = {{modelName}}SchemaSerialized as z.ZodSchema<TSerialized{{className}}>;
+
   constructor(
     private readonly {{modelNameCamelCase}}Repository: {{className}}Repository,
+    private readonly {{modelNameCamelCase}}Service: {{className}}Service,
   ) {}
 
+  @Validate({
+    output: z.array({{className}}Controller.serialized{{className}}Schema),
+    pagination: true,
+  })
   @Get()
-  async findAll(): Promise<{{className}}[]> {
-    return await this.{{modelNameCamelCase}}Repository.find();
+  async findAll(@Query() query: PaginationOptions): Promise<PaginatedResult<TSerialized{{className}}>> {
+    return await this.{{modelNameCamelCase}}Service.paginate(query);
   }
 
+  @Validate({
+    output: {{className}}Controller.serialized{{className}}Schema,
+  })
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<{{className}}> {
+  async findOne(@Param('id') id: string): Promise<TSerialized{{className}}> {
+    const {{modelNameCamelCase}} = await this.get{{className}}(id);
+    return this.serialize{{className}}({{modelNameCamelCase}});
+  }
+
+  @Validate({
+    output: {{className}}Controller.serialized{{className}}Schema,
+    input: create{{className}}Schema
+  })
+  @Post()
+  async create(@Body() {{modelNameCamelCase}}: {{className}}): Promise<TSerialized{{className}}> {
+    return await this.{{modelNameCamelCase}}Repository.save({{modelNameCamelCase}});
+  }
+
+  @Validate({
+    output: {{className}}Controller.serialized{{className}}Schema,
+    input: update{{className}}Schema
+  })
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() {{modelNameCamelCase}}: {{className}}): Promise<TSerialized{{className}}> {
+    const {{modelNameCamelCase}}ToUpdate = await this.get{{className}}(id);
+    return await this.{{modelNameCamelCase}}Repository.mergeAndUpdate({{modelNameCamelCase}}ToUpdate, {{modelNameCamelCase}});
+  }
+
+  @Validate({
+    output: {{className}}Controller.serialized{{className}}Schema
+  })
+  @Delete(':id')
+  async delete(@Param('id') id: string): Promise<TSerialized{{className}}> {
+    const {{modelNameCamelCase}} = await this.get{{className}}(id);
+    return await this.{{modelNameCamelCase}}Repository.remove({{modelNameCamelCase}});
+  }
+
+  private serialize{{className}}(entity: {{className}}): TSerialized{{className}} {
+    return new {{className}}(entity);
+  }
+
+  private async get{{className}}(id: string): Promise<{{className}}> {
     const {{modelNameCamelCase}} = await this.{{modelNameCamelCase}}Repository.findOne({ where: { id } });
     if (!{{modelNameCamelCase}}) {
       throw new NotFoundException('{{className}} not found');
     }
     return {{modelNameCamelCase}};
-  }
-
-  @Post()
-  async create(@Body() {{modelNameCamelCase}}: {{className}}): Promise<{{className}}> {
-    return await this.{{modelNameCamelCase}}Repository.save({{modelNameCamelCase}});
-  }
-
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() {{modelNameCamelCase}}: {{className}}): Promise<{{className}}> {
-    const {{modelNameCamelCase}}ToUpdate = await this.{{modelNameCamelCase}}Repository.findOne({ where: { id } });
-    if (!{{modelNameCamelCase}}ToUpdate) {
-      throw new NotFoundException('{{className}} not found');
-    }
-    return await this.{{modelNameCamelCase}}Repository.mergeAndUpdate({{modelNameCamelCase}}ToUpdate, {{modelNameCamelCase}});
-  }
-
-  @Delete(':id')
-  async delete(@Param('id') id: string): Promise<{{className}}> {
-    const {{modelNameCamelCase}} = await this.{{modelNameCamelCase}}Repository.findOne({ where: { id } });
-    if (!{{modelNameCamelCase}}) {
-      throw new NotFoundException('{{className}} not found');
-    }
-    return await this.{{modelNameCamelCase}}Repository.remove({{modelNameCamelCase}});
   }
 }
