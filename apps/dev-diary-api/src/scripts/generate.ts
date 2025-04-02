@@ -9,6 +9,7 @@ const CONFIG = {
   outputDirs: {
     models: path.join(__dirname, '../../src/models'),
     entities: path.join(__dirname, '../../src/entities'),
+    schemas: path.join(__dirname, '../../../../packages/types/src/schema'),
   },
 };
 
@@ -71,6 +72,7 @@ const files = [
   { name: 'listener.ts', outputDir: modelDir },
   { name: 'module.ts', outputDir: modelDir },
   { name: 'entity.ts', outputDir: entityDir },
+  { name: 'schema.ts', outputDir: CONFIG.outputDirs.schemas },
 ];
 
 const generatedFiles: string[] = [];
