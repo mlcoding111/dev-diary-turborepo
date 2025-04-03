@@ -1,3 +1,4 @@
+// @ts-ignore-error
 import {
   ExceptionFilter,
   Catch,
@@ -18,18 +19,26 @@ export class CatchEverythingFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
     const { httpAdapter } = this.httpAdapterHost;
     const ctx = host.switchToHttp();
-
     const isHttpException = this.isHttpException(exception);
     const httpStatus = isHttpException
       ? exception.getStatus()
       : HttpStatus.INTERNAL_SERVER_ERROR;
-
+    // @ts-ignore-error
+    const unknownStatus = exception.status;
+    // @ts-ignore-error
+    const unknownMessage = exception.message;
+    // @ts-ignore-error
+    const unknownCode = exception.code;
+    console.log(exception);
     const responseBody: TApiResponseInternalError = {
       success: false,
-      message: this.getErrorMessage(exception) || 'Internal Server Error',
-      status_code: httpStatus,
+      message:
+        unknownMessage ||
+        this.getErrorMessage(exception) ||
+        'Internal Server Error',
+      status_code: unknownStatus || httpStatus,
       timestamp: new Date().toISOString(),
-      error_code: 'INTERNAL_SERVER_ERROR',
+      error_code: unknownCode || 'INTERNAL_SERVER_ERROR',
       path: httpAdapter.getRequestUrl(ctx.getRequest()) as string,
       stack: this.getStack(exception),
       data: null,

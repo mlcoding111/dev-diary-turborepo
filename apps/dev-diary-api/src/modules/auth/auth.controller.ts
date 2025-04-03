@@ -5,6 +5,10 @@ import {
   BadRequestException,
   ClassSerializerInterceptor,
   UseInterceptors,
+  Req,
+  Get,
+  UnauthorizedException,
+  Res,
 } from '@nestjs/common';
 import { LocalAuthGuard } from './guards/local.guard';
 import { Public } from './decorators/public.decorator';
@@ -27,8 +31,9 @@ import {
 import { User } from '@/entities/user.entity';
 import { UserRepository } from '@/models/user/user.repository';
 import { RequestContextService } from '@/modules/request/request-context.service';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
 @Public()
-@Controller()
+@Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
   constructor(
@@ -45,7 +50,7 @@ export class AuthController {
     output: userLoginOutputSchemaSerialized,
   })
   @UseGuards(LocalAuthGuard)
-  @Post('auth/login')
+  @Post('login')
   async login(
     @Body() body: TUserLoginInput,
   ): Promise<TUserLoginOutputSerialized> {
@@ -68,7 +73,7 @@ export class AuthController {
     input: registerUserSchema,
     output: userLoginOutputSchemaSerialized,
   })
-  @Post('auth/register')
+  @Post('register')
   async register(
     @Body() body: TRegisterUser,
   ): Promise<TUserLoginOutputSerialized> {
@@ -94,14 +99,14 @@ export class AuthController {
     bypass: true,
   })
   @UseGuards(RefreshAuthGuard)
-  @Post('auth/refresh')
+  @Post('refresh')
   async refreshToken() {
     const user = this.clsService.get('user');
     return await this.authService.refreshToken(user.id);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('auth/logout')
+  @Post('logout')
   async logout() {
     const user = this.clsService.get('user');
     return await this.authService.logout(user.id);
@@ -121,5 +126,33 @@ export class AuthController {
       access_token: user.access_token,
       refresh_token: user.refresh_token,
     };
+  }
+
+  @Public()
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/login')
+  async googleAuth(@Req() req) {
+    const user = await this.authService.login(req.user);
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    return user;
+  }
+
+  // TODO: type user
+  @Validate({
+    bypass: true,
+  })
+  @Public()
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/callback')
+  async googleAuthCallback(@Req() req, @Res() res) {
+    const loginResponse = await this.authService.login(req.user);
+    if (!loginResponse) {
+      throw new UnauthorizedException();
+    }
+    res.redirect(
+      `${process.env.WEB_APP_URL}?token=${loginResponse.access_token}`,
+    );
   }
 }

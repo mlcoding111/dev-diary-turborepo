@@ -8,12 +8,16 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './streategy/jwt.strategy';
 import { jwtConfig } from '@/config/jwt.config';
 import { RefreshJwtStrategy } from './streategy/refresh.strategy';
+import { GoogleStrategy } from './streategy/google.strategy';
+import { googleOAuthConfig } from '@/config/google-oauth.config';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     UserModule,
     PassportModule.register({ session: false }),
     JwtModule.registerAsync(jwtConfig.asProvider()),
+    ConfigModule.forFeature(googleOAuthConfig),
   ],
   providers: [
     AuthService,
@@ -21,6 +25,7 @@ import { RefreshJwtStrategy } from './streategy/refresh.strategy';
     JwtStrategy,
     RefreshJwtStrategy,
     JwtService,
+    GoogleStrategy,
   ],
   exports: [AuthService],
   controllers: [AuthController],
