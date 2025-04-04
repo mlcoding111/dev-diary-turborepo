@@ -21,6 +21,10 @@
             "types": "./src/types/error-codes.ts",
             "default": "./dist/types/error-codes.js"
         },
+        "./integrations": {
+            "types": "./src/types/integrations.ts",
+            "default": "./dist/types/integrations.js"
+        },
         "./utils": {
             "types": "./src/utils/index.ts",
             "default": "./dist/utils/index.js"
