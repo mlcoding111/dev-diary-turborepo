@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { baseSchema } from './base.schema';
-
+//  // Json integration data
+//  @Column({ type: 'jsonb', nullable: true })
+//  integration_data: Record<string, any> | null;
 export const userSchema = baseSchema.extend({
   first_name: z.string(),
   last_name: z.string(),
@@ -9,6 +11,7 @@ export const userSchema = baseSchema.extend({
   hashed_refresh_token: z.string().nullable(),
   refresh_token: z.string().nullable(),
   github_token: z.string().nullable().optional(),
+  integration_data: z.record(z.string(), z.any()).nullable().optional(),
 });
 
 export const userSchemaSerialized = userSchema.omit({
@@ -20,6 +23,7 @@ export const createUserSchema = userSchema.omit({
   id: true,
   created_at: true,
   updated_at: true,
+  integration_data: true,
 }).strict();
 
 export const registerUserSchema = userSchema.omit({

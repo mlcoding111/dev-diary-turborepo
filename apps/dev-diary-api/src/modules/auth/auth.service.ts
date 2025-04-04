@@ -152,6 +152,12 @@ export class AuthService {
       const updatedUser = await this.userRepository.save({
         ...existingUser,
         github_token: githubToken,
+        integration_data: {
+          github: {
+            token: githubToken,
+            username: user.username,
+          },
+        },
       });
       return updatedUser;
     }
@@ -159,8 +165,14 @@ export class AuthService {
       email: user.email,
       first_name: user.name.split(' ')[0] || '',
       last_name: user.name.split(' ')[1] || '',
-      password: (await this.generateRandomPassword()).hashedPassword,
+      password: (await this.generateRandomPassword()).password,
       github_token: githubToken,
+      integration_data: {
+        github: {
+          token: githubToken,
+          username: user.username,
+        },
+      },
     });
     return createdUser;
   }
@@ -170,7 +182,8 @@ export class AuthService {
   }
 
   async generateRandomPassword() {
-    const password = Math.random().toString(36).substring(2, 15);
+    const password = 'asdasd';
+    // const password = Math.random().toString(36).substring(2, 15);
     const hashedPassword = await argon2.hash(password);
     return { password, hashedPassword };
   }
