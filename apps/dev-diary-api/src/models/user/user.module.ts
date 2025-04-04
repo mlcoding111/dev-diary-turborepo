@@ -7,6 +7,9 @@ import { UserRepository } from './user.repository';
 import { JwtService } from '@nestjs/jwt';
 import { UserSubscriber } from './user.subscriber';
 import { UserListener } from './user.listener';
+import { GithubService } from '@/modules/github/github.service';
+import { GitResolverService } from '@/modules/git/git-resolver.service';
+
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
   providers: [
@@ -15,6 +18,8 @@ import { UserListener } from './user.listener';
     UserSubscriber,
     UserListener,
     JwtService,
+    GithubService,
+    GitResolverService,
   ],
   controllers: [UserController],
   exports: [UserService, UserRepository],

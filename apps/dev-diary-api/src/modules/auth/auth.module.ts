@@ -8,12 +8,19 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './streategy/jwt.strategy';
 import { jwtConfig } from '@/config/jwt.config';
 import { RefreshJwtStrategy } from './streategy/refresh.strategy';
-
+import { GoogleStrategy } from './streategy/google.strategy';
+import { googleOAuthConfig } from '@/config/google-oauth.config';
+import { ConfigModule } from '@nestjs/config';
+import { GithubStrategy } from './streategy/github.strategy';
+import { githubOAuthConfig } from '@/config/github-oauth.config';
+import { GithubService } from '@/modules/github/github.service';
 @Module({
   imports: [
     UserModule,
     PassportModule.register({ session: false }),
     JwtModule.registerAsync(jwtConfig.asProvider()),
+    ConfigModule.forFeature(googleOAuthConfig),
+    ConfigModule.forFeature(githubOAuthConfig),
   ],
   providers: [
     AuthService,
@@ -21,6 +28,9 @@ import { RefreshJwtStrategy } from './streategy/refresh.strategy';
     JwtStrategy,
     RefreshJwtStrategy,
     JwtService,
+    GoogleStrategy,
+    GithubStrategy,
+    GithubService,
   ],
   exports: [AuthService],
   controllers: [AuthController],

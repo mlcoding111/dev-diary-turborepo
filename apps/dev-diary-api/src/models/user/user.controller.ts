@@ -21,7 +21,10 @@ import {
   PaginatedResult,
   type PaginationOptions,
 } from '@/core/utils/service/base.service';
-
+import { GithubService } from '@/modules/github/github.service';
+import { ClsService } from 'nestjs-cls';
+import { GitResolverService } from '@/modules/git/git-resolver.service';
+import { GitProviderType } from '@repo/types/integrations';
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
@@ -31,6 +34,9 @@ export class UserController {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly userService: UserService,
+    // private readonly githubService: GithubService,
+    private readonly clsService: ClsService,
+    private readonly gitResolverService: GitResolverService,
   ) {}
 
   @Validate({
@@ -41,6 +47,16 @@ export class UserController {
   async findAll(
     @Query() query: PaginationOptions,
   ): Promise<PaginatedResult<TSerializedUser>> {
+    const gitProvider = this.gitResolverService.resolve(GitProviderType.GITHUB);
+
+    try {
+      const userProfile = await gitProvider.getUserProfile();
+      const commits = await gitProvider.getCommits('my-turborepo');
+      // console.log('userProfile', userProfile);
+      console.log('commits', commits);
+    } catch (error) {
+      console.log('error', error);
+    }
     return await this.userService.paginate(query);
   }
 

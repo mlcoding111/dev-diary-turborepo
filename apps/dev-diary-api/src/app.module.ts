@@ -16,6 +16,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { jwtConfig, refreshJwtConfig, databaseConfig } from './config';
 import { RequestContextModule } from './modules/request/request-context.module';
 import modelsModule from './models';
+import { GithubModule } from './modules/github/github.module';
+import { GitResolverModule } from './modules/git/git-resolver.module';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import modelsModule from './models';
     ProductsModule,
     DatabaseModule,
     AuthModule,
+    GithubModule,
+    GitResolverModule,
     ...modelsModule,
   ],
   controllers: [ProductsController],

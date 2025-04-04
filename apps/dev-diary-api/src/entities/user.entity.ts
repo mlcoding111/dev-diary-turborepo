@@ -8,6 +8,11 @@ import {
 import { Exclude } from 'class-transformer';
 import { IBaseEntity } from '@/core/entity/base.entity';
 
+export interface IIntegrationData {
+  type: string;
+  data: Record<string, any>;
+}
+
 @Entity()
 export class User implements IBaseEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -38,6 +43,13 @@ export class User implements IBaseEntity {
 
   @Column({ type: 'varchar', nullable: true })
   refresh_token: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  github_token: string | null;
+
+  // Json integration data
+  @Column({ type: 'jsonb', nullable: true })
+  integration_data: Record<string, any> | null;
 
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);
