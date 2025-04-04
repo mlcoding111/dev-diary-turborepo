@@ -39,6 +39,9 @@ export class User implements IBaseEntity {
   @Column({ type: 'varchar', nullable: true })
   refresh_token: string | null;
 
+  @Column({ type: 'varchar', nullable: true })
+  github_token: string | null;
+
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);
   }

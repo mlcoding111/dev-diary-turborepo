@@ -8,8 +8,8 @@ export const userSchema = baseSchema.extend({
   password: z.string(),
   hashed_refresh_token: z.string().nullable(),
   refresh_token: z.string().nullable(),
+  github_token: z.string().nullable().optional(),
 });
-
 
 export const userSchemaSerialized = userSchema.omit({
   password: true,
@@ -30,7 +30,7 @@ export const registerUserSchema = userSchema.omit({
   refresh_token: true,
 }).strict();
 
-export type TCreateUser = Omit<z.infer<typeof userSchema>, 'id' | 'created_at' | 'updated_at'>;
+export type TCreateUser = z.infer<typeof createUserSchema>;
 export type TRegisterUser = z.infer<typeof registerUserSchema>;
 export type TSerializedUser = z.infer<typeof userSchemaSerialized>;
 export type TUser = z.infer<typeof userSchema>;

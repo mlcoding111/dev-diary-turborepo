@@ -11,6 +11,7 @@ import { UserRepository } from '@/models/user/user.repository';
 import { UserService } from '@/models/user/user.service';
 import type { User } from '@/entities/user.entity';
 import type { TRegisterUser, TUserLoginOutput } from '@repo/types/schema';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -22,30 +23,35 @@ export class AuthService {
 
   async validateUser(email: string, pass: string): Promise<any> {
     const user = await this.userRepository.findOneBy({ email });
-    if (user && user.password === pass) {
+    if (user && (await argon2.verify(user.password, pass))) {
       return user;
     }
     return null;
   }
 
   async login(user: User): Promise<TUserLoginOutput> {
-    const { access_token, refresh_token } = await this.generateTokens(
-      user.id,
-      user.email,
-    );
-    const hashedRefreshToken = await argon2.hash(refresh_token);
+    try {
+      const { access_token, refresh_token } = await this.generateTokens(
+        user.id,
+        user.email,
+      );
+      const hashedRefreshToken = await argon2.hash(refresh_token);
 
-    await this.userService.updateHashedRefreshToken(
-      user.id,
-      hashedRefreshToken,
-      refresh_token,
-    );
+      await this.userService.updateHashedRefreshToken(
+        user.id,
+        hashedRefreshToken,
+        refresh_token,
+      );
 
-    return {
-      user,
-      access_token,
-      refresh_token,
-    };
+      return {
+        user,
+        access_token,
+        refresh_token,
+      };
+    } catch (error) {
+      console.log('error', error);
+      throw new UnauthorizedException();
+    }
   }
   async register(user: TRegisterUser): Promise<User> {
     // check if user already exists
@@ -132,8 +138,39 @@ export class AuthService {
     if (existingUser) return existingUser;
     return await this.register(user);
   }
+  async validateGithubUser(
+    user: { email: string; name: string },
+    githubToken: string,
+  ) {
+    const existingUser = await this.userRepository.findOneBy({
+      email: user.email,
+    });
+    if (existingUser) {
+      const updatedUser = await this.userRepository.save({
+        ...existingUser,
+        github_token: githubToken,
+      });
+      return updatedUser;
+    }
+    const createdUser = await this.register({
+      email: user.email,
+      first_name: user.name.split(' ')[0] || '',
+      last_name: user.name.split(' ')[1] || '',
+      password: (await this.generateRandomPassword()).hashedPassword,
+      github_token: githubToken,
+    });
+    return createdUser;
+  }
 
   async logout(userId: string) {
     await this.userService.updateHashedRefreshToken(userId, '');
+  }
+
+  async generateRandomPassword() {
+    const password = Math.random().toString(36).substring(2, 15);
+    const hashedPassword = await argon2.hash(password);
+    console.log('password', password);
+    console.log('hashedPassword', hashedPassword);
+    return { password, hashedPassword };
   }
 }

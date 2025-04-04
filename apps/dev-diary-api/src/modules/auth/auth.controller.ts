@@ -32,6 +32,7 @@ import { User } from '@/entities/user.entity';
 import { UserRepository } from '@/models/user/user.repository';
 import { RequestContextService } from '@/modules/request/request-context.service';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { AuthGuard } from '@nestjs/passport';
 @Public()
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -131,13 +132,7 @@ export class AuthController {
   @Public()
   @UseGuards(GoogleAuthGuard)
   @Get('google/login')
-  async googleAuth(@Req() req) {
-    const user = await this.authService.login(req.user);
-    if (!user) {
-      throw new UnauthorizedException();
-    }
-    return user;
-  }
+  async googleAuth() {}
 
   // TODO: type user
   @Validate({
@@ -151,6 +146,30 @@ export class AuthController {
     if (!loginResponse) {
       throw new UnauthorizedException();
     }
+    console.log('THE ENV', process.env.WEB_APP_URL);
+    res.redirect(
+      `${process.env.WEB_APP_URL}?token=${loginResponse.access_token}`,
+    );
+  }
+
+  @Public()
+  @UseGuards(AuthGuard('github'))
+  @Get('github/login')
+  async githubAuth() {}
+
+  @Validate({
+    bypass: true,
+  })
+  @Public()
+  @Get('github/callback')
+  @UseGuards(AuthGuard('github'))
+  async githubAuthCallback(@Req() req, @Res() res) {
+    const loginResponse = await this.authService.login(req.user.user);
+
+    if (!loginResponse) {
+      throw new UnauthorizedException();
+    }
+
     res.redirect(
       `${process.env.WEB_APP_URL}?token=${loginResponse.access_token}`,
     );
