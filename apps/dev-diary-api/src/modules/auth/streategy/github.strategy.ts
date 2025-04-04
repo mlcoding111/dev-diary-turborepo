@@ -33,7 +33,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     profile._json.email = primaryEmail;
 
     const user = await this.authService.validateGithubUser(
-      profile._json,
+      profile._json as Record<string, any>,
       accessToken,
     );
     // Either user is not found or user is not valid
