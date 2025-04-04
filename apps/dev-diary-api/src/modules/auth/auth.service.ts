@@ -61,7 +61,13 @@ export class AuthService {
     if (userExists) {
       throw new BadRequestException('User already exists');
     }
-    const savedUser: User = await this.userRepository.save(user);
+
+    const hashedPassword = await argon2.hash(user.password);
+
+    const savedUser: User = await this.userRepository.save({
+      ...user,
+      password: hashedPassword,
+    });
 
     return savedUser;
   }
@@ -138,10 +144,7 @@ export class AuthService {
     if (existingUser) return existingUser;
     return await this.register(user);
   }
-  async validateGithubUser(
-    user: { email: string; name: string },
-    githubToken: string,
-  ) {
+  async validateGithubUser(user: Record<string, any>, githubToken: string) {
     const existingUser = await this.userRepository.findOneBy({
       email: user.email,
     });
@@ -169,8 +172,6 @@ export class AuthService {
   async generateRandomPassword() {
     const password = Math.random().toString(36).substring(2, 15);
     const hashedPassword = await argon2.hash(password);
-    console.log('password', password);
-    console.log('hashedPassword', hashedPassword);
     return { password, hashedPassword };
   }
 }

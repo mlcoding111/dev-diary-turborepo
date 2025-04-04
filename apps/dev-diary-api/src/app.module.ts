@@ -16,6 +16,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { jwtConfig, refreshJwtConfig, databaseConfig } from './config';
 import { RequestContextModule } from './modules/request/request-context.module';
 import modelsModule from './models';
+import { GithubModule } from './modules/github/github.module';
 
 @Module({
   imports: [

@@ -3,12 +3,14 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-github';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth.service';
+import { GithubService } from '@/modules/github/github.service';
 
 @Injectable()
 export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
   constructor(
     private configService: ConfigService,
     private authService: AuthService,
+    private githubService: GithubService,
   ) {
     super({
       clientID: configService.get('githubOAuth.clientId'),
@@ -19,26 +21,26 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     });
   }
 
+  // TODO: For now, we are using the profile._json to get the email
+  // TODO: Eventually, we should use the whole profile object to get more data
   async validate(accessToken: string, refreshToken: string, profile: any) {
-    const { Octokit } = await import('@octokit/rest');
-    const octokit = new Octokit({ auth: accessToken });
-    const [response, userResponse] = await Promise.all([
-      octokit.request('GET /user/emails'),
-      octokit.request('GET /user'),
-    ]);
-    const primaryEmail = response.data.filter((e) => e.primary === true)[0]
-      ?.email;
-    userResponse.data.email = primaryEmail;
+    const primaryEmail = await this.githubService.getUserEmail(accessToken);
 
     if (!primaryEmail) {
       throw new UnauthorizedException('Github primary email not found');
     }
 
     profile._json.email = primaryEmail;
+
     const user = await this.authService.validateGithubUser(
-      userResponse.data,
+      profile._json,
       accessToken,
     );
+    // Either user is not found or user is not valid
+    // Return unauthorized
+    if (!user) {
+      return false;
+    }
     return { accessToken, profile, user };
   }
 }

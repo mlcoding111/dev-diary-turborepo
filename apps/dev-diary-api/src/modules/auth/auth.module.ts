@@ -13,7 +13,7 @@ import { googleOAuthConfig } from '@/config/google-oauth.config';
 import { ConfigModule } from '@nestjs/config';
 import { GithubStrategy } from './streategy/github.strategy';
 import { githubOAuthConfig } from '@/config/github-oauth.config';
-
+import { GithubService } from '@/modules/github/github.service';
 @Module({
   imports: [
     UserModule,
@@ -30,6 +30,7 @@ import { githubOAuthConfig } from '@/config/github-oauth.config';
     JwtService,
     GoogleStrategy,
     GithubStrategy,
+    GithubService,
   ],
   exports: [AuthService],
   controllers: [AuthController],
