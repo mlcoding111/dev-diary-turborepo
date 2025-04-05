@@ -1,8 +1,7 @@
 import { z } from 'zod';
 import { baseSchema } from './base.schema';
-//  // Json integration data
-//  @Column({ type: 'jsonb', nullable: true })
-//  integration_data: Record<string, any> | null;
+import { TIntegrationData } from '../types/integrations';
+
 export const userSchema = baseSchema.extend({
   first_name: z.string(),
   last_name: z.string(),
@@ -38,5 +37,3 @@ export type TCreateUser = z.infer<typeof createUserSchema>;
 export type TRegisterUser = z.infer<typeof registerUserSchema>;
 export type TSerializedUser = z.infer<typeof userSchemaSerialized>;
 export type TUser = z.infer<typeof userSchema>;
-
-// Ensure type correctness with TSerializedUser and TCreateUser

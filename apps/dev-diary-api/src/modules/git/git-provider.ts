@@ -1,10 +1,12 @@
-import { GitProviderType } from '@repo/types/integrations';
-import { IIntegrationData } from '@repo/types/integrations';
+import {
+  GitProviderType,
+  TIntegrationDataProvider,
+} from '@repo/types/integrations';
 import { TSerializedUser } from '@repo/types/schema';
 
 export abstract class GitProvider {
   private readonly user: TSerializedUser;
-  private readonly integrationData: IIntegrationData;
+  private readonly integrationData: TIntegrationDataProvider;
   public readonly token: string;
   abstract provider: GitProviderType;
   abstract getUserProfile(): Promise<any>;
@@ -22,7 +24,7 @@ export abstract class GitProvider {
   private getIntegrationJsonData(
     user: TSerializedUser,
     provider: GitProviderType,
-  ): IIntegrationData {
+  ): TIntegrationDataProvider {
     const integrationData = user.integration_data?.[provider] || null;
 
     if (!integrationData) {

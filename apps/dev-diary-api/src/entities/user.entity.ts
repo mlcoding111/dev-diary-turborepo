@@ -8,11 +8,6 @@ import {
 import { Exclude } from 'class-transformer';
 import { IBaseEntity } from '@/core/entity/base.entity';
 
-export interface IIntegrationData {
-  type: string;
-  data: Record<string, any>;
-}
-
 @Entity()
 export class User implements IBaseEntity {
   @PrimaryGeneratedColumn('uuid')

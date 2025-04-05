@@ -14,14 +14,14 @@ export class GithubProvider extends GitProvider {
     return new Octokit({ auth: this.token });
   }
 
-  async getUserProfile() {
+  async getUserProfile(): Promise<any> {
     const client = await this.getClient();
     const { data } = await client.request('GET /user');
     return data;
   }
   // since string
   // Only show results that were last updated after the given time. This is a timestamp in ISO 8601 format: YYYY-MM-DDTHH:MM:SSZ. Due to limitations of Git, timestamps must be between 1970-01-01 and 2099-12-31 (inclusive) or unexpected results may be returned.
-  async getCommits(repo: string) {
+  async getCommits(repo: string): Promise<any> {
     const client = await this.getClient();
     const { data } = await client.request(
       `GET /repos/mlcoding111/${repo}/commits`,
@@ -32,19 +32,19 @@ export class GithubProvider extends GitProvider {
     return data;
   }
 
-  async getRepositories() {
+  async getRepositories(): Promise<any> {
     const client = await this.getClient();
     const { data } = await client.request('GET /user/repos');
     return data;
   }
 
-  async getUserEmail() {
+  async getUserEmail(): Promise<any> {
     const client = await this.getClient();
     const { data } = await client.request('GET /user/emails');
     return data;
   }
 
-  async getIntegrationData() {
+  async getIntegrationData(): Promise<any> {
     const client = await this.getClient();
     const { data } = await client.request('GET /user');
     return data;

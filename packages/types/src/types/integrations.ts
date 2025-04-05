@@ -3,8 +3,16 @@ export enum GitProviderType {
 	BITBUCKET = "bitbucket",
 }
 
-export interface IIntegrationData {
+export type TIntegrationData = {
+  [provider in GitProviderType]: TIntegrationDataProvider;
+};
+
+export type TIntegrationDataProvider = {
   token: string;
   provider: GitProviderType;
+  username?: string;
 }
 
+export type TBitbucketIntegrationData = TIntegrationDataProvider & {
+  provider: GitProviderType.BITBUCKET;
+}
