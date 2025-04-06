@@ -25,7 +25,8 @@ export abstract class GitProvider {
     user: TSerializedUser,
     provider: GitProviderType,
   ): TIntegrationDataProvider {
-    const integrationData = user.integration_data?.[provider] || null;
+    const integrationData: TIntegrationDataProvider | null =
+      user.integration_data?.[provider] || null;
 
     if (!integrationData) {
       throw new Error('Integration data not found');
