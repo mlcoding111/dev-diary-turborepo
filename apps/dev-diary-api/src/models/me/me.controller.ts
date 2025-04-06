@@ -1,69 +1,41 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Param,
   Put,
-  Delete,
-  Query,
   UseInterceptors,
   ClassSerializerInterceptor,
-  NotFoundException,
 } from '@nestjs/common';
-import { Me } from '@/entities/me.entity';
-import { MeRepository } from './me.repository';
-import { MeService } from './me.service';
+import { User } from '@/entities/user.entity';
+import { UserRepository } from '../user/user.repository';
+import { UserService } from '@/models/user/user.service';
 import { Validate } from 'src/decorators/validation.decorator';
 import { z } from 'zod';
-import {
-  PaginatedResult,
-  type PaginationOptions,
-} from '@/core/utils/service/base.service';
-import {
-  meSchemaSerialized,
-  createMeSchema,
-  updateMeSchema,
-} from '@repo/types/schema';
-import type { TSerializedMe } from '@repo/types/schema';
-@Controller('mes')
+import { updateMeSchema, userSchemaSerialized } from '@repo/types/schema';
+import type { TSerializedUser } from '@repo/types/schema';
+import { RequestContextService } from '@/modules/request/request-context.service';
+
+@Controller('me')
 @UseInterceptors(ClassSerializerInterceptor)
 export class MeController {
   private static readonly serializedMeSchema =
-    meSchemaSerialized as z.ZodSchema<TSerializedMe>;
+    userSchemaSerialized as z.ZodSchema<TSerializedUser>;
 
   constructor(
-    private readonly meRepository: MeRepository,
-    private readonly meService: MeService,
+    private readonly userRepository: UserRepository,
+    private readonly userService: UserService,
+    private readonly requestContextService: RequestContextService,
   ) {}
 
   @Validate({
-    output: z.array(MeController.serializedMeSchema),
-    pagination: true,
+    output: MeController.serializedMeSchema,
   })
   @Get()
-  async findAll(
-    @Query() query: PaginationOptions,
-  ): Promise<PaginatedResult<TSerializedMe>> {
-    return await this.meService.paginate(query);
-  }
-
-  @Validate({
-    output: MeController.serializedMeSchema,
-  })
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<TSerializedMe> {
-    const me = await this.getMe(id);
-    return this.serializeMe(me);
-  }
-
-  @Validate({
-    output: MeController.serializedMeSchema,
-    input: createMeSchema,
-  })
-  @Post()
-  async create(@Body() me: Me): Promise<TSerializedMe> {
-    return await this.meRepository.save(me);
+  async find(): Promise<TSerializedUser> {
+    const user = this.requestContextService.get('user');
+    const userToSerialize = await this.userService.getUser(user.id);
+    return this.serializeUser(userToSerialize);
   }
 
   @Validate({
@@ -73,30 +45,13 @@ export class MeController {
   @Put(':id')
   async update(
     @Param('id') id: string,
-    @Body() me: Me,
-  ): Promise<TSerializedMe> {
-    const meToUpdate = await this.getMe(id);
-    return await this.meRepository.mergeAndUpdate(meToUpdate, me);
+    @Body() user: User,
+  ): Promise<TSerializedUser> {
+    const userToUpdate: User = await this.userService.getUser(id);
+    return await this.userRepository.mergeAndUpdate(userToUpdate, user);
   }
 
-  @Validate({
-    output: MeController.serializedMeSchema,
-  })
-  @Delete(':id')
-  async delete(@Param('id') id: string): Promise<TSerializedMe> {
-    const me = await this.getMe(id);
-    return await this.meRepository.remove(me);
-  }
-
-  private serializeMe(entity: Me): TSerializedMe {
-    return new Me(entity);
-  }
-
-  private async getMe(id: string): Promise<Me> {
-    const me = await this.meRepository.findOne({ where: { id } });
-    if (!me) {
-      throw new NotFoundException('Me not found');
-    }
-    return me;
+  private serializeUser(entity: User): TSerializedUser {
+    return new User(entity);
   }
 }

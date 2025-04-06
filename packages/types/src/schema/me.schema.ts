@@ -1,15 +1,11 @@
-import { z } from "zod";
-import { baseSchema, baseCreateSchema, baseUpdateSchema } from "./base.schema";
+import { z } from 'zod';
+import { userSchema, userSchemaSerialized } from './user.schema';
 
-export const meSchema = baseSchema.extend({
+export const meSchema = userSchema.extend({
   // Add fields here
 });
 
-export const meSchemaSerialized = meSchema
-  .omit({
-    // Add fields here
-  })
-  .strict();
+export const meSchemaSerialized = userSchemaSerialized;
 
 export const createMeSchema = meSchema
   .omit({
@@ -29,5 +25,5 @@ export const updateMeSchema = meSchema
 
 export type TCreateMe = z.infer<typeof createMeSchema>;
 export type TUpdateMe = z.infer<typeof updateMeSchema>;
-export type TSerializedMe = z.infer<typeof meSchemaSerialized>;
+export type TSerializedMe = z.infer<typeof userSchemaSerialized>;
 export type TMe = z.infer<typeof meSchema>;

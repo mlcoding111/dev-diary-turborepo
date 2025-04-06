@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { BaseService } from '@/core/utils/service/base.service';
 import { JwtService } from '@nestjs/jwt';
@@ -67,5 +67,13 @@ export class UserService extends BaseService<User> {
     }
 
     return null;
+  }
+
+  async getUser(id: string): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 }
