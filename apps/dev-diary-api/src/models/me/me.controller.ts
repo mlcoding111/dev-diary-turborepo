@@ -49,8 +49,4 @@ export class MeController {
     const userToUpdate: User = await this.userService.getUser(id);
     return await this.userRepository.mergeAndUpdate(userToUpdate, user);
   }
-
-  private serializeUser(entity: User): TSerializedUser {
-    return new User(entity);
-  }
 }
