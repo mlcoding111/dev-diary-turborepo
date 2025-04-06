@@ -34,8 +34,7 @@ export class MeController {
   @Get()
   async find(): Promise<TSerializedUser> {
     const user = this.requestContextService.get('user');
-    const userToSerialize = await this.userService.getUser(user.id);
-    return this.serializeUser(userToSerialize);
+    return await this.userService.getUser(user.id);
   }
 
   @Validate({
