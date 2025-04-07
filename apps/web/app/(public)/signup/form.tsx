@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 export function SignupForm() {
 	const [state, formAction] = useActionState<FormState>(signup, undefined);
 
+
 	return (
 		<form action={formAction}>
 			<Label htmlFor="email">Email</Label>	

@@ -9,9 +9,9 @@ export async function signup(state: FormState, formData: FormData) {
         email: formData.get('email'),
         password: formData.get('password'),
     });
-
+    console.log(validationResult);
     if (!validationResult.success) {
-        return { error: validationResult.error.flatten().fieldErrors };
+        return { errors: validationResult.error.flatten().fieldErrors };
     }
 
     return {
