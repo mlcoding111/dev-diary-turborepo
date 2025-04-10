@@ -1,9 +1,11 @@
 // async server component
-
+import HeroGeometric from "@/components/kokonutui/hero-geometric";
+import Faq02 from "@/components/kokonutui/faq-02";
 export default async function Home() {
     return (
         <div>
-            <h1>Home</h1>
+            <HeroGeometric />
+            <Faq02 />
         </div>
     );
 }
