@@ -78,9 +78,9 @@ function ElegantShape({
 }
 
 export default function HeroGeometric({
-    badge = "Kokonut UI",
+    badge = "Dev Diary",
     title1 = "Elevate Your",
-    title2 = "Digital Vision",
+    title2 = "Dev Experience",
 }: {
     badge?: string;
     title1?: string;
