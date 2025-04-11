@@ -20,7 +20,7 @@ export function SignupForm() {
   const [state, formAction] = useActionState<SignupState, FormData>(signup, undefined);
 
   useEffect(() => {
-    console.log('The state', state);
+    console.log(state);
   }, [state]);
 
   // Helper function to check if state has errors for a given field

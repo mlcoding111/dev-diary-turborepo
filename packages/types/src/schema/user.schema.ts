@@ -3,10 +3,10 @@ import { baseSchema } from './base.schema';
 import { TIntegrationData } from '../types/integrations';
 
 export const userSchema = baseSchema.extend({
-  first_name: z.string(),
-  last_name: z.string(),
-  email: z.string(),
-  password: z.string(),
+  first_name: z.string().trim().min(1, "First name is required"),
+  last_name: z.string().trim().min(1, "Last name is required"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  email: z.string().email(),
   hashed_refresh_token: z.string().nullable(),
   refresh_token: z.string().nullable(),
   github_token: z.string().nullable().optional(),

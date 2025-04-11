@@ -10,15 +10,14 @@ export type ValidationFormState<T> = {
 
 export async function validateForm<T>(
   schema: ZodSchema<T>,
-  formData: FormData
+  data: Record<string, string>
 ): Promise<ValidationFormState<T> & { success: boolean }> {
-  // Extract all form fields
-  const formEntries = Object.fromEntries(formData.entries());
   
   // Validate with schema
-  const validationResult = schema.safeParse(formEntries);
-  
+  const validationResult = schema.safeParse(data);
+  console.log(validationResult, data);
   if (!validationResult.success) {
+    console.log(validationResult.error?.flatten().fieldErrors);
     // Format errors properly
     return { 
       errors: validationResult.error.flatten().fieldErrors as Record<string, string[]>,
@@ -34,6 +33,9 @@ export async function validateForm<T>(
   };
 }
 
+export const hasErrors = (fields: Record<string, string[]>, state: ValidationFormState<any>) => {
+
+}
   // // Helper function to check if state has errors for a given field
   // export const hasErrors = <T, K extends keyof T>(field: K, state: ValidationFormState<T>) => {
   //   if (!state) return false;
