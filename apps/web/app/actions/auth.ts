@@ -9,7 +9,7 @@ import { TSerializedMe } from "@repo/types/schema";
 export async function signup(
 	data: TRegisterUser,
 ): Promise<TApiResponse<TSerializedMe>> {
-	const response = await fetch("http://localhost:3001/auth/register", {
+	const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
 		method: "POST",
 		body: JSON.stringify(data),
 		headers: {
