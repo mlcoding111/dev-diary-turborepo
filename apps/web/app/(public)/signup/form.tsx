@@ -2,66 +2,86 @@
 "use client";
 
 import { signup } from "@/app/actions/auth";
-import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useEffect } from "react";
-import { TSerializedMe, TRegisterUser } from "@repo/types/schema";
-import { TFormSubmitResponse } from "@repo/types/api";
-
-// The form fields we're validating
-type FormFields = keyof TRegisterUser;
-
-// Type for state to be compatible with both input validation and API response
-type SignupState = TFormSubmitResponse<TSerializedMe> | undefined;
+import { TRegisterUser, registerUserSchema } from "@repo/types/schema";
+import { useForm } from 'react-hook-form'
+import { zodResolver } from "@hookform/resolvers/zod";
+import Form from "@/components/common/Form";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 
 export function SignupForm() {
-  const [state, formAction] = useActionState<SignupState, FormData>(signup, undefined);
+  const form = useForm<TRegisterUser>({
+    resolver: zodResolver(registerUserSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      first_name: '',
+      last_name: '',
+    },	
+  });
 
-  useEffect(() => {
-    console.log('The state', state);
-  }, [state]);
-
-  // Helper function to check if state has errors for a given field
-  const hasErrors = (field: FormFields) => {
-    if (!state) return false;
-    if ("errors" in state && state.errors && field in state.errors) {
-      return Boolean(state.errors[field as keyof typeof state.errors]);
-    }
-    return false;
-  };
-
-  // Helper function to get error messages
-  const getErrorMessage = (field: FormFields) => {
-    if (!state || !("errors" in state) || !state.errors) return "";
-    const errors = state.errors[field as keyof typeof state.errors];
-    return errors ? (Array.isArray(errors) ? errors.join(", ") : errors as string) : "";
+  const onSubmit = async (data: TRegisterUser) => {
+    return await signup(data);
   };
 
   return (
-    <form action={formAction}>
-      <Label htmlFor="email">Email</Label>
-      <Input name="email" type="email" />
-      {hasErrors("email") && <p className="text-red-500">{getErrorMessage("email")}</p>}
+    <Form form={form} onSubmit={onSubmit}>
+        <FormField 
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField 
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />	
+            </FormItem>
+          )}
+        />
+        <FormField 
+          control={form.control}
+          name="first_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>First Name</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField 
+          control={form.control}
+          name="last_name"	
+          render={({ field }) => (	
+            <FormItem>
+              <FormLabel>Last Name</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>		
+          )}
+        />
+		{/* Get the api response and display response.message */}
 
-      <Label htmlFor="password">Password</Label>
-      <Input name="password" type="password" />
-      {hasErrors("password") && <p className="text-red-500">{getErrorMessage("password")}</p>}
-
-      <Label htmlFor="first_name">First Name</Label>
-      <Input name="first_name" type="text" />
-      {hasErrors("first_name") && (
-        <p className="text-red-500">{getErrorMessage("first_name")}</p>
-      )}
-
-      <Label htmlFor="last_name">Last Name</Label>
-      <Input name="last_name" type="text" />
-      {hasErrors("last_name") && (
-        <p className="text-red-500">{getErrorMessage("last_name")}</p>
-      )}
-
-      <Button type="submit">Sign Up</Button>
-    </form>
+        <Button type="submit">Sign Up</Button>
+    </Form>
   );
 }
