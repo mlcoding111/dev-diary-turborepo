@@ -6,25 +6,21 @@ import { revalidateTag } from "next/cache";
 import { TApiResponse } from "@repo/types/api";
 import { TSerializedMe } from "@repo/types/schema";
 import { createSession } from "@/lib/session";
+import { callFetch } from "@/lib/api";
 
 export async function signup(
 	data: TRegisterUser,
 ): Promise<TApiResponse<TSerializedMe>> {
-	const response: TApiResponse<TSerializedMe> = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
+	const response = await callFetch<TSerializedMe>({
 		method: "POST",
-		body: JSON.stringify(data),
-		headers: {
-			"Content-Type": "application/json",
-		},
-	}).then(res => res.json());
+		data,
+		url: "/auth/register",
+	})
 
 	if (response.success) {
 		revalidateTag("me");
+		await createSession(response.data?.user?.id);
 	}
-
-	const user = response.data;
-
-	await createSession(user?.id);
 
 	return response;
 }

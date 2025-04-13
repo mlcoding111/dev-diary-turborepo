@@ -26,7 +26,7 @@ const cookie: Cookie = {
     duration: 24 * 60 * 60 * 1000,
 }
 export async function encrypt(payload: JWTPayload){
-    return await new SignJWT(payload)
+    return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime('1day')
@@ -54,7 +54,7 @@ export async function createSession(userId: string){
 }
 
 export async function verifySession(){
-    const cookie = (await cookies()).get(cookies.name)?.value;
+    const cookie = (await cookies()).get('session')?.value;
     const session = await decrypt(cookie ?? "");
     if(!session?.userId) {
         redirect("/login");

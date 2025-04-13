@@ -3,7 +3,7 @@ import { getMe } from "../actions/user";
 
 export default async function Dashboard(){
     const session = await verifySession();
-    const { data: user } = await getMe();
+    // const { data: user } = await getMe();
     
     // const role = session?.role;
     // if(role === "admin"){
@@ -20,7 +20,7 @@ export default async function Dashboard(){
     return (
         <div>
             <h1>Dashboard</h1>
-            <p>{user?.email}</p>
+            {/* <p>{user?.email}</p> */}
         </div>
     )
 }
