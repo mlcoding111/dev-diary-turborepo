@@ -1,23 +1,20 @@
+// SERVER ACTION
 "use server";
 
-import { registerUserSchema } from "@repo/types/schema";
+import { TRegisterUser } from "@repo/types/schema";
 import { revalidateTag } from "next/cache";
+import { TApiResponse } from "@repo/types/api";
+import { TSerializedMe } from "@repo/types/schema";
 
-export async function signup(state: FormState, formData: FormData): Promise<FormState> {
-	const validationResult = registerUserSchema.safeParse({
-		email: formData.get("email"),
-		password: formData.get("password"),
-	});
-
-	if (!validationResult.success) {
-		return { errors: validationResult.error.flatten().fieldErrors };
-	}
-
-	const { email, password } = validationResult.data;
-
-	const response = await fetch("http://localhost:3000/api/auth/signup", {
+export async function signup(
+	data: TRegisterUser,
+): Promise<TApiResponse<TSerializedMe>> {
+	const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
 		method: "POST",
-		body: JSON.stringify({ email, password }),
+		body: JSON.stringify(data),
+		headers: {
+			"Content-Type": "application/json",
+		},
 	});
 
 	if (response.ok) {
@@ -26,15 +23,3 @@ export async function signup(state: FormState, formData: FormData): Promise<Form
 
 	return response.json();
 }
-
-export type FormState =
-	| {
-			errors?: {
-				first_name?: string[];
-				last_name?: string[];
-				email?: string[];
-				password?: string[];
-			};
-			message?: string;
-	  }
-	| undefined;

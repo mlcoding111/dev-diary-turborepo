@@ -1,4 +1,4 @@
-import { TErrorCode } from './error-codes';
+import { TErrorCode } from "./error-codes";
 
 export type TApiResponse<T> = {
 	success: boolean;
@@ -7,6 +7,15 @@ export type TApiResponse<T> = {
 	data: T | null | T[];
 	metadata?: Record<string, any>;
 };
+// Omit the success property
+export type TFormValidationErrors<T> = {
+	success: false;
+	errors?: {
+		[K in keyof T]?: string[];
+	};
+};
+
+export type TFormSubmitResponse<T> = TFormValidationErrors<T> | TApiResponse<T>;
 
 export type TErrorDataType = Record<string, any> | null;
 
@@ -30,7 +39,7 @@ export type TApiResponseValidationError = Omit<TApiResponseInternalError, "data"
 
 export type TExceptionErrorPayload = Pick<
 	TApiResponseError,
-	 "message" | "metadata" | "status_code"
+	"message" | "metadata" | "status_code"
 > & {
 	error_code: TErrorCode;
 	data?: TErrorDataType;

@@ -1,43 +1,53 @@
+// UTILS/PARSER.TS
 import { ZodSchema } from "zod";
 
 // Generic type for form validation state
 export type ValidationFormState<T> = {
-  errors?: {
-    [K in keyof T]?: string[];
-  };
-  message?: string;
-  data?: T;
+  errors?: Record<string, string[]>;
+  data: T;
   success: boolean;
 };
-// S
+
 export async function validateForm<T>(
   schema: ZodSchema<T>,
-  formData: FormData
-): Promise<ValidationFormState<T>> {
-  // Extract all form fields to pass to the schema
-  const formEntries = Object.fromEntries(formData.entries());
+  data: Record<string, string>
+): Promise<ValidationFormState<T> & { success: boolean }> {
   
-  // Validate with the provided schem
-  const validationResult = schema.safeParse(formEntries);
-  
+  // Validate with schema
+  const validationResult = schema.safeParse(data);
+  console.log(validationResult, data);
   if (!validationResult.success) {
-    // Return field errors in the expected format
+    console.log(validationResult.error?.flatten().fieldErrors);
+    // Format errors properly
     return { 
-      errors: validationResult.error.flatten().fieldErrors as {
-        [K in keyof T]?: string[];
-      },
+      errors: validationResult.error.flatten().fieldErrors as Record<string, string[]>,
+      data: {} as T, // Empty object cast as T since we know validation failed
       success: false
     };
   }
 
+  // Successful validation
   return {
-    success: true,
-    errors: undefined
-  }
-  
-  // Return the validated data
-  return { 
     data: validationResult.data,
     success: true
   };
 }
+
+export const hasErrors = (fields: Record<string, string[]>, state: ValidationFormState<any>) => {
+
+}
+  // // Helper function to check if state has errors for a given field
+  // export const hasErrors = <T, K extends keyof T>(field: K, state: ValidationFormState<T>) => {
+  //   if (!state) return false;
+  //   if ("errors" in state && state.errors && field in state.errors) {
+  //     return Boolean(state.errors[field as keyof typeof state.errors]);
+  //   }
+  //   return false;
+  // };
+
+  // // Helper function to get error messages
+  // export const getErrorMessage = <T, K extends keyof T>(field: K, state: ValidationFormState<T>) => {
+  //   if (!state || !("errors" in state) || !state.errors) return "";
+  //   const errors = state.errors[field as keyof typeof state.errors];
+  //   return errors ? (Array.isArray(errors) ? errors.join(", ") : errors as string) : "";
+  // };

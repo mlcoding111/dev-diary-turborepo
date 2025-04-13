@@ -1,36 +1,87 @@
+// CLIENT COMPONENT
 "use client";
 
 import { signup } from "@/app/actions/auth";
-import { useActionState } from "react";
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { TRegisterUser, registerUserSchema } from "@repo/types/schema";
+import { useForm } from 'react-hook-form'
+import { zodResolver } from "@hookform/resolvers/zod";
+import Form from "@/components/common/Form";
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+
 export function SignupForm() {
-	const [state, formAction] = useActionState(signup, undefined);
+  const form = useForm<TRegisterUser>({
+    resolver: zodResolver(registerUserSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      first_name: '',
+      last_name: '',
+    },	
+  });
 
-	useEffect(() => {
-		console.log(state);
-	}, [state]);
+  const onSubmit = async (data: TRegisterUser) => {
+    return await signup(data);
+  };
 
-	return (
-		<form action={formAction}>
-			<Label htmlFor="email">Email</Label>	
-			<Input name="email" type="email" />
-            {state?.errors?.email && <p>{state.errors.email.join(", ")}</p>}
-			<Label htmlFor="password">Password</Label>
-			<Input name="password" type="password" />
-            {state?.errors?.password && <p className="text-red-500">{state.errors.password.join(", ")}</p>}
+  return (
+    <Form form={form} onSubmit={onSubmit}>
+        <FormField 
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField 
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />	
+            </FormItem>
+          )}
+        />
+        <FormField 
+          control={form.control}
+          name="first_name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>First Name</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField 
+          control={form.control}
+          name="last_name"	
+          render={({ field }) => (	
+            <FormItem>
+              <FormLabel>Last Name</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>		
+          )}
+        />
+		{/* Get the api response and display response.message */}
 
-			<Label htmlFor="first_name">First Name</Label>
-			<Input name="first_name" type="text" />
-            {state?.errors?.first_name && <p className="text-red-500">{state.errors.first_name.join(", ")}</p>}
-
-			<Label htmlFor="last_name">Last Name</Label>
-			<Input name="last_name" type="text" />
-            {state?.errors?.last_name && <p className="text-red-500">{state.errors.last_name.join(", ")}</p>}
-			
-			<Button type="submit">Sign Up</Button>
-		</form>
-	);
+        <Button type="submit">Sign Up</Button>
+    </Form>
+  );
 }
