@@ -39,9 +39,8 @@ export async function decrypt(session: string){
 export async function createSession(userId: string){
     const expires = new Date(Date.now() + cookie.duration);
     const session = await encrypt({ userId, expires});
-    const cookieStore = await cookies();
     
-    cookies().set(cookie.name, session, cookie.options);
+    (await cookies()).set(cookie.name, session, cookie.options);
     redirect("/dashboard")
 }
 
