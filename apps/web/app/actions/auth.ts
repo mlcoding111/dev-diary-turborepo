@@ -22,9 +22,9 @@ export async function signup(
 		revalidateTag("me");
 	}
 
-	const user = response.data?.user;
+	const user = response.data;
 
-	await createSession(user.id);
+	await createSession(user?.id);
 
 	return response;
 }

@@ -4,13 +4,22 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 const key = new TextEncoder().encode(process.env.NEXT_PUBLIC_JWT_SECRET);
-
-const cookie = {
+type Cookie = {
+    name: string;
+    options: {
+        httpOnly: boolean;
+        secure: boolean;
+        sameSite: "lax" | "none" | "strict";
+        path: string;
+    }
+    duration: number;
+}
+const cookie: Cookie = {
     name: "session",
     options: {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: "lax" as const,
         // maxAge: 60 * 60 * 24 * 30,
         path: "/",
     },
@@ -46,7 +55,7 @@ export async function createSession(userId: string){
 
 export async function verifySession(){
     const cookie = (await cookies()).get(cookies.name)?.value;
-    const session = await decrypt(cookie);
+    const session = await decrypt(cookie ?? "");
     if(!session?.userId) {
         redirect("/login");
     }
@@ -54,7 +63,7 @@ export async function verifySession(){
 }
 
 export async function deleteSession(){
-    cookies().delete(cookie.name);
+    (await cookies()).delete(cookie.name);
 
     redirect("/login");
 }
