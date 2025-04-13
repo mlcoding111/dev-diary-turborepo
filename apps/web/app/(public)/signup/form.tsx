@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { TRegisterUser, registerUserSchema } from "@repo/types/schema";
 import { useForm } from 'react-hook-form'
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form } from "@/components/ui/form";
+import Form from "@/components/common/Form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 
 export function SignupForm() {
@@ -22,13 +22,11 @@ export function SignupForm() {
   });
 
   const onSubmit = async (data: TRegisterUser) => {
-    console.log(data);
-    await signup(data);
+    return await signup(data);
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+    <Form form={form} onSubmit={onSubmit}>
         <FormField 
           control={form.control}
           name="email"
@@ -84,7 +82,6 @@ export function SignupForm() {
 		{/* Get the api response and display response.message */}
 
         <Button type="submit">Sign Up</Button>
-      </form>
     </Form>
   );
 }

@@ -17,8 +17,6 @@ export async function signup(
 		},
 	});
 
-	console.log(response);
-
 	if (response.ok) {
 		revalidateTag("me");
 	}
