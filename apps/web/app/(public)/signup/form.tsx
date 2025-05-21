@@ -21,6 +21,7 @@ export function SignupForm() {
     },	
   });
 
+  // TODO: Add error handling
   const onSubmit = async (data: TRegisterUser) => {
     return await signup(data);
   };
