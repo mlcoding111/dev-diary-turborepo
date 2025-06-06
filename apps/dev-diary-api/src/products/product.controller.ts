@@ -9,12 +9,14 @@ import {
 import type { TSerializedProduct } from '@repo/types/schema';
 import z from 'zod';
 import { ConfigService } from '@nestjs/config';
+import { RequestContextService } from '@/modules/request/request-context.service';
 
 @Controller('products')
 export class ProductsController {
   constructor(
     private readonly productsService: ProductsService,
     private readonly configService: ConfigService,
+    private readonly clsService: RequestContextService,
   ) {}
 
   @Post()
@@ -32,9 +34,8 @@ export class ProductsController {
   })
   @Get()
   getProducts(): TSerializedProduct[] {
-    // console.log all the config from the config service
-    console.log('PG_HOST', this.configService.get('PG_HOST'));
-    console.log('refresh-jwt', this.configService.get('refresh-jwt'));
+    const user = this.clsService.get('user');
+    console.log('This is the user', user);
     // TODO: Replace with serializer
     const serializedProducts = this.productsService
       .getProducts()

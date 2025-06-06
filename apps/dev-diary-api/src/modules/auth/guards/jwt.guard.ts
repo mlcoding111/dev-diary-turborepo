@@ -31,12 +31,17 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     if (isPublic) {
       return true;
     }
-
     const canActivate = (await super.canActivate(context)) as boolean;
 
-    const user = await this.userRepository.findOneBy({
-      id: request.user.sub,
+    const user = await this.userRepository.findOne({
+      where: {
+        id: request.user.sub,
+      },
     });
+
+    if (!request.user?.sub || !request.user?.email) {
+      throw new UnauthorizedException('Malformed JWT payload');
+    }
 
     if (!user) {
       throw new UnauthorizedException('User not found');

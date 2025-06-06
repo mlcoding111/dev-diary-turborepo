@@ -1,6 +1,6 @@
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -13,9 +13,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
   // TODO: To Type
-  validate(payload: any): { id: string; email: string } {
-    // console.log('THE PAYLOAD', payload);
-    return { id: payload.sub, email: payload.email };
+  validate(payload: any): { sub: string; email: string } {
+    if (!payload?.sub || !payload?.email) {
+      throw new UnauthorizedException('Malformed JWT payload');
+    }
+    return { sub: payload.sub, email: payload.email };
   }
 }
 

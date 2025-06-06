@@ -47,16 +47,16 @@ export class UserController {
     @Query() query: PaginationOptions,
   ): Promise<PaginatedResult<TSerializedUser>> {
     // TODO: Test git provider. Remove later when git module is ready
-    // const gitProvider = this.gitResolverService.resolve(GitProviderType.GITHUB);
+    const gitProvider = this.gitResolverService.resolve(GitProviderType.GITHUB);
 
-    // try {
-    //   const userProfile = await gitProvider.getUserProfile();
-    //   const commits = await gitProvider.getCommits('my-turborepo');
-    //   // console.log('userProfile', userProfile);
-    //   console.log('commits', commits);
-    // } catch (error) {
-    //   console.log('error', error);
-    // }
+    try {
+      const userProfile = await gitProvider.getUserProfile();
+      const commits = await gitProvider.getCommits('my-turborepo');
+      // console.log('userProfile', userProfile);
+      console.log('commits', commits);
+    } catch (error) {
+      console.log('error', error);
+    }
     return await this.userService.paginate(query);
   }
 
