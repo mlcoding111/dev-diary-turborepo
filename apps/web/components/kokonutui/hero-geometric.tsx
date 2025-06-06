@@ -12,7 +12,7 @@ const pacifico = Pacifico({
     variable: "--font-pacifico",
 });
 
-function ElegantShape({
+export function ElegantShape({
     className,
     delay = 0,
     width = 400,

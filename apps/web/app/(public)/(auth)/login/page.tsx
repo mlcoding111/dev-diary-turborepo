@@ -1,0 +1,11 @@
+import { GalleryVerticalEnd } from "lucide-react";
+import { ElegantShape } from "@/components/kokonutui/hero-geometric";
+import { LoginForm } from "@/components/login-form";
+
+export default function LoginPage() {
+	return (
+		<>
+			<LoginForm />
+		</>
+	);
+}

@@ -7,6 +7,7 @@ export type TApiResponse<T> = {
 	data: T | null | T[];
 	metadata?: Record<string, any>;
 };
+
 // Omit the success property
 export type TFormValidationErrors<T> = {
 	success: false;
