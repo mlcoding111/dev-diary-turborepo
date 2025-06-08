@@ -27,7 +27,7 @@ import { GitProviderType } from '@repo/types/integrations';
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
-  private static readonly serializedUserSchema =
+  public static readonly serializedUserSchema =
     userSchemaSerialized as z.ZodSchema<TSerializedUser>;
 
   constructor(
@@ -37,6 +37,14 @@ export class UserController {
     private readonly clsService: ClsService,
     private readonly gitResolverService: GitResolverService,
   ) {}
+
+  @Validate({
+    bypass: true,
+  })
+  @Get('me')
+  getMe(): TSerializedUser {
+    return this.clsService.get<TSerializedUser>('user');
+  }
 
   @Validate({
     output: z.array(UserController.serializedUserSchema),

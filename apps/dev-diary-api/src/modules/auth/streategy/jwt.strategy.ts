@@ -7,7 +7,11 @@ import { ConfigService } from '@nestjs/config';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly configService: ConfigService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      // jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+        (req: any) => req?.cookies?.access_token, // ← get token from cookie
+      ]),
       ignoreExpiration: false,
       secretOrKey: configService.get('JWT_SECRET') as string,
     });
@@ -17,6 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!payload?.sub || !payload?.email) {
       throw new UnauthorizedException('Malformed JWT payload');
     }
+    console.log('The payload', payload)
     return { sub: payload.sub, email: payload.email };
   }
 }

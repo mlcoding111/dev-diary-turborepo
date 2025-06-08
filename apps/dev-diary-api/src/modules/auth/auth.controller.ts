@@ -9,6 +9,7 @@ import {
   Get,
   UnauthorizedException,
   Res,
+  Param,
 } from '@nestjs/common';
 import { LocalAuthGuard } from './guards/local.guard';
 import { Public } from './decorators/public.decorator';
@@ -22,6 +23,7 @@ import type {
   TUserLoginOutput,
   TUserLoginOutputSerialized,
   TUserLoginInput,
+  TSerializedUser,
 } from '@repo/types/schema';
 import { Body } from '@nestjs/common';
 import {
@@ -31,8 +33,11 @@ import {
 import { User } from '@/entities/user.entity';
 import { UserRepository } from '@/models/user/user.repository';
 import { RequestContextService } from '@/modules/request/request-context.service';
+import { UserController } from '@/models/user/user.controller';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
+import { type Response } from 'express';
+
 @Public()
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -106,10 +111,18 @@ export class AuthController {
     return await this.authService.refreshToken(user.id);
   }
 
+  @Validate({
+    bypass: true,
+  })
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  async logout() {
+  async logout(@Res() res) {
     const user = this.clsService.get('user');
+    console.log('The user', user)
+    // Clear cookies by setting them to expire in the past
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
+
     return await this.authService.logout(user.id);
   }
 
@@ -146,10 +159,23 @@ export class AuthController {
     if (!loginResponse) {
       throw new UnauthorizedException();
     }
-    console.log('THE ENV', process.env.WEB_APP_URL);
-    res.redirect(
-      `${process.env.WEB_APP_URL}?token=${loginResponse.access_token}`,
-    );
+    // ✅ Set a secure cookie
+    res.cookie('access_token', loginResponse.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Lax', // Or 'Strict' / 'None' depending on your use case
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    });
+
+    res.cookie('refresh_token', loginResponse.refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Lax',
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    });
+
+    // Optional: redirect to your frontend (without passing token in URL)
+    res.redirect(`${process.env.WEB_APP_URL}`);
   }
 
   @Public()

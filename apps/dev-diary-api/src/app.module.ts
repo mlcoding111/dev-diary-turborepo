@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ProductsModule } from './products/products.module';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
@@ -18,6 +18,7 @@ import { RequestContextModule } from './modules/request/request-context.module';
 import modelsModule from './models';
 import { GithubModule } from './modules/github/github.module';
 import { GitResolverModule } from './modules/git/git-resolver.module';
+import { LoggerMiddleware } from './middlewares/request.middleware';
 
 @Module({
   imports: [
@@ -63,4 +64,8 @@ import { GitResolverModule } from './modules/git/git-resolver.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
