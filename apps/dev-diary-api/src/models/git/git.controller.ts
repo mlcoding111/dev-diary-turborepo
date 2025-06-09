@@ -1,0 +1,47 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+  Query,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+  NotFoundException,
+} from '@nestjs/common';
+import { GitService } from './git.service';
+import { Validate } from 'src/decorators/validation.decorator';
+import { z } from 'zod';
+import {
+  PaginatedResult,
+  type PaginationOptions,
+} from '@/core/utils/service/base.service';
+import { GitResolverService } from '@/modules/git/git-resolver.service';
+import { GitProviderType } from '@repo/types/integrations';
+
+@Controller('git')
+@UseInterceptors(ClassSerializerInterceptor)
+export class GitController {
+  constructor(
+    private readonly gitService: GitService,
+    private readonly gitResolverService: GitResolverService,
+  ) {}
+
+  @Validate({
+    bypass: true,
+  })
+  @Get('commits')
+  async findAll(
+    @Query() query: PaginationOptions,
+  ): Promise<PaginatedResult<any>> {
+    const gitProvider = this.gitResolverService.resolve(GitProviderType.GITHUB);
+    const userProfile = await gitProvider.getUserProfile();
+    const commits = await gitProvider.getCommits('my-turborepo');
+
+    console.log('The user profile is', userProfile);
+    return commits;
+    return await this.gitService.paginate(query);
+  }
+}

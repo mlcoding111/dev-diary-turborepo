@@ -2,6 +2,7 @@
 
 import { ObjectLiteral, Repository, FindOptionsWhere } from 'typeorm';
 import { PaginationResult } from './pagination';
+import { BadRequestException } from '@nestjs/common';
 
 export interface PaginationOptions {
   page?: number;
@@ -24,11 +25,7 @@ export interface PaginatedResult<T> {
 }
 
 export class BaseService<T extends ObjectLiteral> {
-  constructor(private readonly repository: Repository<T>) {}
-
-  async findAll(): Promise<T[]> {
-    return await this.repository.find();
-  }
+  constructor(private readonly repository?: Repository<T>) {}
 
   /**
    * Paginate results from the repository
@@ -36,6 +33,8 @@ export class BaseService<T extends ObjectLiteral> {
    * @returns Paginated result with data and metadata
    */
   async paginate(options: PaginationOptions = {}): Promise<PaginatedResult<T>> {
+    if (!this.repository)
+      throw new BadRequestException('Repository not defined');
     const {
       page = 1,
       limit = 10,

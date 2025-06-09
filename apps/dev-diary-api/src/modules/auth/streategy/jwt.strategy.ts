@@ -21,7 +21,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!payload?.sub || !payload?.email) {
       throw new UnauthorizedException('Malformed JWT payload');
     }
-    console.log('The payload', payload)
     return { sub: payload.sub, email: payload.email };
   }
 }
