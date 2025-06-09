@@ -37,10 +37,10 @@ export class GitController {
     @Query() query: PaginationOptions,
   ): Promise<PaginatedResult<any>> {
     const gitProvider = this.gitResolverService.resolve(GitProviderType.GITHUB);
-    const userProfile = await gitProvider.getUserProfile();
+    // const userProfile = await gitProvider.getUserProfile();
     const commits = await gitProvider.getCommits('my-turborepo');
 
-    console.log('The user profile is', userProfile);
+    console.log('The commits are', commits);
     return commits;
     return await this.gitService.paginate(query);
   }
