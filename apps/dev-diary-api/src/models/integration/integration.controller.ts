@@ -26,6 +26,7 @@ import {
   updateIntegrationSchema,
 } from '@repo/types/schema';
 import type { TSerializedIntegration } from '@repo/types/schema';
+
 @Controller('integrations')
 @UseInterceptors(ClassSerializerInterceptor)
 export class IntegrationController {

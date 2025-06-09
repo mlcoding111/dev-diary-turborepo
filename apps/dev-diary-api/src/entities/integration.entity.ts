@@ -8,7 +8,10 @@ import {
 } from 'typeorm';
 import { IBaseEntity } from '@/core/entity/base.entity';
 import { User } from './user.entity';
-import { GitProviderType } from '@repo/types/integrations';
+import {
+  GitProviderType,
+  type TIntegrationData,
+} from '@repo/types/integrations';
 
 @Entity()
 export class Integration implements IBaseEntity {
@@ -28,6 +31,10 @@ export class Integration implements IBaseEntity {
   // Integration type
   @Column({ type: 'enum', enum: GitProviderType })
   type: GitProviderType;
+
+  // Integration data
+  @Column({ type: 'jsonb' })
+  data: TIntegrationData;
 
   constructor(partial: Partial<Integration>) {
     Object.assign(this, partial);
