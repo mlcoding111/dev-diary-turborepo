@@ -24,6 +24,7 @@ import {
 import { ClsService } from 'nestjs-cls';
 import { GitResolverService } from '@/modules/git/git-resolver.service';
 import { GitProviderType } from '@repo/types/integrations';
+
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {

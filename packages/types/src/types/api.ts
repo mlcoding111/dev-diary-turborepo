@@ -58,8 +58,13 @@ export type TInternalErrorPayload = Pick<TApiResponse<null>, "metadata"> & {
 	message?: string;
 };
 
-export type TApiResponseSuccess<T> = Omit<TApiResponse<T>, "status_code"> & {
+export type TApiResponseSuccess<T> = Omit<
+	TApiResponse<T>,
+	"status_code" | "success"
+> & {
+	status_code: 200;
 	success: true;
+	message: "success";
 };
 
 export type TExceptionError = TExceptionErrorResponse & {

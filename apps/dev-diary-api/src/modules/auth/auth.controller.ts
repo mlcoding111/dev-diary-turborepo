@@ -9,7 +9,6 @@ import {
   Get,
   UnauthorizedException,
   Res,
-  Param,
 } from '@nestjs/common';
 import { LocalAuthGuard } from './guards/local.guard';
 import { Public } from './decorators/public.decorator';
@@ -23,7 +22,6 @@ import type {
   TUserLoginOutput,
   TUserLoginOutputSerialized,
   TUserLoginInput,
-  TSerializedUser,
 } from '@repo/types/schema';
 import { Body } from '@nestjs/common';
 import {
@@ -33,11 +31,8 @@ import {
 import { User } from '@/entities/user.entity';
 import { UserRepository } from '@/models/user/user.repository';
 import { RequestContextService } from '@/modules/request/request-context.service';
-import { UserController } from '@/models/user/user.controller';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
-import { type Response } from 'express';
-
 @Public()
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -66,8 +61,10 @@ export class AuthController {
     if (!user) {
       throw new BadRequestException('User not found');
     }
-    const loggedUser: TUserLoginOutput = await this.authService.login(user);
+    const loggedUser = await this.authService.login(user);
+
     const serializedUser = new User(user);
+
     return {
       user: serializedUser,
       access_token: loggedUser.access_token,
@@ -118,7 +115,7 @@ export class AuthController {
   @Post('logout')
   async logout(@Res() res) {
     const user = this.clsService.get('user');
-    console.log('The user', user)
+    console.log('The user', user);
     // Clear cookies by setting them to expire in the past
     res.clearCookie('access_token');
     res.clearCookie('refresh_token');

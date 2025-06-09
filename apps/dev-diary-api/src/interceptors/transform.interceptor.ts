@@ -44,6 +44,7 @@ export class TransformInterceptor<T>
         data: data.data,
         message: 'success',
         metadata: omit(data.metadata, '_isPaginated'),
+        status_code: 200,
       };
     }
     return {
@@ -51,6 +52,7 @@ export class TransformInterceptor<T>
       data: data as T,
       message: 'success',
       metadata: {},
+      status_code: 200,
     };
   }
 }
