@@ -172,7 +172,7 @@ export class AuthController {
     });
 
     // Optional: redirect to your frontend (without passing token in URL)
-    res.redirect(`${process.env.WEB_APP_URL}`);
+    res.redirect(`${process.env.WEB_APP_URL}/dashboard`);
   }
 
   @Public()
