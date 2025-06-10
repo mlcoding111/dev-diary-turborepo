@@ -35,29 +35,11 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     refreshToken: string,
     profile: any,
   ) {
-    // const requestUser = this.requestContextService.get('user');
-    const requestState = JSON.parse(req.query.state);
-
-    // If the user is already logged in or have an account, request.user will be set
-    // and we can use it to get the user from the database
-
     let user: User | null = null;
-
-    // If user in the state, that means the user is already logged in
-    if (requestState.user.sub) {
-      user = await this.userService.getUser(requestState.user.sub);
-      await this.userService.upsertIntegration(user, {
-        provider: 'github',
-        data: {
-          access_token: accessToken,
-          profile: profile._json,
-        },
-      });
-      return { accessToken, profile, user };
-    }
-
     const primaryEmail = await this.githubService.getUserEmail(accessToken);
-
+    // console.log('The primary email is', primaryEmail);
+    // console.log('The profile is', profile);
+    console.log('The state is', req.query.state);
     if (!primaryEmail) {
       throw new UnauthorizedException('Github primary email not found');
     }
@@ -65,15 +47,15 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     profile._json.email = primaryEmail;
 
     // If user is not found, create a new user
-    user = await this.authService.validateGithubUser(
-      profile._json as Record<string, any>,
-      accessToken,
-    );
-    // Either user is not found or user is not valid
-    // Return unauthorized
-    if (!user) {
-      return false;
-    }
-    return { accessToken, profile, user };
+    // user = await this.authService.validateGithubUser(
+    //   profile._json as Record<string, any>,
+    //   accessToken,
+    // );
+    // // Either user is not found or user is not valid
+    // // Return unauthorized
+    // if (!user) {
+    //   return false;
+    // }
+    return { accessToken, profile, user: profile._json };
   }
 }

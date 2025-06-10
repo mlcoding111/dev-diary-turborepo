@@ -38,6 +38,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { GitHubAuthGuard } from './guards/github-auth.guard';
 import { GitProviderType } from '@repo/types/integrations';
 import { OAuthService } from './oauth/oauth.service';
+import { DynamicAuthGuard } from './guards/oauth.guard';
+import { DynamicAuthGuardFactory } from './guards/dynamic-auth.guard';
 
 @Public()
 @Controller('auth')
@@ -146,27 +148,29 @@ export class AuthController {
     };
   }
 
+  @Validate({
+    bypass: true,
+  })
   @Public()
-  @UseGuards(AuthGuard('oauth'))
   @Get(':provider')
+  @UseGuards(DynamicAuthGuardFactory())
   async redirectToProvider(@Param('provider') provider: GitProviderType) {}
 
+  @Validate({
+    bypass: true,
+  })
   @Get(':provider/callback')
-  @UseGuards(AuthGuard('oauth')) // Strategy determines which provider
+  @UseGuards(DynamicAuthGuardFactory())
   async handleCallback(
-    @Param('provider') provider: string,
+    @Param('provider') provider: GitProviderType,
     @Req() req,
     @Res() res,
     @Query('state') state: string,
   ) {
-    const requesrUser = this.clsService.get('user');
-    const customData = JSON.parse(state);
-    const sessionUserId = requesrUser?.id;
-    const profile = req.user as any;
+    const sessionUserId = this.clsService.get('user')?.id;
+    const profile = req.user;
 
-    console.log('🚀 Custom state:', customData);
-    console.log('The provider is', provider);
-    console.log('The profile is', profile);
+    console.log('The req.user is', req.user);
 
     // const user = await this.oauthService.handleOAuthLogin(
     //   {
@@ -178,8 +182,57 @@ export class AuthController {
     //   sessionUserId,
     // );
 
+    // res.cookie('access_token', loginResponse.access_token, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === 'production',
+    //   sameSite: 'Lax', // Or 'Strict' / 'None' depending on your use case
+    //   maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    // });
+
+    // res.cookie('refresh_token', loginResponse.refresh_token, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === 'production',
+    //   sameSite: 'Lax',
+    //   maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    // });
+
     res.redirect(`${process.env.WEB_APP_URL}/dashboard`);
   }
+
+  // @Public()
+  // @UseGuards(DynamicAuthGuard)
+  // @Get(':provider')
+  // async redirectToProvider(@Param('provider') provider: GitProviderType) {}
+
+  // @Get(':provider/callback')
+  // @UseGuards(DynamicAuthGuard) // Strategy determines which provider
+  // async handleCallback(
+  //   @Param('provider') provider: string,
+  //   @Req() req,
+  //   @Res() res,
+  //   @Query('state') state: string,
+  // ) {
+  //   const requesrUser = this.clsService.get('user');
+  //   const customData = JSON.parse(state);
+  //   const sessionUserId = requesrUser?.id;
+  //   const profile = req.user as any;
+
+  //   console.log('🚀 Custom state:', customData);
+  //   console.log('The provider is', provider);
+  //   console.log('The profile is', profile);
+
+  //   // const user = await this.oauthService.handleOAuthLogin(
+  //   //   {
+  //   //     provider,
+  //   //     providerId: profile.id,
+  //   //     email: profile.email,
+  //   //     raw: profile,
+  //   //   },
+  //   //   sessionUserId,
+  //   // );
+
+  //   res.redirect(`${process.env.WEB_APP_URL}/dashboard`);
+  // }
 
   // @Public()
   // @UseGuards(GoogleAuthGuard)
