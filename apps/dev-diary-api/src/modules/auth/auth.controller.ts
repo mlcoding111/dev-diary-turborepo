@@ -9,6 +9,7 @@ import {
   Get,
   UnauthorizedException,
   Res,
+  Query,
 } from '@nestjs/common';
 import { LocalAuthGuard } from './guards/local.guard';
 import { Public } from './decorators/public.decorator';
@@ -33,6 +34,7 @@ import { UserRepository } from '@/models/user/user.repository';
 import { RequestContextService } from '@/modules/request/request-context.service';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
+import { GitHubAuthGuard } from './guards/github-auth.guard';
 @Public()
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -176,23 +178,25 @@ export class AuthController {
   }
 
   @Public()
-  @UseGuards(AuthGuard('github'))
+  @UseGuards(GitHubAuthGuard)
   @Get('github/login')
-  async githubAuth() {}
+  async githubAuth() {
+    console.log('🚀 GithubAuthController githubAuth');
+  }
 
-  @Validate({
-    bypass: true,
-  })
+  @Validate({ bypass: true })
   @Public()
   @Get('github/callback')
-  @UseGuards(AuthGuard('github'))
-  async githubAuthCallback(@Req() req, @Res() res) {
+  @UseGuards(GitHubAuthGuard)
+  async githubAuthCallback(
+    @Req() req,
+    @Res() res,
+    @Query('state') state: string,
+  ) {
+    const customData = JSON.parse(state);
+    console.log('🚀 Custom state:', customData);
+    // Example: redirect using your custom data
     const loginResponse = await this.authService.login(req.user.user);
-
-    if (!loginResponse) {
-      throw new UnauthorizedException();
-    }
-
     res.redirect(
       `${process.env.WEB_APP_URL}?token=${loginResponse.access_token}`,
     );
