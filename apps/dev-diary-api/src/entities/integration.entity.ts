@@ -5,6 +5,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
   Column,
+  JoinColumn,
 } from 'typeorm';
 import { IBaseEntity } from '@/core/entity/base.entity';
 import { User } from './user.entity';
@@ -24,9 +25,12 @@ export class Integration implements IBaseEntity {
   @UpdateDateColumn()
   updated_at: Date;
 
-  // Integration belong to a user
-  @ManyToOne(() => User, (user) => user.id)
+  @Column({ name: 'user_id' })
   user_id: string;
+
+  @ManyToOne(() => User, (user) => user.integrations)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
   // Integration type
   @Column({ type: 'enum', enum: GitProviderType })

@@ -9,9 +9,11 @@ import { UserSubscriber } from './user.subscriber';
 import { UserListener } from './user.listener';
 import { GithubService } from '@/modules/github/github.service';
 import { GitResolverService } from '@/modules/git/git-resolver.service';
+import { IntegrationRepository } from '../integration/integration.repository';
+import { Integration } from '@/entities/integration.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [TypeOrmModule.forFeature([User, Integration])],
   providers: [
     UserService,
     UserRepository,
@@ -20,6 +22,7 @@ import { GitResolverService } from '@/modules/git/git-resolver.service';
     JwtService,
     GithubService,
     GitResolverService,
+    IntegrationRepository,
   ],
   controllers: [UserController],
   exports: [UserService, UserRepository],

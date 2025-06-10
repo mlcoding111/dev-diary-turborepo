@@ -5,11 +5,14 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '@/entities/user.entity';
 
 import { AuthJwtPayload } from '@/modules/auth/types/jwt-payload';
+import { IntegrationRepository } from '../integration/integration.repository';
+
 @Injectable()
 export class UserService extends BaseService<User> {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
+    private readonly integrationRepository: IntegrationRepository,
   ) {
     super(userRepository);
   }
@@ -38,9 +41,7 @@ export class UserService extends BaseService<User> {
     if (authHeader) {
       const [type, token] = authHeader.split(' ');
       if (type === 'Bearer' && token) {
-        // console.log('THere')
         const payload: AuthJwtPayload = this.jwtService.verify(token);
-        console.log('payload', payload);
         if (payload) {
           const user = await this.userRepository.findOne({
             relations: ['userWorkspaces'],
@@ -75,5 +76,29 @@ export class UserService extends BaseService<User> {
       throw new NotFoundException('User not found');
     }
     return user;
+  }
+
+  async upsertIntegration(user: User, integration: Record<string, any>) {
+    if (!user || !integration.provider) {
+      throw new Error('Missing user or provider info');
+    }
+
+    const existingIntegration = await this.integrationRepository.findOneBy({
+      user_id: user.id,
+      type: integration.provider,
+    });
+
+    if (existingIntegration) {
+      return await this.integrationRepository.save({
+        ...existingIntegration,
+        data: integration.data,
+      });
+    }
+
+    return await this.integrationRepository.save({
+      user_id: user.id,
+      type: integration.provider,
+      data: integration.data,
+    });
   }
 }

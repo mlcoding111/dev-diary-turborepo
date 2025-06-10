@@ -1,4 +1,4 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RequestContextService } from '@/modules/request/request-context.service';
 
@@ -8,15 +8,12 @@ export class GitHubAuthGuard extends AuthGuard('github') {
     super();
   }
 
-  getAuthenticateOptions(context: ExecutionContext) {
-    // console.log('🚀 GitHubAuthGuard context:', context);
+  getAuthenticateOptions() {
     const user = this.requestContextService.get('user');
-    console.log('🚀 GitHubAuthGuard user:', user);
 
     return {
       state: JSON.stringify({
-        foo: 'bar', // your custom payload
-        redirect: '/dashboard', // example
+        redirect: '/dashboard',
         timestamp: Date.now(),
         user: {
           sub: user?.sub,

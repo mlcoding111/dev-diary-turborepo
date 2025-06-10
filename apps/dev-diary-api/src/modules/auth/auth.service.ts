@@ -145,22 +145,20 @@ export class AuthService {
     if (existingUser) return existingUser;
     return await this.register(user);
   }
+
   async validateGithubUser(user: Record<string, any>, githubToken: string) {
     const existingUser = await this.userRepository.findOneBy({
       email: user.email,
     });
     if (existingUser) {
-      const updatedUser = await this.userRepository.save({
-        ...existingUser,
-        github_token: githubToken,
-        integration_data: {
-          github: {
-            token: githubToken,
-            username: user.username,
-          },
+      await this.userService.upsertIntegration(existingUser, {
+        provider: 'github',
+        data: {
+          access_token: githubToken,
+          profile: user,
         },
       });
-      return updatedUser;
+      return existingUser;
     }
     const createdUser = await this.register({
       email: user.email,
@@ -173,6 +171,13 @@ export class AuthService {
           token: githubToken,
           username: user.username,
         },
+      },
+    });
+    await this.userService.upsertIntegration(createdUser, {
+      provider: 'github',
+      data: {
+        access_token: githubToken,
+        profile: user,
       },
     });
     return createdUser;

@@ -44,7 +44,7 @@ export class User implements IBaseEntity {
   @Column({ type: 'varchar', nullable: true })
   github_token: string | null;
 
-  @OneToMany(() => Integration, (integration) => integration.user_id)
+  @OneToMany(() => Integration, (integration) => integration.user)
   integrations: Integration[];
 
   constructor(partial: Partial<User>) {
