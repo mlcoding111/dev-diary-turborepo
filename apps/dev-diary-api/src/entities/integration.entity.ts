@@ -34,7 +34,7 @@ export class Integration implements IBaseEntity {
 
   // Integration type
   @Column({ type: 'enum', enum: GitProviderType })
-  type: GitProviderType;
+  provider: GitProviderType;
 
   // Integration data
   @Column({ type: 'jsonb' })
