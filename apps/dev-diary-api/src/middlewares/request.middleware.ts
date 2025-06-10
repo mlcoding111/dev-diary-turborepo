@@ -10,9 +10,12 @@ export class LoggerMiddleware implements NestMiddleware {
     const accessToken = req.cookies['access_token']; // 👈 Your cookie
     // console.log('Access token:', accessToken);
     // decode the access token
-    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
-    // console.log('Decoded access token:', decoded);
-    this.requestContextService.set('user', decoded);
+    try {
+      const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
+      this.requestContextService.set('user', decoded);
+    } catch (error) {
+      console.log('Error decoding access token:', error);
+    }
     // console.log('Request...');
     next();
   }

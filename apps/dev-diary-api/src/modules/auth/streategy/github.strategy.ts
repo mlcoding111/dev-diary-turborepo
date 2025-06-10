@@ -24,7 +24,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
   // TODO: For now, we are using the profile._json to get the email
   // TODO: Eventually, we should use the whole profile object to get more data
   async validate(accessToken: string, refreshToken: string, profile: any) {
-    console.log('🚀 GithubStrategy profile:');
+    console.log('🚀 GithubStrategy profile:', profile);
     const primaryEmail = await this.githubService.getUserEmail(accessToken);
 
     if (!primaryEmail) {
