@@ -1,7 +1,7 @@
 import { User } from '@/entities/user.entity';
 import { IntegrationRepository } from '@/models/integration/integration.repository';
 import { UserRepository } from '@/models/user/user.repository';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { GitProviderType } from '@repo/types/integrations';
 
 @Injectable()
@@ -17,13 +17,14 @@ export class OAuthService {
     // CASE 1: User is logged in -> link new integration
     if (sessionUserId) {
       const user = await this.usersRepo.findOneBy({ id: sessionUserId });
+      if (!user) throw new NotFoundException('User not found');
       await this.linkIntegration(user, provider, providerId, email, raw);
       return user;
     }
 
     // CASE 2: Try to find by integration
     const integration = await this.integrationsRepo.findOne({
-      where: { provider, providerId },
+      where: { provider, user: { id: sessionUserId } },
       relations: ['user'],
     });
 
@@ -51,17 +52,16 @@ export class OAuthService {
   ) {
     const existing = await this.integrationsRepo.findOneBy({
       provider,
-      providerId,
+      user: { id: user.id },
     });
     if (existing) return;
 
-    const integration = this.integrationsRepo.create({
+    return await this.integrationsRepo.save({
       provider,
       providerId,
       email,
       user,
       rawProfile,
     });
-    await this.integrationsRepo.save(integration);
   }
 }
