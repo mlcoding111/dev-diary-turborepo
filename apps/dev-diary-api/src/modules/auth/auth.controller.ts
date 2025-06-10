@@ -10,6 +10,7 @@ import {
   UnauthorizedException,
   Res,
   Query,
+  Param,
 } from '@nestjs/common';
 import { LocalAuthGuard } from './guards/local.guard';
 import { Public } from './decorators/public.decorator';
@@ -35,6 +36,9 @@ import { RequestContextService } from '@/modules/request/request-context.service
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { GitHubAuthGuard } from './guards/github-auth.guard';
+import { GitProviderType } from '@repo/types/integrations';
+import { OAuthService } from './oauth/oauth.service';
+
 @Public()
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -43,6 +47,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private userRepository: UserRepository,
     private readonly clsService: RequestContextService,
+    private readonly oauthService: OAuthService,
   ) {}
 
   @Validate({
@@ -142,63 +147,98 @@ export class AuthController {
   }
 
   @Public()
-  @UseGuards(GoogleAuthGuard)
-  @Get('google/login')
-  async googleAuth() {}
+  @UseGuards(AuthGuard('oauth'))
+  @Get(':provider')
+  async redirectToProvider(@Param('provider') provider: GitProviderType) {}
 
-  // TODO: type user
-  @Validate({
-    bypass: true,
-  })
-  @Public()
-  @UseGuards(GoogleAuthGuard)
-  @Get('google/callback')
-  async googleAuthCallback(@Req() req, @Res() res) {
-    const loginResponse = await this.authService.login(req.user);
-    if (!loginResponse) {
-      throw new UnauthorizedException();
-    }
-    // ✅ Set a secure cookie
-    res.cookie('access_token', loginResponse.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Lax', // Or 'Strict' / 'None' depending on your use case
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-    });
-
-    res.cookie('refresh_token', loginResponse.refresh_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Lax',
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-    });
-
-    // Optional: redirect to your frontend (without passing token in URL)
-    res.redirect(`${process.env.WEB_APP_URL}/dashboard`);
-  }
-
-  @Public()
-  @UseGuards(GitHubAuthGuard)
-  @Get('github/login')
-  async githubAuth() {
-    console.log('🚀 GithubAuthController githubAuth');
-  }
-
-  @Validate({ bypass: true })
-  @Public()
-  @Get('github/callback')
-  @UseGuards(GitHubAuthGuard)
-  async githubAuthCallback(
+  @Get(':provider/callback')
+  @UseGuards(AuthGuard('oauth')) // Strategy determines which provider
+  async handleCallback(
+    @Param('provider') provider: string,
     @Req() req,
     @Res() res,
     @Query('state') state: string,
   ) {
+    const requesrUser = this.clsService.get('user');
     const customData = JSON.parse(state);
+    const sessionUserId = requesrUser?.id;
+    const profile = req.user as any;
+
     console.log('🚀 Custom state:', customData);
-    // Example: redirect using your custom data
-    const loginResponse = await this.authService.login(req.user.user);
-    res.redirect(
-      `${process.env.WEB_APP_URL}?token=${loginResponse.access_token}`,
-    );
+    console.log('The provider is', provider);
+    console.log('The profile is', profile);
+
+    // const user = await this.oauthService.handleOAuthLogin(
+    //   {
+    //     provider,
+    //     providerId: profile.id,
+    //     email: profile.email,
+    //     raw: profile,
+    //   },
+    //   sessionUserId,
+    // );
+
+    res.redirect(`${process.env.WEB_APP_URL}/dashboard`);
   }
+
+  // @Public()
+  // @UseGuards(GoogleAuthGuard)
+  // @Get('google/login')
+  // async googleAuth() {}
+
+  // // TODO: type user
+  // @Validate({
+  //   bypass: true,
+  // })
+  // @Public()
+  // @UseGuards(GoogleAuthGuard)
+  // @Get('google/callback')
+  // async googleAuthCallback(@Req() req, @Res() res) {
+  //   const loginResponse = await this.authService.login(req.user);
+  //   if (!loginResponse) {
+  //     throw new UnauthorizedException();
+  //   }
+  //   // ✅ Set a secure cookie
+  //   res.cookie('access_token', loginResponse.access_token, {
+  //     httpOnly: true,
+  //     secure: process.env.NODE_ENV === 'production',
+  //     sameSite: 'Lax', // Or 'Strict' / 'None' depending on your use case
+  //     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+  //   });
+
+  //   res.cookie('refresh_token', loginResponse.refresh_token, {
+  //     httpOnly: true,
+  //     secure: process.env.NODE_ENV === 'production',
+  //     sameSite: 'Lax',
+  //     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+  //   });
+
+  //   // Optional: redirect to your frontend (without passing token in URL)
+  //   res.redirect(`${process.env.WEB_APP_URL}/dashboard`);
+  // }
+
+  // @Public()
+  // @UseGuards(GitHubAuthGuard)
+  // @Get('github/login')
+  // async githubAuth() {
+  //   console.log('🚀 GithubAuthController githubAuth');
+  // }
+
+  // @Validate({ bypass: true })
+  // @Public()
+  // @Get('github/callback')
+  // @UseGuards(GitHubAuthGuard)
+  // async githubAuthCallback(
+  //   @Req() req,
+  //   @Res() res,
+  //   @Query('state') state: string,
+  // ) {
+  // const customData = JSON.parse(state);
+  // console.log('🚀 Custom state:', customData);
+  //   // Example: redirect using your custom data
+  //   const loginResponse = await this.authService.login(req.user.user);
+  //   res.redirect(
+  //     `${process.env.WEB_APP_URL}?token=${loginResponse.access_token}`,
+  //   );
+  // }
 }

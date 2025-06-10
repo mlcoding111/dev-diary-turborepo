@@ -85,7 +85,7 @@ export class UserService extends BaseService<User> {
 
     const existingIntegration = await this.integrationRepository.findOneBy({
       user_id: user.id,
-      type: integration.provider,
+      provider: integration.provider,
     });
 
     if (existingIntegration) {
