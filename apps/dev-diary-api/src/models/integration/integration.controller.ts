@@ -26,6 +26,7 @@ import {
   updateIntegrationSchema,
 } from '@repo/types/schema';
 import type { TSerializedIntegration } from '@repo/types/schema';
+import { RequestContextService } from '@/modules/request/request-context.service';
 
 @Controller('integrations')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -36,6 +37,7 @@ export class IntegrationController {
   constructor(
     private readonly integrationRepository: IntegrationRepository,
     private readonly integrationService: IntegrationService,
+    private readonly requestContextService: RequestContextService,
   ) {}
 
   @Validate({
@@ -46,7 +48,17 @@ export class IntegrationController {
   async findAll(
     @Query() query: PaginationOptions,
   ): Promise<PaginatedResult<TSerializedIntegration>> {
-    return await this.integrationService.paginate(query);
+    const user = this.requestContextService.get('user');
+    return await this.integrationService.paginate({
+      ...query,
+      filter: {
+        where: {
+          user_id: {
+            id: user.id,
+          },
+        },
+      },
+    });
   }
 
   @Validate({

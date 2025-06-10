@@ -137,6 +137,7 @@ export class AuthService {
 
     return { id: userId };
   }
+
   async validateGoogleUser(user: TRegisterUser) {
     const existingUser = await this.userRepository.findOneBy({
       email: user.email,

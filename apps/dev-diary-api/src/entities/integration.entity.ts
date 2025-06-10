@@ -26,7 +26,7 @@ export class Integration implements IBaseEntity {
 
   // Integration belong to a user
   @ManyToOne(() => User, (user) => user.id)
-  user: User;
+  user_id: string;
 
   // Integration type
   @Column({ type: 'enum', enum: GitProviderType })
