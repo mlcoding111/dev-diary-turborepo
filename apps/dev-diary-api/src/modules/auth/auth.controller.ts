@@ -23,11 +23,13 @@ import type {
   TUserLoginOutput,
   TUserLoginOutputSerialized,
   TUserLoginInput,
+  TSerializedUser,
 } from '@repo/types/schema';
 import { Body } from '@nestjs/common';
 import {
   registerUserSchema,
   userLoginOutputSchemaSerialized,
+  userSchemaSerialized,
 } from '@repo/types/schema';
 import { User } from '@/entities/user.entity';
 import { UserRepository } from '@/models/user/user.repository';
@@ -50,13 +52,11 @@ export class AuthController {
       email: z.string().email(),
       password: z.string().min(6),
     }),
-    output: userLoginOutputSchemaSerialized,
+    output: userSchemaSerialized,
   })
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(
-    @Body() body: TUserLoginInput,
-  ): Promise<TUserLoginOutputSerialized> {
+  async login(@Body() body: TUserLoginInput): Promise<TSerializedUser> {
     const user: User | null = await this.userRepository.findOneBy({
       email: body.email,
     });
@@ -65,13 +65,7 @@ export class AuthController {
     }
     const loggedUser = await this.authService.login(user);
 
-    const serializedUser = new User(loggedUser.user);
-
-    return {
-      user: serializedUser,
-      access_token: loggedUser.access_token,
-      refresh_token: loggedUser.refresh_token,
-    };
+    return new User(loggedUser);
   }
 
   @Validate({
@@ -79,11 +73,9 @@ export class AuthController {
     output: userLoginOutputSchemaSerialized,
   })
   @Post('register')
-  async register(
-    @Body() body: TRegisterUser,
-  ): Promise<TUserLoginOutputSerialized> {
+  async register(@Body() body: TRegisterUser): Promise<TSerializedUser> {
     const user: User = await this.authService.register(body);
-    const loggedUser: TUserLoginOutput = await this.authService.login(user);
+    const loggedUser: TSerializedUser = await this.authService.login(user);
     if (!loggedUser) {
       throw new BadRequestException('Failed to login');
     }
@@ -92,13 +84,8 @@ export class AuthController {
     if (!userData) {
       throw new BadRequestException('User not found');
     }
-    const serializedUser = new User(userData);
 
-    return {
-      user: serializedUser,
-      access_token: loggedUser.access_token,
-      refresh_token: loggedUser.refresh_token,
-    };
+    return new User(userData);
   }
 
   @Validate({
@@ -118,7 +105,7 @@ export class AuthController {
   @Post('logout')
   async logout(@Res() res) {
     const user = this.clsService.get('user');
-    console.log('The user', user);
+
     // Clear cookies by setting them to expire in the past
     res.clearCookie('access_token');
     res.clearCookie('refresh_token');

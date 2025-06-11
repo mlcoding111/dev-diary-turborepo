@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { baseSchema } from './base.schema';
-import { TIntegrationData } from '../types/integrations';
 
 export const userSchema = baseSchema.extend({
   first_name: z.string().trim().min(1, "First name is required"),

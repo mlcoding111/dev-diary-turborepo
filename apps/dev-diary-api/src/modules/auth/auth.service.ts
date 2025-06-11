@@ -10,7 +10,7 @@ import * as argon2 from 'argon2';
 import { UserRepository } from '@/models/user/user.repository';
 import { UserService } from '@/models/user/user.service';
 import type { User } from '@/entities/user.entity';
-import type { TRegisterUser, TUserLoginOutput } from '@repo/types/schema';
+import type { TRegisterUser, TSerializedUser } from '@repo/types/schema';
 
 @Injectable()
 export class AuthService {
@@ -29,7 +29,7 @@ export class AuthService {
     return null;
   }
 
-  async login(user: User): Promise<TUserLoginOutput> {
+  async login(user: User): Promise<TSerializedUser> {
     try {
       const { access_token, refresh_token } = await this.generateTokens(
         user.id,
@@ -45,11 +45,7 @@ export class AuthService {
 
       await this.userService.updateAccessToken(user.id, access_token);
 
-      return {
-        user,
-        access_token,
-        refresh_token,
-      };
+      return user;
     } catch (error) {
       console.log('error', error);
       throw new UnauthorizedException();
