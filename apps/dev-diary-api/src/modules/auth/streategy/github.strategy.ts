@@ -2,14 +2,15 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-github';
 import { ConfigService } from '@nestjs/config';
-import { AuthService } from '../auth.service';
+import { OAuthService } from '../oauth/oauth.service';
+import { TNormalizedOAuthProfile, OAuthProviderType } from '@/types/auth';
 import { GithubService } from '@/modules/github/github.service';
 
 @Injectable()
 export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
   constructor(
     private configService: ConfigService,
-    private authService: AuthService,
+    private oauthService: OAuthService,
     private githubService: GithubService,
   ) {
     super({
@@ -18,29 +19,36 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
       callbackURL: configService.get('githubOAuth.callbackUrl'),
       scope: ['user:email', 'read:user', 'repo'], // Scope to access repositories
       prompt: 'consent',
+      passReqToCallback: true,
     });
   }
 
-  // TODO: For now, we are using the profile._json to get the email
-  // TODO: Eventually, we should use the whole profile object to get more data
-  async validate(accessToken: string, refreshToken: string, profile: any) {
-    const primaryEmail = await this.githubService.getUserEmail(accessToken);
+  async validate(
+    req: any,
+    accessToken: string,
+    refreshToken: string,
+    profile: any,
+  ) {
+    const userEmail: string =
+      await this.githubService.getUserEmail(accessToken);
 
-    if (!primaryEmail) {
-      throw new UnauthorizedException('Github primary email not found');
+    if (!userEmail) {
+      throw new UnauthorizedException('User email not found');
     }
 
-    profile._json.email = primaryEmail;
+    const normalizedProfile: TNormalizedOAuthProfile = {
+      email: userEmail,
+      first_name: profile._json.name.split(' ')[0] || '',
+      last_name: profile._json.name.split(' ')[1] || '',
+    };
 
-    const user = await this.authService.validateGithubUser(
-      profile._json as Record<string, any>,
+    return await this.oauthService.handleOAuthConnection(
+      req,
       accessToken,
+      refreshToken,
+      profile,
+      OAuthProviderType.GITHUB,
+      normalizedProfile,
     );
-    // Either user is not found or user is not valid
-    // Return unauthorized
-    if (!user) {
-      return false;
-    }
-    return { accessToken, profile, user };
   }
 }

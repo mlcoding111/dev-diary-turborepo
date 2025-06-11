@@ -4,9 +4,14 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
-import { Exclude } from 'class-transformer';
+import { Exclude, instanceToPlain } from 'class-transformer';
 import { IBaseEntity } from '@/core/entity/base.entity';
+import { Integration } from './integration.entity';
+import { TSerializedUser } from '@repo/types/schema';
 
 @Entity()
 export class User implements IBaseEntity {
@@ -40,17 +45,40 @@ export class User implements IBaseEntity {
   refresh_token: string | null;
 
   @Column({ type: 'varchar', nullable: true })
-  github_token: string | null;
+  access_token: string | null;
 
-  // Json integration data
-  @Column({ type: 'jsonb', nullable: true })
-  integration_data: Record<string, any> | null;
+  @Column({ name: 'active_integration_id', nullable: true, type: 'uuid' })
+  active_integration_id: string | null;
+
+  @Exclude()
+  @ManyToOne(() => Integration)
+  @JoinColumn({ name: 'active_integration_id' })
+  active_integration: Integration;
+
+  @Exclude()
+  @OneToMany(() => Integration, (integration) => integration.user)
+  integrations: Integration[];
 
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);
   }
 }
 
+export class LoginOutput {
+  user: TSerializedUser;
+  access_token: string;
+  refresh_token: string;
+
+  constructor(user: User, access_token: string, refresh_token: string) {
+    // 👇 Ensure user is serialized and typed correctly
+    this.user = instanceToPlain(user, {
+      enableImplicitConversion: true,
+    }) as TSerializedUser;
+
+    this.access_token = access_token;
+    this.refresh_token = refresh_token;
+  }
+}
 export type UserType = InstanceType<typeof User>;
 
 // Make sure it satisfies the TCreateUserType

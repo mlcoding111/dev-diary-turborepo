@@ -9,6 +9,7 @@ import {
   Get,
   UnauthorizedException,
   Res,
+  Param,
 } from '@nestjs/common';
 import { LocalAuthGuard } from './guards/local.guard';
 import { Public } from './decorators/public.decorator';
@@ -22,17 +23,20 @@ import type {
   TUserLoginOutput,
   TUserLoginOutputSerialized,
   TUserLoginInput,
+  TSerializedUser,
 } from '@repo/types/schema';
 import { Body } from '@nestjs/common';
 import {
   registerUserSchema,
   userLoginOutputSchemaSerialized,
+  userSchemaSerialized,
 } from '@repo/types/schema';
 import { User } from '@/entities/user.entity';
 import { UserRepository } from '@/models/user/user.repository';
 import { RequestContextService } from '@/modules/request/request-context.service';
-import { GoogleAuthGuard } from './guards/google-auth.guard';
-import { AuthGuard } from '@nestjs/passport';
+import { GitProviderType, OAuthProviderType } from '@repo/types/integrations';
+import { DynamicAuthGuardFactory } from './guards/dynamic-auth.guard';
+
 @Public()
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -48,13 +52,11 @@ export class AuthController {
       email: z.string().email(),
       password: z.string().min(6),
     }),
-    output: userLoginOutputSchemaSerialized,
+    output: userSchemaSerialized,
   })
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(
-    @Body() body: TUserLoginInput,
-  ): Promise<TUserLoginOutputSerialized> {
+  async login(@Body() body: TUserLoginInput): Promise<TSerializedUser> {
     const user: User | null = await this.userRepository.findOneBy({
       email: body.email,
     });
@@ -63,13 +65,7 @@ export class AuthController {
     }
     const loggedUser = await this.authService.login(user);
 
-    const serializedUser = new User(user);
-
-    return {
-      user: serializedUser,
-      access_token: loggedUser.access_token,
-      refresh_token: loggedUser.refresh_token,
-    };
+    return new User(loggedUser);
   }
 
   @Validate({
@@ -77,11 +73,9 @@ export class AuthController {
     output: userLoginOutputSchemaSerialized,
   })
   @Post('register')
-  async register(
-    @Body() body: TRegisterUser,
-  ): Promise<TUserLoginOutputSerialized> {
+  async register(@Body() body: TRegisterUser): Promise<TSerializedUser> {
     const user: User = await this.authService.register(body);
-    const loggedUser: TUserLoginOutput = await this.authService.login(user);
+    const loggedUser: TSerializedUser = await this.authService.login(user);
     if (!loggedUser) {
       throw new BadRequestException('Failed to login');
     }
@@ -90,12 +84,8 @@ export class AuthController {
     if (!userData) {
       throw new BadRequestException('User not found');
     }
-    const serializedUser = new User(userData);
-    return {
-      user: serializedUser,
-      access_token: loggedUser.access_token,
-      refresh_token: loggedUser.refresh_token,
-    };
+
+    return new User(userData);
   }
 
   @Validate({
@@ -115,12 +105,52 @@ export class AuthController {
   @Post('logout')
   async logout(@Res() res) {
     const user = this.clsService.get('user');
-    console.log('The user', user);
+
     // Clear cookies by setting them to expire in the past
     res.clearCookie('access_token');
     res.clearCookie('refresh_token');
 
     return await this.authService.logout(user.id);
+  }
+
+  @Validate({
+    bypass: true,
+  })
+  @Public()
+  @Get(':provider')
+  @UseGuards(DynamicAuthGuardFactory())
+  async redirectToProvider(@Param('provider') provider: GitProviderType) {}
+
+  @Validate({
+    bypass: true,
+  })
+  @Get(':provider/callback')
+  @UseGuards(DynamicAuthGuardFactory())
+  async handleCallback(
+    @Param('provider') provider: OAuthProviderType,
+    @Req() req,
+    @Res() res,
+  ) {
+    const loginResponse = await this.authService.login(req.user);
+
+    if (!loginResponse) {
+      throw new UnauthorizedException();
+    }
+    res.cookie('access_token', loginResponse.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Lax', // Or 'Strict' / 'None' depending on your use case
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    });
+
+    res.cookie('refresh_token', loginResponse.refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Lax',
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    });
+
+    res.redirect(`${process.env.WEB_APP_URL}/dashboard`);
   }
 
   // TODO: Implement this
@@ -137,64 +167,5 @@ export class AuthController {
       access_token: user.access_token,
       refresh_token: user.refresh_token,
     };
-  }
-
-  @Public()
-  @UseGuards(GoogleAuthGuard)
-  @Get('google/login')
-  async googleAuth() {}
-
-  // TODO: type user
-  @Validate({
-    bypass: true,
-  })
-  @Public()
-  @UseGuards(GoogleAuthGuard)
-  @Get('google/callback')
-  async googleAuthCallback(@Req() req, @Res() res) {
-    const loginResponse = await this.authService.login(req.user);
-    if (!loginResponse) {
-      throw new UnauthorizedException();
-    }
-    // ✅ Set a secure cookie
-    res.cookie('access_token', loginResponse.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Lax', // Or 'Strict' / 'None' depending on your use case
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-    });
-
-    res.cookie('refresh_token', loginResponse.refresh_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Lax',
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-    });
-
-    // Optional: redirect to your frontend (without passing token in URL)
-    res.redirect(`${process.env.WEB_APP_URL}/dashboard`);
-  }
-
-  @Public()
-  @UseGuards(AuthGuard('github'))
-  @Get('github/login')
-  async githubAuth() {}
-
-  @Validate({
-    bypass: true,
-  })
-  @Public()
-  @Get('github/callback')
-  @UseGuards(AuthGuard('github'))
-  async githubAuthCallback(@Req() req, @Res() res) {
-    const loginResponse = await this.authService.login(req.user.user);
-
-    if (!loginResponse) {
-      throw new UnauthorizedException();
-    }
-
-    res.redirect(
-      `${process.env.WEB_APP_URL}?token=${loginResponse.access_token}`,
-    );
   }
 }

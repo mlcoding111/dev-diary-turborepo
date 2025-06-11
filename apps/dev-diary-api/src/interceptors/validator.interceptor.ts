@@ -59,7 +59,6 @@ export class GlobalValidationInterceptor implements NestInterceptor {
     if (!schema || schema.bypass) return next.handle();
 
     if (schema.input) {
-      // get the schema
       const result = schema.input.safeParse(body);
       if (!result.success) {
         throw new ApiException({

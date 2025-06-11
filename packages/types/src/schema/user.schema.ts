@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { baseSchema } from './base.schema';
-import { TIntegrationData } from '../types/integrations';
 
 export const userSchema = baseSchema.extend({
   first_name: z.string().trim().min(1, "First name is required"),
@@ -9,8 +8,8 @@ export const userSchema = baseSchema.extend({
   email: z.string().email(),
   hashed_refresh_token: z.string().nullable(),
   refresh_token: z.string().nullable(),
-  github_token: z.string().nullable().optional(),
-  integration_data: z.record(z.string(), z.any()).nullable().optional(),
+  access_token: z.string().nullable(),
+  active_integration_id: z.string().uuid().nullable(),
 });
 
 export const userSchemaSerialized = userSchema.omit({
@@ -22,7 +21,6 @@ export const createUserSchema = userSchema.omit({
   id: true,
   created_at: true,
   updated_at: true,
-  integration_data: true,
 }).strict();
 
 export const registerUserSchema = userSchema.omit({
@@ -31,6 +29,8 @@ export const registerUserSchema = userSchema.omit({
   updated_at: true,
   hashed_refresh_token: true,
   refresh_token: true,
+  access_token: true,
+  active_integration_id: true,
 }).strict();
 
 export type TCreateUser = z.infer<typeof createUserSchema>;

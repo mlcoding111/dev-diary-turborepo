@@ -26,8 +26,8 @@ export abstract class GitProvider {
     provider: GitProviderType,
   ): TIntegrationDataProvider {
     console.log('user', user);
-    const integrationData: TIntegrationDataProvider | null =
-      user.integration_data?.[provider] || null;
+    const integrationData: TIntegrationDataProvider | null = null;
+      // user.integration_data?.[provider] || null;
 
     if (!integrationData) {
       throw new Error('Integration data not found');

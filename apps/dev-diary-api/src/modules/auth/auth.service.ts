@@ -10,7 +10,7 @@ import * as argon2 from 'argon2';
 import { UserRepository } from '@/models/user/user.repository';
 import { UserService } from '@/models/user/user.service';
 import type { User } from '@/entities/user.entity';
-import type { TRegisterUser, TUserLoginOutput } from '@repo/types/schema';
+import type { TRegisterUser, TSerializedUser } from '@repo/types/schema';
 
 @Injectable()
 export class AuthService {
@@ -29,7 +29,7 @@ export class AuthService {
     return null;
   }
 
-  async login(user: User): Promise<TUserLoginOutput> {
+  async login(user: User): Promise<TSerializedUser> {
     try {
       const { access_token, refresh_token } = await this.generateTokens(
         user.id,
@@ -43,11 +43,9 @@ export class AuthService {
         refresh_token,
       );
 
-      return {
-        user,
-        access_token,
-        refresh_token,
-      };
+      await this.userService.updateAccessToken(user.id, access_token);
+
+      return user;
     } catch (error) {
       console.log('error', error);
       throw new UnauthorizedException();
@@ -63,6 +61,25 @@ export class AuthService {
     }
 
     const hashedPassword = await argon2.hash(user.password);
+
+    const savedUser: User = await this.userRepository.save({
+      ...user,
+      password: hashedPassword,
+    });
+
+    return savedUser;
+  }
+
+  async registerOAuthUser(user: TRegisterUser): Promise<User> {
+    const userExists = await this.userRepository.findOneBy({
+      email: user.email,
+    });
+    if (userExists) {
+      throw new BadRequestException('User already exists');
+    }
+
+    // Generate a random password
+    const { hashedPassword } = await this.generateRandomPassword();
 
     const savedUser: User = await this.userRepository.save({
       ...user,
@@ -137,6 +154,7 @@ export class AuthService {
 
     return { id: userId };
   }
+
   async validateGoogleUser(user: TRegisterUser) {
     const existingUser = await this.userRepository.findOneBy({
       email: user.email,
@@ -144,34 +162,32 @@ export class AuthService {
     if (existingUser) return existingUser;
     return await this.register(user);
   }
+
   async validateGithubUser(user: Record<string, any>, githubToken: string) {
     const existingUser = await this.userRepository.findOneBy({
       email: user.email,
     });
     if (existingUser) {
-      const updatedUser = await this.userRepository.save({
-        ...existingUser,
-        github_token: githubToken,
-        integration_data: {
-          github: {
-            token: githubToken,
-            username: user.username,
-          },
+      await this.userService.upsertIntegration(existingUser, {
+        provider: 'github',
+        data: {
+          access_token: githubToken,
+          profile: user,
         },
       });
-      return updatedUser;
+      return existingUser;
     }
     const createdUser = await this.register({
       email: user.email,
       first_name: user.name.split(' ')[0] || '',
       last_name: user.name.split(' ')[1] || '',
       password: (await this.generateRandomPassword()).password,
-      github_token: githubToken,
-      integration_data: {
-        github: {
-          token: githubToken,
-          username: user.username,
-        },
+    });
+    await this.userService.upsertIntegration(createdUser, {
+      provider: 'github',
+      data: {
+        access_token: githubToken,
+        profile: user,
       },
     });
     return createdUser;
@@ -182,7 +198,7 @@ export class AuthService {
   }
 
   async generateRandomPassword() {
-    const password = 'asdasd';
+    const password = process.env.TEMP_PASSWORD || '';
     // const password = Math.random().toString(36).substring(2, 15);
     const hashedPassword = await argon2.hash(password);
     return { password, hashedPassword };

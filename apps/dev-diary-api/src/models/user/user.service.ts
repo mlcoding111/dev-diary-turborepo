@@ -5,11 +5,16 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '@/entities/user.entity';
 
 import { AuthJwtPayload } from '@/modules/auth/types/jwt-payload';
+import { IntegrationRepository } from '../integration/integration.repository';
+import { OnEvent } from '@nestjs/event-emitter';
+import { Integration } from '@/entities/integration.entity';
+
 @Injectable()
 export class UserService extends BaseService<User> {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
+    private readonly integrationRepository: IntegrationRepository,
   ) {
     super(userRepository);
   }
@@ -30,6 +35,13 @@ export class UserService extends BaseService<User> {
     });
   }
 
+  async updateAccessToken(userId: string, accessToken: string) {
+    return await this.userRepository.save({
+      id: userId,
+      access_token: accessToken,
+    });
+  }
+
   async getUserFromHeadersToken(
     req: Request & { headers: { authorization?: string } },
   ): Promise<User | null> {
@@ -38,9 +50,7 @@ export class UserService extends BaseService<User> {
     if (authHeader) {
       const [type, token] = authHeader.split(' ');
       if (type === 'Bearer' && token) {
-        // console.log('THere')
         const payload: AuthJwtPayload = this.jwtService.verify(token);
-        console.log('payload', payload);
         if (payload) {
           const user = await this.userRepository.findOne({
             relations: ['userWorkspaces'],
@@ -69,6 +79,17 @@ export class UserService extends BaseService<User> {
     return null;
   }
 
+  async getUserByAccessToken(accessToken: string | null): Promise<User | null> {
+    if (!accessToken) return null;
+
+    const user = await this.userRepository.findOne({
+      where: {
+        access_token: accessToken,
+      },
+    });
+    return user;
+  }
+
   async getUser(id: string): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
@@ -76,4 +97,45 @@ export class UserService extends BaseService<User> {
     }
     return user;
   }
+
+  async upsertIntegration(user: User, integration: Record<string, any>) {
+    if (!user || !integration.provider) {
+      throw new Error('Missing user or provider info');
+    }
+
+    const existingIntegration = await this.integrationRepository.findOneBy({
+      user_id: user.id,
+      provider: integration.provider,
+    });
+
+    if (existingIntegration) {
+      return await this.integrationRepository.save({
+        ...existingIntegration,
+        data: integration.data,
+      });
+    }
+
+    return await this.integrationRepository.save({
+      user_id: user.id,
+      type: integration.provider,
+      data: integration.data,
+    });
+  }
+
+  //#region EVENTS
+
+  /**
+   * Handle integration upsert event
+   * @param event - Integration entity
+   */
+  @OnEvent('entity.afterUpsert.integration')
+  async handleIntegrationAfterUpsert(event: Integration) {
+    if (event.is_active) {
+      await this.userRepository.save({
+        id: event.user_id,
+        active_integration_id: event.id,
+      });
+    }
+  }
+  //#endregion
 }

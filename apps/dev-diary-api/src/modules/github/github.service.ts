@@ -7,10 +7,11 @@ export class GithubService {
     return new Octokit({ auth: token });
   }
 
-  async getUserEmail(token: string, existingClient?: any): Promise<unknown> {
+  async getUserEmail(token: string, existingClient?: any): Promise<string> {
     const client = existingClient ?? (await this.getClient(token));
     const { data } = await client.request('GET /user/emails');
-    const primaryEmail = data.filter((e) => e.primary === true)[0]?.email;
+    const primaryEmail: string = data.filter((e) => e.primary === true)[0]
+      ?.email;
 
     if (!primaryEmail) {
       throw new UnauthorizedException('Github primary email not found');
