@@ -9,6 +9,8 @@ export const userSchema = baseSchema.extend({
   email: z.string().email(),
   hashed_refresh_token: z.string().nullable(),
   refresh_token: z.string().nullable(),
+  access_token: z.string().nullable(),
+  active_integration_id: z.string().nullable(),
 });
 
 export const userSchemaSerialized = userSchema.omit({
@@ -28,6 +30,8 @@ export const registerUserSchema = userSchema.omit({
   updated_at: true,
   hashed_refresh_token: true,
   refresh_token: true,
+  access_token: true,
+  active_integration_id: true,
 }).strict();
 
 export type TCreateUser = z.infer<typeof createUserSchema>;

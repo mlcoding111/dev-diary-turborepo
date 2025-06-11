@@ -24,6 +24,7 @@ import type {
   TUserLoginOutput,
   TUserLoginOutputSerialized,
   TUserLoginInput,
+  TSerializedUser,
 } from '@repo/types/schema';
 import { Body } from '@nestjs/common';
 import {
@@ -40,6 +41,7 @@ import { GitProviderType, OAuthProviderType } from '@repo/types/integrations';
 import { OAuthService } from './oauth/oauth.service';
 import { DynamicAuthGuard } from './guards/oauth.guard';
 import { DynamicAuthGuardFactory } from './guards/dynamic-auth.guard';
+import { instanceToPlain } from 'class-transformer';
 
 @Public()
 @Controller('auth')
@@ -59,6 +61,7 @@ export class AuthController {
       password: z.string().min(6),
     }),
     output: userLoginOutputSchemaSerialized,
+    // bypass: true,
   })
   @UseGuards(LocalAuthGuard)
   @Post('login')
@@ -73,7 +76,10 @@ export class AuthController {
     }
     const loggedUser = await this.authService.login(user);
 
-    const serializedUser = new User(user);
+    // const serializedUser = new User(user);
+    const serializedUser: TSerializedUser = instanceToPlain(new User(user), {
+      enableImplicitConversion: true,
+    }) as TSerializedUser;
 
     return {
       user: serializedUser,
@@ -101,6 +107,7 @@ export class AuthController {
       throw new BadRequestException('User not found');
     }
     const serializedUser = new User(userData);
+
     return {
       user: serializedUser,
       access_token: loggedUser.access_token,
@@ -237,10 +244,10 @@ export class AuthController {
   // @UseGuards(GoogleAuthGuard)
   // @Get('google/callback')
   // async googleAuthCallback(@Req() req, @Res() res) {
-    // const loginResponse = await this.authService.login(req.user);
-    // if (!loginResponse) {
-    //   throw new UnauthorizedException();
-    // }
+  // const loginResponse = await this.authService.login(req.user);
+  // if (!loginResponse) {
+  //   throw new UnauthorizedException();
+  // }
   //   // ✅ Set a secure cookie
   //   res.cookie('access_token', loginResponse.access_token, {
   //     httpOnly: true,

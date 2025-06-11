@@ -49,10 +49,12 @@ export class User implements IBaseEntity {
   @Column({ name: 'active_integration_id', nullable: true })
   active_integration_id: string | null;
 
+  @Exclude()
   @ManyToOne(() => Integration)
   @JoinColumn({ name: 'active_integration_id' })
   active_integration: Integration;
 
+  @Exclude()
   @OneToMany(() => Integration, (integration) => integration.user)
   integrations: Integration[];
 

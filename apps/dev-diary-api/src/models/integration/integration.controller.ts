@@ -43,21 +43,6 @@ export class IntegrationController {
   ) {}
 
   @Validate({
-    output: z.array(
-      z.object({
-        title: z.string(),
-        description: z.string(),
-        provider: z.nativeEnum(OAuthProviderType),
-        available: z.boolean(),
-      }),
-    ),
-  })
-  @Get('list')
-  async getList(): Promise<typeof OAuthList> {
-    return OAuthList;
-  }
-
-  @Validate({
     output: z.array(IntegrationController.serializedIntegrationSchema),
     pagination: true,
   })
@@ -76,6 +61,21 @@ export class IntegrationController {
         },
       },
     });
+  }
+
+  @Validate({
+    output: z.array(
+      z.object({
+        title: z.string(),
+        description: z.string(),
+        provider: z.nativeEnum(OAuthProviderType),
+        available: z.boolean(),
+      }),
+    ),
+  })
+  @Get('available')
+  getList(): typeof OAuthList {
+    return OAuthList;
   }
 
   @Validate({
