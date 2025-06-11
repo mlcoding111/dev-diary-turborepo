@@ -31,17 +31,12 @@ import {
   registerUserSchema,
   userLoginOutputSchemaSerialized,
 } from '@repo/types/schema';
-import { LoginOutput, User } from '@/entities/user.entity';
+import { User } from '@/entities/user.entity';
 import { UserRepository } from '@/models/user/user.repository';
 import { RequestContextService } from '@/modules/request/request-context.service';
-import { GoogleAuthGuard } from './guards/google-auth.guard';
-import { AuthGuard } from '@nestjs/passport';
-import { GitHubAuthGuard } from './guards/github-auth.guard';
 import { GitProviderType, OAuthProviderType } from '@repo/types/integrations';
 import { OAuthService } from './oauth/oauth.service';
-import { DynamicAuthGuard } from './guards/oauth.guard';
 import { DynamicAuthGuardFactory } from './guards/dynamic-auth.guard';
-import { instanceToPlain } from 'class-transformer';
 
 @Public()
 @Controller('auth')
@@ -61,7 +56,6 @@ export class AuthController {
       password: z.string().min(6),
     }),
     output: userLoginOutputSchemaSerialized,
-    // bypass: true,
   })
   @UseGuards(LocalAuthGuard)
   @Post('login')
@@ -76,14 +70,13 @@ export class AuthController {
     }
     const loggedUser = await this.authService.login(user);
 
-    // const serializedUser = new User(user);
-    const loginOutput = new LoginOutput(
-      user,
-      loggedUser.access_token,
-      loggedUser.refresh_token,
-    );
+    const serializedUser = new User(loggedUser.user);
 
-    return loginOutput;
+    return {
+      user: serializedUser,
+      access_token: loggedUser.access_token,
+      refresh_token: loggedUser.refresh_token,
+    };
   }
 
   @Validate({

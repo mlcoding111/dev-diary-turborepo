@@ -44,7 +44,6 @@ export class User implements IBaseEntity {
   @Column({ type: 'varchar', nullable: true })
   refresh_token: string | null;
 
-  @Exclude()
   @Column({ type: 'varchar', nullable: true })
   access_token: string | null;
 
