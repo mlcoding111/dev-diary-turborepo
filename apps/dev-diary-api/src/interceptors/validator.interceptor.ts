@@ -60,6 +60,11 @@ export class GlobalValidationInterceptor implements NestInterceptor {
 
     if (schema.input) {
       // get the schema
+      console.log(
+        `Validating input with schema: ${schema.input.constructor.name}`,
+        '\nSchema definition:',
+        JSON.stringify(schema.input._def, null, 2),
+      );
       const result = schema.input.safeParse(body);
       if (!result.success) {
         throw new ApiException({
@@ -75,6 +80,11 @@ export class GlobalValidationInterceptor implements NestInterceptor {
       map((data) => {
         const dataToValidate = schema.pagination ? data.data : data;
         if (schema.pagination) {
+          // console.log(
+          //   `Validating pagination with schema: ${paginationSchema.constructor.name}`,
+          //   '\nSchema definition:',
+          //   JSON.stringify(paginationSchema._def, null, 2),
+          // );
           const result = paginationSchema.safeParse(data.metadata);
           if (!result.success) {
             throw new ApiException({
@@ -87,6 +97,11 @@ export class GlobalValidationInterceptor implements NestInterceptor {
         }
         // Validate response data if output schema exists
         if (schema.output) {
+          // console.log(
+          //   `Validating output with schema: ${schema.output.constructor.name}`,
+          //   '\nSchema definition:',
+          //   JSON.stringify(schema.output._def, null, 2),
+          // );
           const result = schema.output.safeParse(dataToValidate);
           if (!result.success) {
             throw new ApiException({

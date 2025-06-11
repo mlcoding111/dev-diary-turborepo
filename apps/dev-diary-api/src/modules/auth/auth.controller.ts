@@ -31,7 +31,7 @@ import {
   registerUserSchema,
   userLoginOutputSchemaSerialized,
 } from '@repo/types/schema';
-import { User } from '@/entities/user.entity';
+import { LoginOutput, User } from '@/entities/user.entity';
 import { UserRepository } from '@/models/user/user.repository';
 import { RequestContextService } from '@/modules/request/request-context.service';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
@@ -77,15 +77,13 @@ export class AuthController {
     const loggedUser = await this.authService.login(user);
 
     // const serializedUser = new User(user);
-    const serializedUser: TSerializedUser = instanceToPlain(new User(user), {
-      enableImplicitConversion: true,
-    }) as TSerializedUser;
+    const loginOutput = new LoginOutput(
+      user,
+      loggedUser.access_token,
+      loggedUser.refresh_token,
+    );
 
-    return {
-      user: serializedUser,
-      access_token: loggedUser.access_token,
-      refresh_token: loggedUser.refresh_token,
-    };
+    return loginOutput;
   }
 
   @Validate({

@@ -10,7 +10,7 @@ export const userSchema = baseSchema.extend({
   hashed_refresh_token: z.string().nullable(),
   refresh_token: z.string().nullable(),
   access_token: z.string().nullable(),
-  active_integration_id: z.string().nullable(),
+  active_integration_id: z.string().uuid().nullable(),
 });
 
 export const userSchemaSerialized = userSchema.omit({

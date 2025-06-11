@@ -9,7 +9,7 @@ export const integrationSchema = baseSchema.extend({
   provider: z.nativeEnum(OAuthProviderType),
   data: z.any(),
   is_active: z.boolean().default(true),
-});
+}).describe('Integration');
 
 export const integrationSchemaSerialized = integrationSchema
   .omit({

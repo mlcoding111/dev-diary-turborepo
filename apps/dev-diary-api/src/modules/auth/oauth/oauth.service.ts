@@ -35,7 +35,12 @@ export class OAuthService {
     let user = await this.userService.getUserByAccessToken(accessTokenCookie);
     // User was found, simply return the user and update the integration data
     if (!user) {
-      user = await this.registerOAuthUser(normalizedProfile);
+      user = await this.usersRepo.findOneBy({
+        email: normalizedProfile.email,
+      });
+      if (!user) {
+        user = await this.registerOAuthUser(normalizedProfile);
+      }
     }
     // Link integration
     await this.upsertIntegration(

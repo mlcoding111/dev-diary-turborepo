@@ -13,7 +13,7 @@ import { OAuthProviderType } from '@/types/auth';
 
 @Entity()
 export class Integration implements IBaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @CreateDateColumn()
