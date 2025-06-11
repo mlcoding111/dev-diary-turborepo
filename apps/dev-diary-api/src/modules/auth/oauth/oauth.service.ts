@@ -26,17 +26,14 @@ export class OAuthService {
     provider: OAuthProviderType,
     normalizedProfile: TNormalizedOAuthProfile,
   ) {
-    console.log('Getting here1');
     // If access token is present, try to find user by access token
     const accessTokenCookie: string | null =
       req?.cookies['access_token'] || null;
     let user = await this.userService.getUserByAccessToken(accessTokenCookie);
-    console.log('Getting here2');
     // User was found, simply return the user and update the integration data
     if (!user) {
       user = await this.registerOAuthUser(normalizedProfile);
     }
-    console.log('Getting here3');
     // Link integration
     await this.linkIntegration(
       user,

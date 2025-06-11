@@ -39,9 +39,11 @@ export class Integration implements IBaseEntity {
   @Column({ type: 'enum', enum: OAuthProviderType })
   provider: OAuthProviderType;
 
-  // Integration data
   @Column({ type: 'jsonb' })
   data: any;
+
+  @Column({ name: 'is_active', type: 'boolean', default: true })
+  is_active: boolean;
 
   constructor(partial: Partial<Integration>) {
     Object.assign(this, partial);
