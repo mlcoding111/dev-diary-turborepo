@@ -83,8 +83,9 @@ export class OAuthService {
     try {
       const existing = await this.integrationsRepo.findOneBy({
         provider,
-        user: { id: user.id },
+        user_id: user.id,
       });
+
       if (existing) {
         integration = await this.integrationsRepo.save({
           ...existing,
@@ -93,16 +94,15 @@ export class OAuthService {
           data: profile,
           is_active: true,
         });
+      } else {
+        integration = await this.integrationsRepo.save({
+          provider,
+          user_id: user.id,
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          data: profile,
+        });
       }
-
-      integration = await this.integrationsRepo.save({
-        provider,
-        user,
-        access_token: accessToken,
-        refresh_token: refreshToken,
-        data: profile,
-        is_active: true,
-      });
 
       this.eventEmitter.emit('entity.afterUpsert.integration', integration);
 

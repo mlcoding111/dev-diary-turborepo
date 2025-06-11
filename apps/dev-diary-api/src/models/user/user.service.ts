@@ -122,6 +122,12 @@ export class UserService extends BaseService<User> {
     });
   }
 
+  //#region EVENTS
+
+  /**
+   * Handle integration upsert event
+   * @param event - Integration entity
+   */
   @OnEvent('entity.afterUpsert.integration')
   async handleIntegrationAfterUpsert(event: Integration) {
     if (event.is_active) {
@@ -131,4 +137,5 @@ export class UserService extends BaseService<User> {
       });
     }
   }
+  //#endregion
 }
