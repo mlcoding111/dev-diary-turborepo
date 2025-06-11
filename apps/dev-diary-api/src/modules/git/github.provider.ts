@@ -33,9 +33,13 @@ export class GithubProvider extends GitProvider {
     return data;
   }
 
-  async getRepositories(): Promise<any> {
+  async getRepositories(params?: Record<string, any>): Promise<any> {
     const client = await this.getClient();
-    const { data } = await client.request('GET /user/repos');
+    const { data } = await client.request('GET /user/repos', {
+      per_page: 100,
+      visibility: 'all',
+      ...params,
+    });
     return data;
   }
 
