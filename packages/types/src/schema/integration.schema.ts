@@ -1,13 +1,20 @@
-import { z } from "zod";
-import { baseSchema, baseCreateSchema, baseUpdateSchema } from "./base.schema";
+import { z } from 'zod';
+import { baseSchema } from './base.schema';
+import { OAuthProviderType } from '../types/integrations';
 
 export const integrationSchema = baseSchema.extend({
-  // Add fields here
+  user_id: z.string(),
+  access_token: z.string(),
+  refresh_token: z.string().nullable().optional(),
+  provider: z.nativeEnum(OAuthProviderType),
+  data: z.any(),
+  is_active: z.boolean().default(true),
 });
 
 export const integrationSchemaSerialized = integrationSchema
   .omit({
-    // Add fields here
+    access_token: true,
+    refresh_token: true,
   })
   .strict();
 

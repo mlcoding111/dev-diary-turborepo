@@ -6,6 +6,8 @@ import { User } from '@/entities/user.entity';
 
 import { AuthJwtPayload } from '@/modules/auth/types/jwt-payload';
 import { IntegrationRepository } from '../integration/integration.repository';
+import { OnEvent } from '@nestjs/event-emitter';
+import { Integration } from '@/entities/integration.entity';
 
 @Injectable()
 export class UserService extends BaseService<User> {
@@ -30,6 +32,13 @@ export class UserService extends BaseService<User> {
       id: userId,
       hashed_refresh_token: hashedRefreshToken,
       ...(refreshTokenToSave && { refresh_token: refreshTokenToSave }),
+    });
+  }
+
+  async updateAccessToken(userId: string, accessToken: string) {
+    return await this.userRepository.save({
+      id: userId,
+      access_token: accessToken,
     });
   }
 
@@ -70,6 +79,17 @@ export class UserService extends BaseService<User> {
     return null;
   }
 
+  async getUserByAccessToken(accessToken: string | null): Promise<User | null> {
+    if (!accessToken) return null;
+
+    const user = await this.userRepository.findOne({
+      where: {
+        access_token: accessToken,
+      },
+    });
+    return user;
+  }
+
   async getUser(id: string): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
@@ -85,7 +105,7 @@ export class UserService extends BaseService<User> {
 
     const existingIntegration = await this.integrationRepository.findOneBy({
       user_id: user.id,
-      type: integration.provider,
+      provider: integration.provider,
     });
 
     if (existingIntegration) {
@@ -101,4 +121,21 @@ export class UserService extends BaseService<User> {
       data: integration.data,
     });
   }
+
+  //#region EVENTS
+
+  /**
+   * Handle integration upsert event
+   * @param event - Integration entity
+   */
+  @OnEvent('entity.afterUpsert.integration')
+  async handleIntegrationAfterUpsert(event: Integration) {
+    if (event.is_active) {
+      await this.userRepository.save({
+        id: event.user_id,
+        active_integration_id: event.id,
+      });
+    }
+  }
+  //#endregion
 }

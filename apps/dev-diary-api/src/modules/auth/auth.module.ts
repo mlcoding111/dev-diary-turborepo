@@ -14,9 +14,12 @@ import { ConfigModule } from '@nestjs/config';
 import { GithubStrategy } from './streategy/github.strategy';
 import { githubOAuthConfig } from '@/config/github-oauth.config';
 import { GithubService } from '@/modules/github/github.service';
+import { OAuthModule } from './oauth/oauth.module';
+
 @Module({
   imports: [
     UserModule,
+    OAuthModule,
     PassportModule.register({ session: false }),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(googleOAuthConfig),

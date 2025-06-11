@@ -14,7 +14,7 @@ export class LoggerMiddleware implements NestMiddleware {
       const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
       this.requestContextService.set('user', decoded);
     } catch (error) {
-      console.log('Error decoding access token:', error);
+      // console.log('Error decoding access token:', error);
     }
     // console.log('Request...');
     next();

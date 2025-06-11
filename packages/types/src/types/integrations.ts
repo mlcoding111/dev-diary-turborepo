@@ -1,6 +1,12 @@
 export enum GitProviderType {
-	GITHUB = "github",
-	BITBUCKET = "bitbucket",
+	GITHUB = 'github',
+	BITBUCKET = 'bitbucket',
+}
+
+export enum OAuthProviderType {
+	GOOGLE = 'google',
+  GITHUB = 'github',
+  BITBUCKET = 'bitbucket',
 }
 
 export type TIntegrationData = {

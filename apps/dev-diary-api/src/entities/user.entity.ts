@@ -5,6 +5,8 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { IBaseEntity } from '@/core/entity/base.entity';
@@ -42,8 +44,17 @@ export class User implements IBaseEntity {
   refresh_token: string | null;
 
   @Column({ type: 'varchar', nullable: true })
-  github_token: string | null;
+  access_token: string | null;
 
+  @Column({ name: 'active_integration_id', nullable: true })
+  active_integration_id: string | null;
+
+  @Exclude()
+  @ManyToOne(() => Integration)
+  @JoinColumn({ name: 'active_integration_id' })
+  active_integration: Integration;
+
+  @Exclude()
   @OneToMany(() => Integration, (integration) => integration.user)
   integrations: Integration[];
 

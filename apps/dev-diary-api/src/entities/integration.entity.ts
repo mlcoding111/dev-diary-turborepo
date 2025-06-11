@@ -9,10 +9,7 @@ import {
 } from 'typeorm';
 import { IBaseEntity } from '@/core/entity/base.entity';
 import { User } from './user.entity';
-import {
-  GitProviderType,
-  type TIntegrationData,
-} from '@repo/types/integrations';
+import { OAuthProviderType } from '@/types/auth';
 
 @Entity()
 export class Integration implements IBaseEntity {
@@ -28,17 +25,25 @@ export class Integration implements IBaseEntity {
   @Column({ name: 'user_id' })
   user_id: string;
 
+  @Column({ name: 'access_token' })
+  access_token: string;
+
+  @Column({ name: 'refresh_token', type: 'varchar', nullable: true })
+  refresh_token?: string | null;
+
   @ManyToOne(() => User, (user) => user.integrations)
   @JoinColumn({ name: 'user_id' })
   user: User;
 
   // Integration type
-  @Column({ type: 'enum', enum: GitProviderType })
-  type: GitProviderType;
+  @Column({ type: 'enum', enum: OAuthProviderType })
+  provider: OAuthProviderType;
 
-  // Integration data
   @Column({ type: 'jsonb' })
-  data: TIntegrationData;
+  data: any;
+
+  @Column({ name: 'is_active', type: 'boolean', default: true })
+  is_active: boolean;
 
   constructor(partial: Partial<Integration>) {
     Object.assign(this, partial);

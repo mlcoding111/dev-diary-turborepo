@@ -2,20 +2,16 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-github';
 import { ConfigService } from '@nestjs/config';
-import { AuthService } from '../auth.service';
+import { OAuthService } from '../oauth/oauth.service';
+import { TNormalizedOAuthProfile, OAuthProviderType } from '@/types/auth';
 import { GithubService } from '@/modules/github/github.service';
-import { UserService } from '@/models/user/user.service';
-import { RequestContextService } from '@/modules/request/request-context.service';
-import { User } from '@/entities/user.entity';
 
 @Injectable()
 export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
   constructor(
     private configService: ConfigService,
-    private authService: AuthService,
+    private oauthService: OAuthService,
     private githubService: GithubService,
-    private userService: UserService,
-    private requestContextService: RequestContextService,
   ) {
     super({
       clientID: configService.get('githubOAuth.clientId'),
@@ -27,53 +23,32 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     });
   }
 
-  // TODO: For now, we are using the profile._json to get the email
-  // TODO: Eventually, we should use the whole profile object to get more data
   async validate(
     req: any,
     accessToken: string,
     refreshToken: string,
     profile: any,
   ) {
-    // const requestUser = this.requestContextService.get('user');
-    const requestState = JSON.parse(req.query.state);
+    const userEmail: string =
+      await this.githubService.getUserEmail(accessToken);
 
-    // If the user is already logged in or have an account, request.user will be set
-    // and we can use it to get the user from the database
-
-    let user: User | null = null;
-
-    // If user in the state, that means the user is already logged in
-    if (requestState.user.sub) {
-      user = await this.userService.getUser(requestState.user.sub);
-      await this.userService.upsertIntegration(user, {
-        provider: 'github',
-        data: {
-          access_token: accessToken,
-          profile: profile._json,
-        },
-      });
-      return { accessToken, profile, user };
+    if (!userEmail) {
+      throw new UnauthorizedException('User email not found');
     }
 
-    const primaryEmail = await this.githubService.getUserEmail(accessToken);
+    const normalizedProfile: TNormalizedOAuthProfile = {
+      email: userEmail,
+      first_name: profile._json.name.split(' ')[0] || '',
+      last_name: profile._json.name.split(' ')[1] || '',
+    };
 
-    if (!primaryEmail) {
-      throw new UnauthorizedException('Github primary email not found');
-    }
-
-    profile._json.email = primaryEmail;
-
-    // If user is not found, create a new user
-    user = await this.authService.validateGithubUser(
-      profile._json as Record<string, any>,
+    return await this.oauthService.handleOAuthConnection(
+      req,
       accessToken,
+      refreshToken,
+      profile,
+      OAuthProviderType.GITHUB,
+      normalizedProfile,
     );
-    // Either user is not found or user is not valid
-    // Return unauthorized
-    if (!user) {
-      return false;
-    }
-    return { accessToken, profile, user };
   }
 }

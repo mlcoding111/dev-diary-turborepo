@@ -10,6 +10,7 @@ import {
   UnauthorizedException,
   Res,
   Query,
+  Param,
 } from '@nestjs/common';
 import { LocalAuthGuard } from './guards/local.guard';
 import { Public } from './decorators/public.decorator';
@@ -23,6 +24,7 @@ import type {
   TUserLoginOutput,
   TUserLoginOutputSerialized,
   TUserLoginInput,
+  TSerializedUser,
 } from '@repo/types/schema';
 import { Body } from '@nestjs/common';
 import {
@@ -35,6 +37,12 @@ import { RequestContextService } from '@/modules/request/request-context.service
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { GitHubAuthGuard } from './guards/github-auth.guard';
+import { GitProviderType, OAuthProviderType } from '@repo/types/integrations';
+import { OAuthService } from './oauth/oauth.service';
+import { DynamicAuthGuard } from './guards/oauth.guard';
+import { DynamicAuthGuardFactory } from './guards/dynamic-auth.guard';
+import { instanceToPlain } from 'class-transformer';
+
 @Public()
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -43,6 +51,8 @@ export class AuthController {
     private readonly authService: AuthService,
     private userRepository: UserRepository,
     private readonly clsService: RequestContextService,
+    private readonly oauthService: OAuthService,
+    private readonly requestContextService: RequestContextService,
   ) {}
 
   @Validate({
@@ -51,6 +61,7 @@ export class AuthController {
       password: z.string().min(6),
     }),
     output: userLoginOutputSchemaSerialized,
+    // bypass: true,
   })
   @UseGuards(LocalAuthGuard)
   @Post('login')
@@ -65,7 +76,10 @@ export class AuthController {
     }
     const loggedUser = await this.authService.login(user);
 
-    const serializedUser = new User(user);
+    // const serializedUser = new User(user);
+    const serializedUser: TSerializedUser = instanceToPlain(new User(user), {
+      enableImplicitConversion: true,
+    }) as TSerializedUser;
 
     return {
       user: serializedUser,
@@ -93,6 +107,7 @@ export class AuthController {
       throw new BadRequestException('User not found');
     }
     const serializedUser = new User(userData);
+
     return {
       user: serializedUser,
       access_token: loggedUser.access_token,
@@ -141,24 +156,29 @@ export class AuthController {
     };
   }
 
-  @Public()
-  @UseGuards(GoogleAuthGuard)
-  @Get('google/login')
-  async googleAuth() {}
-
-  // TODO: type user
   @Validate({
     bypass: true,
   })
   @Public()
-  @UseGuards(GoogleAuthGuard)
-  @Get('google/callback')
-  async googleAuthCallback(@Req() req, @Res() res) {
+  @Get(':provider')
+  @UseGuards(DynamicAuthGuardFactory())
+  async redirectToProvider(@Param('provider') provider: GitProviderType) {}
+
+  @Validate({
+    bypass: true,
+  })
+  @Get(':provider/callback')
+  @UseGuards(DynamicAuthGuardFactory())
+  async handleCallback(
+    @Param('provider') provider: OAuthProviderType,
+    @Req() req,
+    @Res() res,
+  ) {
     const loginResponse = await this.authService.login(req.user);
+
     if (!loginResponse) {
       throw new UnauthorizedException();
     }
-    // ✅ Set a secure cookie
     res.cookie('access_token', loginResponse.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -173,32 +193,102 @@ export class AuthController {
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
     });
 
-    // Optional: redirect to your frontend (without passing token in URL)
     res.redirect(`${process.env.WEB_APP_URL}/dashboard`);
   }
 
-  @Public()
-  @UseGuards(GitHubAuthGuard)
-  @Get('github/login')
-  async githubAuth() {
-    console.log('🚀 GithubAuthController githubAuth');
-  }
+  // @Public()
+  // @UseGuards(DynamicAuthGuard)
+  // @Get(':provider')
+  // async redirectToProvider(@Param('provider') provider: GitProviderType) {}
 
-  @Validate({ bypass: true })
-  @Public()
-  @Get('github/callback')
-  @UseGuards(GitHubAuthGuard)
-  async githubAuthCallback(
-    @Req() req,
-    @Res() res,
-    @Query('state') state: string,
-  ) {
-    const customData = JSON.parse(state);
-    console.log('🚀 Custom state:', customData);
-    // Example: redirect using your custom data
-    const loginResponse = await this.authService.login(req.user.user);
-    res.redirect(
-      `${process.env.WEB_APP_URL}?token=${loginResponse.access_token}`,
-    );
-  }
+  // @Get(':provider/callback')
+  // @UseGuards(DynamicAuthGuard) // Strategy determines which provider
+  // async handleCallback(
+  //   @Param('provider') provider: string,
+  //   @Req() req,
+  //   @Res() res,
+  //   @Query('state') state: string,
+  // ) {
+  //   const requesrUser = this.clsService.get('user');
+  //   const customData = JSON.parse(state);
+  //   const sessionUserId = requesrUser?.id;
+  //   const profile = req.user as any;
+
+  //   console.log('🚀 Custom state:', customData);
+  //   console.log('The provider is', provider);
+  //   console.log('The profile is', profile);
+
+  //   // const user = await this.oauthService.handleOAuthLogin(
+  //   //   {
+  //   //     provider,
+  //   //     providerId: profile.id,
+  //   //     email: profile.email,
+  //   //     raw: profile,
+  //   //   },
+  //   //   sessionUserId,
+  //   // );
+
+  //   res.redirect(`${process.env.WEB_APP_URL}/dashboard`);
+  // }
+
+  // @Public()
+  // @UseGuards(GoogleAuthGuard)
+  // @Get('google/login')
+  // async googleAuth() {}
+
+  // // TODO: type user
+  // @Validate({
+  //   bypass: true,
+  // })
+  // @Public()
+  // @UseGuards(GoogleAuthGuard)
+  // @Get('google/callback')
+  // async googleAuthCallback(@Req() req, @Res() res) {
+  // const loginResponse = await this.authService.login(req.user);
+  // if (!loginResponse) {
+  //   throw new UnauthorizedException();
+  // }
+  //   // ✅ Set a secure cookie
+  //   res.cookie('access_token', loginResponse.access_token, {
+  //     httpOnly: true,
+  //     secure: process.env.NODE_ENV === 'production',
+  //     sameSite: 'Lax', // Or 'Strict' / 'None' depending on your use case
+  //     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+  //   });
+
+  //   res.cookie('refresh_token', loginResponse.refresh_token, {
+  //     httpOnly: true,
+  //     secure: process.env.NODE_ENV === 'production',
+  //     sameSite: 'Lax',
+  //     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+  //   });
+
+  //   // Optional: redirect to your frontend (without passing token in URL)
+  //   res.redirect(`${process.env.WEB_APP_URL}/dashboard`);
+  // }
+
+  // @Public()
+  // @UseGuards(GitHubAuthGuard)
+  // @Get('github/login')
+  // async githubAuth() {
+  //   console.log('🚀 GithubAuthController githubAuth');
+  // }
+
+  // @Validate({ bypass: true })
+  // @Public()
+  // @Get('github/callback')
+  // @UseGuards(GitHubAuthGuard)
+  // async githubAuthCallback(
+  //   @Req() req,
+  //   @Res() res,
+  //   @Query('state') state: string,
+  // ) {
+  // const customData = JSON.parse(state);
+  // console.log('🚀 Custom state:', customData);
+  //   // Example: redirect using your custom data
+  //   const loginResponse = await this.authService.login(req.user.user);
+  //   res.redirect(
+  //     `${process.env.WEB_APP_URL}?token=${loginResponse.access_token}`,
+  //   );
+  // }
 }
