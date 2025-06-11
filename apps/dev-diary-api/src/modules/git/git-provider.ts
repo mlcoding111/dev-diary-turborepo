@@ -1,12 +1,10 @@
-import {
-  GitProviderType,
-  TIntegrationDataProvider,
-} from '@repo/types/integrations';
+import { Integration } from '@/entities/integration.entity';
+import { GitProviderType } from '@repo/types/integrations';
 import { TSerializedUser } from '@repo/types/schema';
 
 export abstract class GitProvider {
   private readonly user: TSerializedUser;
-  private readonly integrationData: TIntegrationDataProvider;
+  private readonly integration: Integration;
   public readonly token: string;
   abstract provider: GitProviderType;
   abstract getUserProfile(): Promise<any>;
@@ -14,25 +12,9 @@ export abstract class GitProvider {
   abstract getRepositories(): Promise<any>;
   abstract getCommits(repo: string): Promise<any>;
 
-  constructor(user: TSerializedUser, provider: GitProviderType) {
+  constructor(user: TSerializedUser, integration: Integration) {
     this.user = user;
-    const integrationData = this.getIntegrationJsonData(user, provider);
-    this.integrationData = integrationData;
-    this.token = integrationData.token;
-  }
-
-  private getIntegrationJsonData(
-    user: TSerializedUser,
-    provider: GitProviderType,
-  ): TIntegrationDataProvider {
-    console.log('user', user);
-    const integrationData: TIntegrationDataProvider | null = null;
-      // user.integration_data?.[provider] || null;
-
-    if (!integrationData) {
-      throw new Error('Integration data not found');
-    }
-
-    return integrationData;
+    this.integration = integration;
+    this.token = integration.access_token;
   }
 }

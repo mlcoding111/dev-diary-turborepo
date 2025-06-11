@@ -4,8 +4,8 @@ import { GitProvider } from './git-provider';
 import { GitProviderType } from '@repo/types/integrations';
 import { Integration } from '@/entities/integration.entity';
 // https://docs.github.com/en/rest/commits/commits?apiVersion=2022-11-28
-export class GithubProvider extends GitProvider {
-  public provider = GitProviderType.GITHUB;
+export class BitbucketProvider extends GitProvider {
+  public provider = GitProviderType.BITBUCKET;
 
   constructor(user: TSerializedUser, integration: Integration) {
     super(user, integration);

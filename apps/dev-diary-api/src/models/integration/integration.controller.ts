@@ -51,6 +51,7 @@ export class IntegrationController {
     @Query() query: PaginationOptions,
   ): Promise<PaginatedResult<TSerializedIntegration>> {
     const user = this.requestContextService.get('user');
+    console.log('The user', user.email);
     return await this.integrationService.paginate({
       ...query,
       filter: {

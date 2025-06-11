@@ -24,10 +24,7 @@ import { GitProviderType } from '@repo/types/integrations';
 @Controller('git')
 @UseInterceptors(ClassSerializerInterceptor)
 export class GitController {
-  constructor(
-    private readonly gitService: GitService,
-    private readonly gitResolverService: GitResolverService,
-  ) {}
+  constructor(private readonly gitService: GitService) {}
 
   @Validate({
     bypass: true,
@@ -36,7 +33,7 @@ export class GitController {
   async findAll(
     @Query() query: PaginationOptions,
   ): Promise<PaginatedResult<any>> {
-    const gitProvider = this.gitResolverService.resolve(GitProviderType.GITHUB);
+    const gitProvider = await this.gitService.resolveProvider();
     // const userProfile = await gitProvider.getUserProfile();
     const commits = await gitProvider.getCommits('my-turborepo');
 
