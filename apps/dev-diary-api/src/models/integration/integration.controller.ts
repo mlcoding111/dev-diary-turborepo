@@ -27,6 +27,8 @@ import {
 } from '@repo/types/schema';
 import type { TSerializedIntegration } from '@repo/types/schema';
 import { RequestContextService } from '@/modules/request/request-context.service';
+import { OAuthList } from '@/config/oauth.config';
+import { OAuthProviderType } from '@/types/auth';
 
 @Controller('integrations')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -39,6 +41,21 @@ export class IntegrationController {
     private readonly integrationService: IntegrationService,
     private readonly requestContextService: RequestContextService,
   ) {}
+
+  @Validate({
+    output: z.array(
+      z.object({
+        title: z.string(),
+        description: z.string(),
+        provider: z.nativeEnum(OAuthProviderType),
+        available: z.boolean(),
+      }),
+    ),
+  })
+  @Get('list')
+  async getList(): Promise<typeof OAuthList> {
+    return OAuthList;
+  }
 
   @Validate({
     output: z.array(IntegrationController.serializedIntegrationSchema),
