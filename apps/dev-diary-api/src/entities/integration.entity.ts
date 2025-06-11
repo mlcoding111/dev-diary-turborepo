@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { IBaseEntity } from '@/core/entity/base.entity';
 import { User } from './user.entity';
-import { GitProviderType } from '@repo/types/integrations';
+import { OAuthProviderType } from '@/types/auth';
 
 @Entity()
 export class Integration implements IBaseEntity {
@@ -36,8 +36,8 @@ export class Integration implements IBaseEntity {
   user: User;
 
   // Integration type
-  @Column({ type: 'enum', enum: GitProviderType })
-  provider: GitProviderType;
+  @Column({ type: 'enum', enum: OAuthProviderType })
+  provider: OAuthProviderType;
 
   // Integration data
   @Column({ type: 'jsonb' })

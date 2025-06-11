@@ -2,10 +2,13 @@ import { User } from '@/entities/user.entity';
 import { IntegrationRepository } from '@/models/integration/integration.repository';
 import { UserRepository } from '@/models/user/user.repository';
 import { UserService } from '@/models/user/user.service';
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { GitProviderType } from '@repo/types/integrations';
-import { TRegisterUser } from '@repo/types/schema';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import * as argon2 from 'argon2';
+import { TNormalizedOAuthProfile, OAuthProviderType } from '@/types/auth';
 
 @Injectable()
 export class OAuthService {
@@ -20,17 +23,20 @@ export class OAuthService {
     accessToken: string,
     refreshToken: string,
     profile: any,
-    provider: GitProviderType,
+    provider: OAuthProviderType,
+    normalizedProfile: TNormalizedOAuthProfile,
   ) {
+    console.log('Getting here1');
     // If access token is present, try to find user by access token
     const accessTokenCookie: string | null =
       req?.cookies['access_token'] || null;
     let user = await this.userService.getUserByAccessToken(accessTokenCookie);
-
+    console.log('Getting here2');
     // User was found, simply return the user and update the integration data
     if (!user) {
-      user = await this.registerOAuthUser(profile._json);
+      user = await this.registerOAuthUser(normalizedProfile);
     }
+    console.log('Getting here3');
     // Link integration
     await this.linkIntegration(
       user,
@@ -43,8 +49,7 @@ export class OAuthService {
     return user;
   }
 
-  // TODO: Save full_name, last_name from integration data.. etc
-  async registerOAuthUser(user: TRegisterUser): Promise<User> {
+  async registerOAuthUser(user: TNormalizedOAuthProfile): Promise<User> {
     const userExists = await this.usersRepo.findOneBy({
       email: user.email,
     });
@@ -66,30 +71,35 @@ export class OAuthService {
 
   private async linkIntegration(
     user: User,
-    provider: GitProviderType,
+    provider: OAuthProviderType,
     accessToken: string,
     refreshToken: string,
-    profile: GitProviderType,
+    profile: any,
   ) {
-    const existing = await this.integrationsRepo.findOneBy({
-      provider,
-      user: { id: user.id },
-    });
-    if (existing) {
+    try {
+      const existing = await this.integrationsRepo.findOneBy({
+        provider,
+        user: { id: user.id },
+      });
+      if (existing) {
+        return await this.integrationsRepo.save({
+          ...existing,
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          data: profile,
+        });
+      }
+
       return await this.integrationsRepo.save({
-        ...existing,
+        provider,
+        user,
         access_token: accessToken,
         refresh_token: refreshToken,
         data: profile,
       });
+    } catch (error) {
+      console.error('Error linking integration', error);
+      throw new InternalServerErrorException('Error linking integration');
     }
-
-    return await this.integrationsRepo.save({
-      provider,
-      user,
-      access_token: accessToken,
-      refresh_token: refreshToken,
-      data: profile,
-    });
   }
 }

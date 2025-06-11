@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-github';
 import { ConfigService } from '@nestjs/config';
 import { OAuthService } from '../oauth/oauth.service';
-import { GitProviderType } from '@repo/types/integrations';
+import { TNormalizedOAuthProfile, OAuthProviderType } from '@/types/auth';
 
 @Injectable()
 export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
@@ -27,12 +27,19 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     refreshToken: string,
     profile: any,
   ) {
+    const normalizedProfile: TNormalizedOAuthProfile = {
+      email: profile._json.email,
+      first_name: profile._json.name.split(' ')[0] || '',
+      last_name: profile._json.name.split(' ')[1] || '',
+    };
+
     return await this.oauthService.handleOAuthConnection(
       req,
       accessToken,
       refreshToken,
       profile,
-      GitProviderType.GITHUB,
+      OAuthProviderType.GITHUB,
+      normalizedProfile,
     );
   }
 }
