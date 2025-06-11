@@ -74,6 +74,25 @@ export class AuthService {
     return savedUser;
   }
 
+  async registerOAuthUser(user: TRegisterUser): Promise<User> {
+    const userExists = await this.userRepository.findOneBy({
+      email: user.email,
+    });
+    if (userExists) {
+      throw new BadRequestException('User already exists');
+    }
+
+    // Generate a random password
+    const { hashedPassword } = await this.generateRandomPassword();
+
+    const savedUser: User = await this.userRepository.save({
+      ...user,
+      password: hashedPassword,
+    });
+
+    return savedUser;
+  }
+
   async generateTokens(
     userId: string,
     email: string,
@@ -167,13 +186,6 @@ export class AuthService {
       first_name: user.name.split(' ')[0] || '',
       last_name: user.name.split(' ')[1] || '',
       password: (await this.generateRandomPassword()).password,
-      github_token: githubToken,
-      integration_data: {
-        github: {
-          token: githubToken,
-          username: user.username,
-        },
-      },
     });
     await this.userService.upsertIntegration(createdUser, {
       provider: 'github',
