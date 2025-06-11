@@ -33,6 +33,13 @@ export class UserService extends BaseService<User> {
     });
   }
 
+  async updateAccessToken(userId: string, accessToken: string) {
+    return await this.userRepository.save({
+      id: userId,
+      access_token: accessToken,
+    });
+  }
+
   async getUserFromHeadersToken(
     req: Request & { headers: { authorization?: string } },
   ): Promise<User | null> {
@@ -68,6 +75,15 @@ export class UserService extends BaseService<User> {
     }
 
     return null;
+  }
+
+  async getUserByAccessToken(accessToken: string): Promise<User | null> {
+    const user = await this.userRepository.findOne({
+      where: {
+        access_token: accessToken,
+      },
+    });
+    return user;
   }
 
   async getUser(id: string): Promise<User> {

@@ -37,13 +37,14 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
   ) {
     let user: User | null = null;
     const primaryEmail = await this.githubService.getUserEmail(accessToken);
-    // console.log('The primary email is', primaryEmail);
-    // console.log('The profile is', profile);
-    console.log('The state is', req.query.state);
-    if (!primaryEmail) {
-      throw new UnauthorizedException('Github primary email not found');
-    }
+    // get req.cookies ['access_token'
+    const accessToken2 = req.cookies['access_token'];
 
+    if (accessToken2) {
+      console.log('The access token is', accessToken2);
+      user = await this.userService.getUserByAccessToken(accessToken2);
+    }
+    console.log('The user is', user);
     profile._json.email = primaryEmail;
 
     // If user is not found, create a new user
@@ -56,6 +57,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     // if (!user) {
     //   return false;
     // }
-    return { accessToken, profile, user: profile._json };
+    return user;
+    // return { accessToken, profile, user: profile._json };
   }
 }

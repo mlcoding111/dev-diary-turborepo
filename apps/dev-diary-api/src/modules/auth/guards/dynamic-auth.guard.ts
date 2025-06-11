@@ -13,7 +13,7 @@ export function DynamicAuthGuardFactory(providerParamKey = 'provider') {
     getAuthenticateOptions(context: ExecutionContext) {
       const request = context.switchToHttp().getRequest();
       const provider = request.params?.[providerParamKey];
-      console.log('Thexxxcis', provider);
+
       if (!provider) {
         throw new Error('Provider not specified in route param');
       }

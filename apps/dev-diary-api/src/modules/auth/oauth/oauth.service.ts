@@ -1,6 +1,7 @@
 import { User } from '@/entities/user.entity';
 import { IntegrationRepository } from '@/models/integration/integration.repository';
 import { UserRepository } from '@/models/user/user.repository';
+import { UserService } from '@/models/user/user.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { GitProviderType } from '@repo/types/integrations';
 
@@ -9,7 +10,29 @@ export class OAuthService {
   constructor(
     private readonly usersRepo: UserRepository,
     private readonly integrationsRepo: IntegrationRepository,
+    private readonly userService: UserService,
   ) {}
+
+  async handleOAuthConnection(
+    req: any,
+    accessToken: string,
+    refreshToken: string,
+    profile: any,
+  ) {
+    // If access token is present, try to find user by access token
+    const accessTokenCookie = req?.cookies['access_token'] || null;
+    const user = await this.userService.getUserByAccessToken(accessTokenCookie);
+
+    // User was found, simply return the user and update the integration data
+    if (user) {
+      return user;
+    }
+
+    // User was not found, create a new user
+
+    const newUser = await this.userService.createUser(profile);
+    return newUser;
+  }
 
   async handleOAuthLogin(profile: any, sessionUserId?: string) {
     const { provider, providerId, email, raw } = profile;

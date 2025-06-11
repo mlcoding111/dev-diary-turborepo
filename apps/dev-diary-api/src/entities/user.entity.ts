@@ -42,6 +42,9 @@ export class User implements IBaseEntity {
   refresh_token: string | null;
 
   @Column({ type: 'varchar', nullable: true })
+  access_token: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
   github_token: string | null;
 
   @OneToMany(() => Integration, (integration) => integration.user)

@@ -50,6 +50,7 @@ export class AuthController {
     private userRepository: UserRepository,
     private readonly clsService: RequestContextService,
     private readonly oauthService: OAuthService,
+    private readonly requestContextService: RequestContextService,
   ) {}
 
   @Validate({
@@ -167,10 +168,21 @@ export class AuthController {
     @Res() res,
     @Query('state') state: string,
   ) {
-    const sessionUserId = this.clsService.get('user')?.id;
-    const profile = req.user;
+    const cookie = req.cookies;
+    console.log('The cookie is', cookie);
+    // const sessionUserId = this.clsService.get('user')?.id;
+    // const profile = req.user;
 
     console.log('The req.user is', req.user);
+    // Login the user
+    // In scenario where user already exists, this works.
+    // In scenario where user does not exist, we need to create a new user and return the user in the strategy
+    // For that, we will use the same logic for each strategy. In oauthservice
+    const loginResponse = await this.authService.login(req.user);
+
+    if (!loginResponse) {
+      throw new UnauthorizedException();
+    }
 
     // const user = await this.oauthService.handleOAuthLogin(
     //   {
@@ -182,19 +194,19 @@ export class AuthController {
     //   sessionUserId,
     // );
 
-    // res.cookie('access_token', loginResponse.access_token, {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === 'production',
-    //   sameSite: 'Lax', // Or 'Strict' / 'None' depending on your use case
-    //   maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-    // });
+    res.cookie('access_token', loginResponse.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Lax', // Or 'Strict' / 'None' depending on your use case
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    });
 
-    // res.cookie('refresh_token', loginResponse.refresh_token, {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === 'production',
-    //   sameSite: 'Lax',
-    //   maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-    // });
+    res.cookie('refresh_token', loginResponse.refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Lax',
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    });
 
     res.redirect(`${process.env.WEB_APP_URL}/dashboard`);
   }
@@ -247,10 +259,10 @@ export class AuthController {
   // @UseGuards(GoogleAuthGuard)
   // @Get('google/callback')
   // async googleAuthCallback(@Req() req, @Res() res) {
-  //   const loginResponse = await this.authService.login(req.user);
-  //   if (!loginResponse) {
-  //     throw new UnauthorizedException();
-  //   }
+    // const loginResponse = await this.authService.login(req.user);
+    // if (!loginResponse) {
+    //   throw new UnauthorizedException();
+    // }
   //   // ✅ Set a secure cookie
   //   res.cookie('access_token', loginResponse.access_token, {
   //     httpOnly: true,
