@@ -22,8 +22,6 @@ import {
   type PaginationOptions,
 } from '@/core/utils/service/base.service';
 import { ClsService } from 'nestjs-cls';
-import { GitResolverService } from '@/modules/git/git-resolver.service';
-import { GitProviderType } from '@repo/types/integrations';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -34,9 +32,7 @@ export class UserController {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly userService: UserService,
-    // private readonly githubService: GithubService,
     private readonly clsService: ClsService,
-    private readonly gitResolverService: GitResolverService,
   ) {}
 
   @Validate({
@@ -55,7 +51,6 @@ export class UserController {
   async findAll(
     @Query() query: PaginationOptions,
   ): Promise<PaginatedResult<TSerializedUser>> {
-
     return await this.userService.paginate(query);
   }
 

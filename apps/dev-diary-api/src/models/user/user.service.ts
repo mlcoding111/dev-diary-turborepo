@@ -1,10 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { BaseService } from '@/core/utils/service/base.service';
-import { JwtService } from '@nestjs/jwt';
 import { User } from '@/entities/user.entity';
-
-import { AuthJwtPayload } from '@/modules/auth/types/jwt-payload';
 import { IntegrationRepository } from '../integration/integration.repository';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Integration } from '@/entities/integration.entity';
@@ -13,7 +10,6 @@ import { Integration } from '@/entities/integration.entity';
 export class UserService extends BaseService<User> {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly jwtService: JwtService,
     private readonly integrationRepository: IntegrationRepository,
   ) {
     super(userRepository);
