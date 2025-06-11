@@ -46,11 +46,15 @@ export class OAuthService {
     return user;
   }
 
-  async registerOAuthUser(user: TNormalizedOAuthProfile): Promise<User> {
-    const userExists = await this.usersRepo.findOneBy({
-      email: user.email,
+  async registerOAuthUser(
+    normalizedProfile: TNormalizedOAuthProfile,
+  ): Promise<User> {
+    const existingUser = await this.usersRepo.findOneBy({
+      email: normalizedProfile.email,
     });
-    if (userExists) {
+    console.log('The normalized profile is', normalizedProfile);
+    console.log('The found user is', existingUser);
+    if (existingUser) {
       throw new BadRequestException('User already exists');
     }
 
@@ -59,7 +63,7 @@ export class OAuthService {
     const hashedPassword = await argon2.hash(password);
 
     const savedUser: User = await this.usersRepo.save({
-      ...user,
+      ...normalizedProfile,
       password: hashedPassword,
     });
 

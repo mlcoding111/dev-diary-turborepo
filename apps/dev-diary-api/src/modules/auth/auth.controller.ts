@@ -36,7 +36,7 @@ import { RequestContextService } from '@/modules/request/request-context.service
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { GitHubAuthGuard } from './guards/github-auth.guard';
-import { GitProviderType } from '@repo/types/integrations';
+import { GitProviderType, OAuthProviderType } from '@repo/types/integrations';
 import { OAuthService } from './oauth/oauth.service';
 import { DynamicAuthGuard } from './guards/oauth.guard';
 import { DynamicAuthGuardFactory } from './guards/dynamic-auth.guard';
@@ -163,37 +163,15 @@ export class AuthController {
   @Get(':provider/callback')
   @UseGuards(DynamicAuthGuardFactory())
   async handleCallback(
-    @Param('provider') provider: GitProviderType,
+    @Param('provider') provider: OAuthProviderType,
     @Req() req,
     @Res() res,
-    @Query('state') state: string,
   ) {
-    const cookie = req.cookies;
-    console.log('The cookie is', cookie);
-    // const sessionUserId = this.clsService.get('user')?.id;
-    // const profile = req.user;
-
-    console.log('The req.user is', req.user);
-    // Login the user
-    // In scenario where user already exists, this works.
-    // In scenario where user does not exist, we need to create a new user and return the user in the strategy
-    // For that, we will use the same logic for each strategy. In oauthservice
     const loginResponse = await this.authService.login(req.user);
 
     if (!loginResponse) {
       throw new UnauthorizedException();
     }
-
-    // const user = await this.oauthService.handleOAuthLogin(
-    //   {
-    //     provider,
-    //     providerId: profile.id,
-    //     email: profile.email,
-    //     raw: profile,
-    //   },
-    //   sessionUserId,
-    // );
-
     res.cookie('access_token', loginResponse.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
