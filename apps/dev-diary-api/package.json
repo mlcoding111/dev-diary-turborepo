@@ -40,6 +40,7 @@
     "nestjs-cls": "^5.4.2",
     "octokit": "^4.1.2",
     "passport": "^0.7.0",
+    "passport-bitbucket-oauth20": "^1.1.0",
     "passport-github": "^1.1.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",

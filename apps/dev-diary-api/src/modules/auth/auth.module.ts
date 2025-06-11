@@ -15,6 +15,7 @@ import { GithubStrategy } from './streategy/github.strategy';
 import { githubOAuthConfig } from '@/config/github-oauth.config';
 import { GithubService } from '@/modules/github/github.service';
 import { OAuthModule } from './oauth/oauth.module';
+import { bitbucketOAuthConfig } from '@/config/bitbucket-oauth.config';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { OAuthModule } from './oauth/oauth.module';
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(googleOAuthConfig),
     ConfigModule.forFeature(githubOAuthConfig),
+    ConfigModule.forFeature(bitbucketOAuthConfig),
   ],
   providers: [
     AuthService,
