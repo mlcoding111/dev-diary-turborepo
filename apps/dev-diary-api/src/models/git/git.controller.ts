@@ -19,8 +19,6 @@ export class GitController {
   async findAll(): Promise<any> {
     const gitProvider = await this.gitService.resolveProvider();
     const commits = await gitProvider.getCommits('my-turborepo');
-
-    console.log('The commits are', commits);
     return commits;
   }
 

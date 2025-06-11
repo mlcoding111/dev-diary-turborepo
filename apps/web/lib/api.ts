@@ -24,8 +24,6 @@ export async function callFetch<TData, TPayloadData = unknown>(fetchOptions: ICa
             body: fetchOptions.data ? JSON.stringify(fetchOptions.data) : undefined,
             headers,
         }).then(res => res.json());
-
-        console.log('The response is', response);
         
         if(!response.success && fetchOptions.method === "GET"){
             throw new Error(JSON.stringify(response));

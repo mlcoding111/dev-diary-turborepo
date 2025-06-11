@@ -42,43 +42,6 @@ export class UserService extends BaseService<User> {
     });
   }
 
-  async getUserFromHeadersToken(
-    req: Request & { headers: { authorization?: string } },
-  ): Promise<User | null> {
-    const authHeader = req.headers.authorization as string;
-
-    if (authHeader) {
-      const [type, token] = authHeader.split(' ');
-      if (type === 'Bearer' && token) {
-        const payload: AuthJwtPayload = this.jwtService.verify(token);
-        if (payload) {
-          const user = await this.userRepository.findOne({
-            relations: ['userWorkspaces'],
-            where: { id: payload.sub },
-          });
-          if (!user) {
-            console.log('User not found');
-            // throw new ApiException({
-            //     http_status_code: HttpStatus.UNAUTHORIZED,
-            //     error_code: 'INVALID_TOKEN',
-            // });
-          }
-
-          return user;
-        } else {
-          // Payload is invalid
-          console.log('Payload is invalid');
-          // throw new ApiException({
-          //     http_status_code: HttpStatus.UNAUTHORIZED,
-          //     error_code: 'INVALID_TOKEN',
-          // });
-        }
-      }
-    }
-
-    return null;
-  }
-
   async getUserByAccessToken(accessToken: string | null): Promise<User | null> {
     if (!accessToken) return null;
 

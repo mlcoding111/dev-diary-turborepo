@@ -105,7 +105,7 @@ export class AuthController {
   @Post('logout')
   async logout(@Res({ passthrough: true }) res: any) {
     const user = this.clsService.get('user');
-    console.log('user from logout', user);
+
     // Clear cookies by setting them to expire in the past
     res.clearCookie('access_token');
     res.clearCookie('refresh_token');

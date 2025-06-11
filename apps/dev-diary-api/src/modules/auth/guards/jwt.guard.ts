@@ -50,7 +50,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const serializedUser = instanceToPlain(user, {
       enableImplicitConversion: true,
     });
-    console.log('Setting user in jwt guard', serializedUser);
+
     this.clsService.set('user', serializedUser);
     this.clsService.set('request', request);
 

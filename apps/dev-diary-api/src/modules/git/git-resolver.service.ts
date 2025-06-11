@@ -23,7 +23,7 @@ export class GitResolverService {
     providedUser?: TSerializedUser,
   ): GitProvider {
     const user = providedUser || this.requestContextService.get('user');
-    console.log('The user', user);
+
     const GitProvider = GIT_PROVIDERS_MAP[provider];
 
     if (!GitProvider) {

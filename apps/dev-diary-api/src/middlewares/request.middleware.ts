@@ -13,7 +13,6 @@ export class LoggerMiddleware implements NestMiddleware {
     try {
       const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
       this.requestContextService.set('user', decoded);
-      console.log('Setting user in request context', decoded);
     } catch (error) {
       // console.log('Error decoding access token:', error);
     }

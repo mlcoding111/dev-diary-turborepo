@@ -35,7 +35,6 @@ export class ProductsController {
   @Get()
   getProducts(): TSerializedProduct[] {
     const user = this.clsService.get('user');
-    console.log('This is the user', user);
     // TODO: Replace with serializer
     const serializedProducts = this.productsService
       .getProducts()

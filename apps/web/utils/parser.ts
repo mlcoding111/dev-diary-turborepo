@@ -15,9 +15,8 @@ export async function validateForm<T>(
   
   // Validate with schema
   const validationResult = schema.safeParse(data);
-  console.log(validationResult, data);
+
   if (!validationResult.success) {
-    console.log(validationResult.error?.flatten().fieldErrors);
     // Format errors properly
     return { 
       errors: validationResult.error.flatten().fieldErrors as Record<string, string[]>,
