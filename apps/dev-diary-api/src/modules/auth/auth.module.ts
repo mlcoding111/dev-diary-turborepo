@@ -16,6 +16,7 @@ import { githubOAuthConfig } from '@/config/github-oauth.config';
 import { GithubService } from '@/modules/github/github.service';
 import { OAuthModule } from './oauth/oauth.module';
 import { bitbucketOAuthConfig } from '@/config/bitbucket-oauth.config';
+import { BitbucketStrategy } from './streategy/bitbucket.strategy';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { bitbucketOAuthConfig } from '@/config/bitbucket-oauth.config';
     JwtService,
     GoogleStrategy,
     GithubStrategy,
+    BitbucketStrategy,
     GithubService,
   ],
   exports: [AuthService],
