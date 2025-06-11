@@ -6,6 +6,8 @@ import { User } from '@/entities/user.entity';
 
 import { AuthJwtPayload } from '@/modules/auth/types/jwt-payload';
 import { IntegrationRepository } from '../integration/integration.repository';
+import { OnEvent } from '@nestjs/event-emitter';
+import { Integration } from '@/entities/integration.entity';
 
 @Injectable()
 export class UserService extends BaseService<User> {
@@ -118,5 +120,15 @@ export class UserService extends BaseService<User> {
       type: integration.provider,
       data: integration.data,
     });
+  }
+
+  @OnEvent('entity.afterUpsert.integration')
+  async handleIntegrationAfterUpsert(event: Integration) {
+    if (event.is_active) {
+      await this.userRepository.save({
+        id: event.user_id,
+        active_integration_id: event.id,
+      });
+    }
   }
 }

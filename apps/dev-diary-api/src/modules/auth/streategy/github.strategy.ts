@@ -29,7 +29,6 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     refreshToken: string,
     profile: any,
   ) {
-    console.log('The profile is', profile);
     const userEmail: string =
       await this.githubService.getUserEmail(accessToken);
 

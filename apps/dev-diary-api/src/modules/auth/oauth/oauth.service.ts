@@ -9,6 +9,8 @@ import {
 } from '@nestjs/common';
 import * as argon2 from 'argon2';
 import { TNormalizedOAuthProfile, OAuthProviderType } from '@/types/auth';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Integration } from '@/entities/integration.entity';
 
 @Injectable()
 export class OAuthService {
@@ -16,6 +18,7 @@ export class OAuthService {
     private readonly usersRepo: UserRepository,
     private readonly integrationsRepo: IntegrationRepository,
     private readonly userService: UserService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async handleOAuthConnection(
@@ -35,7 +38,7 @@ export class OAuthService {
       user = await this.registerOAuthUser(normalizedProfile);
     }
     // Link integration
-    await this.linkIntegration(
+    await this.upsertIntegration(
       user,
       provider,
       accessToken,
@@ -52,14 +55,13 @@ export class OAuthService {
     const existingUser = await this.usersRepo.findOneBy({
       email: normalizedProfile.email,
     });
-    console.log('The normalized profile is', normalizedProfile);
-    console.log('The found user is', existingUser);
+
     if (existingUser) {
       throw new BadRequestException('User already exists');
     }
 
     // Generate a random password
-    const password = 'asdasd';
+    const password = process.env.TEMP_PASSWORD || '';
     const hashedPassword = await argon2.hash(password);
 
     const savedUser: User = await this.usersRepo.save({
@@ -70,34 +72,41 @@ export class OAuthService {
     return savedUser;
   }
 
-  private async linkIntegration(
+  private async upsertIntegration(
     user: User,
     provider: OAuthProviderType,
     accessToken: string,
     refreshToken: string,
     profile: any,
   ) {
+    let integration: Integration | null = null;
     try {
       const existing = await this.integrationsRepo.findOneBy({
         provider,
         user: { id: user.id },
       });
       if (existing) {
-        return await this.integrationsRepo.save({
+        integration = await this.integrationsRepo.save({
           ...existing,
           access_token: accessToken,
           refresh_token: refreshToken,
           data: profile,
+          is_active: true,
         });
       }
 
-      return await this.integrationsRepo.save({
+      integration = await this.integrationsRepo.save({
         provider,
         user,
         access_token: accessToken,
         refresh_token: refreshToken,
         data: profile,
+        is_active: true,
       });
+
+      this.eventEmitter.emit('entity.afterUpsert.integration', integration);
+
+      return integration;
     } catch (error) {
       console.error('Error linking integration', error);
       throw new InternalServerErrorException('Error linking integration');

@@ -202,7 +202,7 @@ export class AuthService {
   }
 
   async generateRandomPassword() {
-    const password = 'asdasd';
+    const password = process.env.TEMP_PASSWORD || '';
     // const password = Math.random().toString(36).substring(2, 15);
     const hashedPassword = await argon2.hash(password);
     return { password, hashedPassword };
