@@ -9,7 +9,6 @@ import {
   Get,
   UnauthorizedException,
   Res,
-  Query,
   Param,
 } from '@nestjs/common';
 import { LocalAuthGuard } from './guards/local.guard';
@@ -34,7 +33,6 @@ import { User } from '@/entities/user.entity';
 import { UserRepository } from '@/models/user/user.repository';
 import { RequestContextService } from '@/modules/request/request-context.service';
 import { GitProviderType, OAuthProviderType } from '@repo/types/integrations';
-import { OAuthService } from './oauth/oauth.service';
 import { DynamicAuthGuardFactory } from './guards/dynamic-auth.guard';
 
 @Public()
@@ -45,8 +43,6 @@ export class AuthController {
     private readonly authService: AuthService,
     private userRepository: UserRepository,
     private readonly clsService: RequestContextService,
-    private readonly oauthService: OAuthService,
-    private readonly requestContextService: RequestContextService,
   ) {}
 
   @Validate({
@@ -130,22 +126,6 @@ export class AuthController {
     return await this.authService.logout(user.id);
   }
 
-  // TODO: Implement this
-  private async serializeUserLoginOutput(
-    user: TUserLoginOutput,
-  ): Promise<TUserLoginOutputSerialized> {
-    const userData = await this.userRepository.findOneBy({ id: user.user.id });
-    if (!userData) {
-      throw new BadRequestException('User not found');
-    }
-    const serializedUser = new User(userData);
-    return {
-      user: serializedUser,
-      access_token: user.access_token,
-      refresh_token: user.refresh_token,
-    };
-  }
-
   @Validate({
     bypass: true,
   })
@@ -184,5 +164,21 @@ export class AuthController {
     });
 
     res.redirect(`${process.env.WEB_APP_URL}/dashboard`);
+  }
+
+  // TODO: Implement this
+  private async serializeUserLoginOutput(
+    user: TUserLoginOutput,
+  ): Promise<TUserLoginOutputSerialized> {
+    const userData = await this.userRepository.findOneBy({ id: user.user.id });
+    if (!userData) {
+      throw new BadRequestException('User not found');
+    }
+    const serializedUser = new User(userData);
+    return {
+      user: serializedUser,
+      access_token: user.access_token,
+      refresh_token: user.refresh_token,
+    };
   }
 }
