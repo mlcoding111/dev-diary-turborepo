@@ -39,6 +39,15 @@ export class BitbucketProvider extends GitProvider {
     return data;
   }
 
+  async getRepositoryCount(): Promise<number> {
+    const client = await this.getClient();
+    const { headers } = await client.request('GET /user/repos', {
+      per_page: 1,
+      visibility: 'all',
+    });
+    return 0;
+  }
+
   async getUserEmail(): Promise<any> {
     const client = await this.getClient();
     const { data } = await client.request('GET /user/emails');

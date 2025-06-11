@@ -35,7 +35,7 @@ export class GithubProvider extends GitProvider {
 
   async getRepositories(params?: Record<string, any>): Promise<any> {
     const client = await this.getClient();
-    const { data } = await client.request('GET /user/repos', {
+    const { data, headers } = await client.request('GET /user/repos', {
       per_page: 100,
       visibility: 'all',
       ...params,
@@ -43,6 +43,17 @@ export class GithubProvider extends GitProvider {
     return data;
   }
 
+  async getRepositoryCount(): Promise<number> {
+    const client = await this.getClient();
+    const { headers } = await client.request('GET /user/repos', {
+      per_page: 1,
+      visibility: 'all',
+    });
+    const totalCount =
+      Number(headers['x-total-count']) ||
+      this.estimateFromLinkHeader(headers.link || '');
+    return totalCount || 0;
+  }
   async getUserEmail(): Promise<any> {
     const client = await this.getClient();
     const { data } = await client.request('GET /user/emails');
@@ -53,5 +64,17 @@ export class GithubProvider extends GitProvider {
     const client = await this.getClient();
     const { data } = await client.request('GET /user');
     return data;
+  }
+
+  //
+  private estimateFromLinkHeader(linkHeader?: string): number | null {
+    if (!linkHeader) return null;
+
+    const match = linkHeader.match(/&page=(\d+)>; rel="last"/);
+    if (match && match[1]) {
+      return parseInt(match[1], 10); // This gives last page number
+    }
+
+    return null;
   }
 }

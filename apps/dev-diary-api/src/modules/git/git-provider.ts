@@ -11,6 +11,7 @@ export abstract class GitProvider {
   abstract getUserEmail(): Promise<any>;
   abstract getRepositories(): Promise<any>;
   abstract getCommits(repo: string): Promise<any>;
+  abstract getRepositoryCount(): Promise<number>;
 
   constructor(user: TSerializedUser, integration: Integration) {
     this.user = user;

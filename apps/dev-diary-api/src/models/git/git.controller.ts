@@ -33,4 +33,14 @@ export class GitController {
     const repositories = await gitProvider.getRepositories();
     return repositories;
   }
+
+  @Validate({
+    bypass: true,
+  })
+  @Get('repository-count')
+  async getRepositoryCount(): Promise<any> {
+    const gitProvider = await this.gitService.resolveProvider();
+    const repositoryCount = await gitProvider.getRepositoryCount();
+    return repositoryCount;
+  }
 }
