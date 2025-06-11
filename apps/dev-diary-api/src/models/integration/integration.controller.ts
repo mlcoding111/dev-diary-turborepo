@@ -45,6 +45,7 @@ export class IntegrationController {
   @Validate({
     output: z.array(IntegrationController.serializedIntegrationSchema),
     pagination: true,
+    bypass: true,
   })
   @Get()
   async findAll(
@@ -54,11 +55,7 @@ export class IntegrationController {
     return await this.integrationService.paginate({
       ...query,
       filter: {
-        where: {
-          user_id: {
-            id: user.id,
-          },
-        },
+        user_id: user.id,
       },
     });
   }
