@@ -20,8 +20,6 @@ import { Validate } from '@/decorators/validation.decorator';
 import { z } from 'zod';
 import type {
   TRegisterUser,
-  TUserLoginOutput,
-  TUserLoginOutputSerialized,
   TUserLoginInput,
   TSerializedUser,
 } from '@repo/types/schema';
@@ -151,21 +149,5 @@ export class AuthController {
     });
 
     res.redirect(`${process.env.WEB_APP_URL}/dashboard`);
-  }
-
-  // TODO: Implement this
-  private async serializeUserLoginOutput(
-    user: TUserLoginOutput,
-  ): Promise<TUserLoginOutputSerialized> {
-    const userData = await this.userRepository.findOneBy({ id: user.user.id });
-    if (!userData) {
-      throw new BadRequestException('User not found');
-    }
-    const serializedUser = new User(userData);
-    return {
-      user: serializedUser,
-      access_token: user.access_token,
-      refresh_token: user.refresh_token,
-    };
   }
 }
