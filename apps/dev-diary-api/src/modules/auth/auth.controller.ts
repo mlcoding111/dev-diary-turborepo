@@ -148,6 +148,6 @@ export class AuthController {
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
     });
 
-    res.redirect(`${process.env.WEB_APP_URL}/dashboard`);
+    res.redirect(`${process.env.WEB_APP_URL}/dashboard/integrations`);
   }
 }
