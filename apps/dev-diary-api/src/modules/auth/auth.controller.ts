@@ -134,13 +134,13 @@ export class AuthController {
     if (!loginResponse) {
       throw new UnauthorizedException();
     }
+
     res.cookie('access_token', loginResponse.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'Lax', // Or 'Strict' / 'None' depending on your use case
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
     });
-
     res.cookie('refresh_token', loginResponse.refresh_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

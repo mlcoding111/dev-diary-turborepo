@@ -5,30 +5,33 @@ import { User } from '@/entities/user.entity';
 import { IntegrationRepository } from '../integration/integration.repository';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Integration } from '@/entities/integration.entity';
+import * as argon2 from 'argon2';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UserService extends BaseService<User> {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly integrationRepository: IntegrationRepository,
+    private readonly jwtService: JwtService,
   ) {
     super(userRepository);
   }
 
-  async updateHashedRefreshToken(
-    userId: string,
-    hashedRefreshToken: string | null,
-    refreshToken?: string | null,
-  ) {
-    // If there is a refreshToken, take it. Else, if hashedRefreshToken is null, set refreshToken to null.
-    // Else, if there is no refreshToken, do not save anything.
-    const refreshTokenToSave =
-      refreshToken ?? (hashedRefreshToken ? null : undefined);
-    return await this.userRepository.save({
-      id: userId,
-      hashed_refresh_token: hashedRefreshToken,
-      ...(refreshTokenToSave && { refresh_token: refreshTokenToSave }),
-    });
+  async updateAllTokens(
+    user: User,
+    access_token: string,
+    refresh_token: string,
+  ): Promise<User> {
+    const hashed_refresh_token = await argon2.hash(refresh_token);
+
+    const updatedUserData: Partial<User> = {
+      id: user.id,
+      access_token,
+      hashed_refresh_token: hashed_refresh_token,
+      refresh_token,
+    };
+    return await this.userRepository.save(updatedUserData);
   }
 
   async updateAccessToken(userId: string, accessToken: string) {
@@ -38,9 +41,27 @@ export class UserService extends BaseService<User> {
     });
   }
 
+  async updateHashedRefreshToken(userId: string, refreshToken: string) {
+    const hashedRefreshToken = await argon2.hash(refreshToken);
+
+    return await this.userRepository.save({
+      id: userId,
+      hashed_refresh_token: hashedRefreshToken,
+      refresh_token: refreshToken,
+    });
+  }
+
+  async removeAllTokens(userId: string) {
+    return await this.userRepository.save({
+      id: userId,
+      access_token: null,
+      refresh_token: null,
+      hashed_refresh_token: null,
+    });
+  }
+
   async getUserByAccessToken(accessToken: string | null): Promise<User | null> {
     if (!accessToken) return null;
-
     const user = await this.userRepository.findOne({
       where: {
         access_token: accessToken,
