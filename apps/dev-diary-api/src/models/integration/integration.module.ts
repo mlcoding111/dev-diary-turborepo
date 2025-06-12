@@ -6,9 +6,10 @@ import { IntegrationController } from './integration.controller';
 import { IntegrationRepository } from './integration.repository';
 import { IntegrationSubscriber } from './integration.subscriber';
 import { IntegrationListener } from './integration.listener';
+import { UserModule } from '../user/user.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Integration])],
+  imports: [TypeOrmModule.forFeature([Integration]), UserModule],
   providers: [
     IntegrationService,
     IntegrationRepository,

@@ -29,6 +29,9 @@ import type { TSerializedIntegration } from '@repo/types/schema';
 import { RequestContextService } from '@/modules/request/request-context.service';
 import { OAuthList } from '@/config/oauth.config';
 import { OAuthProviderType } from '@/types/auth';
+import { UserService } from '../user/user.service';
+import { User } from '@/entities/user.entity';
+import { capitalizeFirstLetter, capitalizeFirstLetterOfEachWord } from '@/core/utils/string';
 
 @Controller('integrations')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -40,6 +43,7 @@ export class IntegrationController {
     private readonly integrationRepository: IntegrationRepository,
     private readonly integrationService: IntegrationService,
     private readonly requestContextService: RequestContextService,
+    private readonly userService: UserService,
   ) {}
 
   @Validate({
@@ -73,6 +77,33 @@ export class IntegrationController {
   @Get('available')
   getList(): typeof OAuthList {
     return OAuthList;
+  }
+
+  @Validate({
+    bypass: true,
+  })
+  @Get('formatted')
+  async getFormattedList(): Promise<any[]> {
+    const user: User = this.requestContextService.get('user');
+    const integrations = await this.userService.getAllIntegrations(user);
+    const availableProviders = OAuthList.filter(
+      (item) => item.available && item.provider !== OAuthProviderType.GOOGLE,
+    );
+
+    const formattedList = availableProviders.map((item) => {
+      const integration = integrations.find(
+        (integration) => integration.provider === item.provider,
+      );
+      return {
+        title: capitalizeFirstLetterOfEachWord(item.title),
+        description: item.description,
+        is_active: integration ? true : false,
+        connection_url: `${process.env.API_URL}/auth/${item.provider}`,
+        ...integration,
+      };
+    });
+
+    return formattedList;
   }
 
   @Validate({

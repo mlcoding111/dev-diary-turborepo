@@ -31,6 +31,6 @@ export const OAuthList: {
     title: OAuthProviderType.BITBUCKET,
     description: 'Connect your Bitbucket account to your Dev Diary account',
     provider: OAuthProviderType.BITBUCKET,
-    available: false,
+    available: true,
   },
 ];
