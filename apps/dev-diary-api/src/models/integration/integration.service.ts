@@ -4,6 +4,8 @@ import { Integration } from '@/entities/integration.entity';
 import { IntegrationRepository } from './integration.repository';
 import { RequestContextService } from '@/modules/request/request-context.service';
 import { TSerializedUser } from '@repo/types/schema';
+import { Not } from 'typeorm';
+import { OAuthProviderType } from '@/types/auth';
 
 @Injectable()
 export class IntegrationService extends BaseService<Integration> {
@@ -15,9 +17,13 @@ export class IntegrationService extends BaseService<Integration> {
   }
 
   async getActiveIntegration(user: TSerializedUser): Promise<Integration> {
+    if (!user.active_integration_id) {
+      throw new NotFoundException('No active integration found');
+    }
+
     const integration = await this.integrationRepository.findOneBy({
       user_id: user.id,
-      is_active: true,
+      id: user.active_integration_id,
     });
 
     if (!integration) {
