@@ -31,7 +31,7 @@ import { OAuthList } from '@/config/oauth.config';
 import { OAuthProviderType } from '@/types/auth';
 import { UserService } from '../user/user.service';
 import { User } from '@/entities/user.entity';
-import { capitalizeFirstLetter, capitalizeFirstLetterOfEachWord } from '@/core/utils/string';
+import { capitalizeFirstLetterOfEachWord } from '@/core/utils/string';
 
 @Controller('integrations')
 @UseInterceptors(ClassSerializerInterceptor)

@@ -11,6 +11,7 @@ import * as argon2 from 'argon2';
 import { TNormalizedOAuthProfile, OAuthProviderType } from '@/types/auth';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Integration } from '@/entities/integration.entity';
+import { omit } from 'lodash';
 
 @Injectable()
 export class OAuthService {
@@ -49,6 +50,7 @@ export class OAuthService {
       accessToken,
       refreshToken,
       profile,
+      normalizedProfile,
     );
 
     return user;
@@ -83,6 +85,7 @@ export class OAuthService {
     accessToken: string,
     refreshToken: string,
     profile: any,
+    normalizedData: TNormalizedOAuthProfile,
   ) {
     let integration: Integration | null = null;
     try {
@@ -98,6 +101,7 @@ export class OAuthService {
           refresh_token: refreshToken,
           data: profile,
           is_active: true,
+          ...normalizedData,
         });
       } else {
         integration = await this.integrationsRepo.save({
@@ -106,6 +110,7 @@ export class OAuthService {
           access_token: accessToken,
           refresh_token: refreshToken,
           data: profile,
+          ...normalizedData,
         });
       }
 

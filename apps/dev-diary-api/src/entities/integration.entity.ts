@@ -41,6 +41,24 @@ export class Integration implements IBaseEntity {
 
   @Column({ type: 'jsonb' })
   data: any;
+  // ------------------------------------------------------------
+  @Column({ name: 'first_name', type: 'varchar', nullable: true })
+  first_name?: string | null;
+
+  @Column({ name: 'last_name', type: 'varchar', nullable: true })
+  last_name?: string | null;
+
+  @Column({ name: 'email', type: 'varchar', nullable: true })
+  email?: string | null;
+
+  @Column({ name: 'avatar_url', type: 'varchar', nullable: true })
+  avatar_url?: string | null;
+
+  @Column({ name: 'username', type: 'varchar', nullable: true })
+  username?: string | null;
+
+  @Column({ name: 'profile_url', type: 'varchar', nullable: true })
+  profile_url?: string | null;
 
   @Column({ name: 'is_active', type: 'boolean', default: true })
   is_active: boolean;

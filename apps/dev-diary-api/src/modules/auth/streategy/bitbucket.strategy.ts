@@ -41,6 +41,9 @@ export class BitbucketStrategy extends PassportStrategy(Strategy, 'bitbucket') {
       email: primaryEmail,
       first_name: firstName,
       last_name: lastName,
+      avatar_url: profile._json.avatar_url || '',
+      username: profile._json.username || '',
+      profile_url: profile._json.links.html.href || '',
     };
 
     return await this.oauthService.handleOAuthConnection(

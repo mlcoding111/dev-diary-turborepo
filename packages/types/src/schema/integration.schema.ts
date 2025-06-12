@@ -9,6 +9,12 @@ export const integrationSchema = baseSchema.extend({
   provider: z.nativeEnum(OAuthProviderType),
   data: z.any(),
   is_active: z.boolean().default(true),
+  first_name: z.string().nullable().optional(),
+  last_name: z.string().nullable().optional(),
+  email: z.string().nullable().optional(),
+  avatar_url: z.string().nullable().optional(),
+  username: z.string().nullable().optional(),
+  profile_url: z.string().nullable().optional(),
 }).describe('Integration');
 
 export const integrationSchemaSerialized = integrationSchema
