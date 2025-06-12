@@ -86,8 +86,13 @@ export class IntegrationController {
   async getFormattedList(): Promise<any[]> {
     const user: User = this.requestContextService.get('user');
     const integrations = await this.userService.getAllIntegrations(user);
+
+    // This is for debug purposes. Remove this after testing.
+    const withoutGoogle = false;
     const availableProviders = OAuthList.filter(
-      (item) => item.available && item.provider !== OAuthProviderType.GOOGLE,
+      (item) =>
+        item.available &&
+        (withoutGoogle ? item.provider !== OAuthProviderType.GOOGLE : true),
     );
 
     const formattedList = availableProviders.map((item) => {
@@ -99,6 +104,7 @@ export class IntegrationController {
         description: item.description,
         is_active: integration ? true : false,
         connection_url: `${process.env.API_URL}/auth/${item.provider}`,
+        provider: item.provider,
         ...integration,
       };
     });
