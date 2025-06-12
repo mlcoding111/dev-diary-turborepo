@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -12,7 +11,6 @@ import { UserRepository } from '@/models/user/user.repository';
 import { UserService } from '@/models/user/user.service';
 import type { User } from '@/entities/user.entity';
 import type { TRegisterUser, TSerializedUser } from '@repo/types/schema';
-import { ApiException } from '@/filters/api-exception.exception';
 import { InternalServerError } from '@/core/utils/api/exception/ApiError.exception';
 
 @Injectable()
@@ -38,18 +36,13 @@ export class AuthService {
         user.id,
         user.email,
       );
-      const hashedRefreshToken = await argon2.hash(refresh_token);
 
-      await this.userService.updateHashedRefreshToken(
-        user.id,
-        hashedRefreshToken,
+      const updatedUser = await this.userService.updateAllTokens(
+        user,
+        access_token,
         refresh_token,
       );
 
-      const updatedUser = await this.userService.updateAccessToken(
-        user.id,
-        access_token,
-      );
       return updatedUser;
     } catch (error: any) {
       throw new InternalServerError(error.message);
@@ -119,13 +112,8 @@ export class AuthService {
       userId,
       '',
     );
-    const hashedRefreshToken = await argon2.hash(refresh_token);
 
-    await this.userService.updateHashedRefreshToken(
-      userId,
-      hashedRefreshToken,
-      refresh_token,
-    );
+    await this.userService.updateHashedRefreshToken(userId, refresh_token);
 
     return {
       id: userId,
@@ -197,7 +185,7 @@ export class AuthService {
   }
 
   async logout(userId: string) {
-    await this.userService.updateHashedRefreshToken(userId, '');
+    await this.userService.removeAllTokens(userId);
   }
 
   async generateRandomPassword() {
