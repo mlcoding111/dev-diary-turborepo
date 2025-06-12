@@ -34,3 +34,9 @@ export const OAuthList: {
     available: true,
   },
 ];
+
+export const OAuthSettings: Record<string, any> = {
+  webhook: true,
+  auto_sync: true,
+  notifications: true,
+};

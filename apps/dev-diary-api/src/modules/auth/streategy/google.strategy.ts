@@ -34,6 +34,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       email: profile.emails[0].value,
       first_name: profile.name.givenName,
       last_name: profile.name.familyName,
+      avatar_url: profile.photos[0].value || '',
+      username: profile.displayName || '',
+      profile_url: profile.profileUrl || '',
     };
     return await this.oauthService.handleOAuthConnection(
       req,

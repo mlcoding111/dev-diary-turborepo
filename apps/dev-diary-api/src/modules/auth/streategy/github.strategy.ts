@@ -38,8 +38,11 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
 
     const normalizedProfile: TNormalizedOAuthProfile = {
       email: userEmail,
-      first_name: profile._json.name.split(' ')[0] || '',
-      last_name: profile._json.name.split(' ')[1] || '',
+      first_name: profile._json.name?.split(' ')[0] || '',
+      last_name: profile._json.name?.split(' ')[1] || '',
+      avatar_url: profile._json.avatar_url || '',
+      username: profile._json.login || '',
+      profile_url: profile._json.html_url || '',
     };
 
     return await this.oauthService.handleOAuthConnection(
