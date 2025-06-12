@@ -31,6 +31,7 @@ import { OAuthList } from '@/config/oauth.config';
 import { OAuthProviderType } from '@/types/auth';
 import { UserService } from '../user/user.service';
 import { User } from '@/entities/user.entity';
+import { capitalizeFirstLetter, capitalizeFirstLetterOfEachWord } from '@/core/utils/string';
 
 @Controller('integrations')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -85,16 +86,19 @@ export class IntegrationController {
   async getFormattedList(): Promise<any[]> {
     const user: User = this.requestContextService.get('user');
     const integrations = await this.userService.getAllIntegrations(user);
-    const availableProviders = OAuthList.filter((item) => item.available);
+    const availableProviders = OAuthList.filter(
+      (item) => item.available && item.provider !== OAuthProviderType.GOOGLE,
+    );
 
     const formattedList = availableProviders.map((item) => {
       const integration = integrations.find(
         (integration) => integration.provider === item.provider,
       );
       return {
-        title: item.title,
+        title: capitalizeFirstLetterOfEachWord(item.title),
         description: item.description,
         is_active: integration ? true : false,
+        connection_url: `${process.env.API_URL}/auth/${item.provider}`,
         ...integration,
       };
     });
