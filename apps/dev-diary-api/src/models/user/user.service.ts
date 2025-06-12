@@ -32,6 +32,7 @@ export class UserService extends BaseService<User> {
   }
 
   async updateAccessToken(userId: string, accessToken: string) {
+    console.log('updateAccessToken', userId, accessToken);
     return await this.userRepository.save({
       id: userId,
       access_token: accessToken,
@@ -40,7 +41,6 @@ export class UserService extends BaseService<User> {
 
   async getUserByAccessToken(accessToken: string | null): Promise<User | null> {
     if (!accessToken) return null;
-
     const user = await this.userRepository.findOne({
       where: {
         access_token: accessToken,

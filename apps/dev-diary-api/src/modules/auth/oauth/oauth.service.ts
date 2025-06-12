@@ -33,14 +33,14 @@ export class OAuthService {
     const accessTokenCookie: string | null =
       req?.cookies['access_token'] || null;
     let user = await this.userService.getUserByAccessToken(accessTokenCookie);
+
     // User was found, simply return the user and update the integration data
     if (!user) {
       user = await this.usersRepo.findOneBy({
         email: normalizedProfile.email,
       });
-      if (!user) {
-        user = await this.registerOAuthUser(normalizedProfile);
-      }
+
+      if (!user) user = await this.registerOAuthUser(normalizedProfile);
     }
     // Link integration
     await this.upsertIntegration(

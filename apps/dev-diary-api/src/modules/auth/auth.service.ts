@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -11,6 +12,8 @@ import { UserRepository } from '@/models/user/user.repository';
 import { UserService } from '@/models/user/user.service';
 import type { User } from '@/entities/user.entity';
 import type { TRegisterUser, TSerializedUser } from '@repo/types/schema';
+import { ApiException } from '@/filters/api-exception.exception';
+import { InternalServerError } from '@/core/utils/api/exception/ApiError.exception';
 
 @Injectable()
 export class AuthService {
@@ -43,11 +46,13 @@ export class AuthService {
         refresh_token,
       );
 
-      await this.userService.updateAccessToken(user.id, access_token);
-
-      return user;
-    } catch (error) {
-      throw new UnauthorizedException();
+      const updatedUser = await this.userService.updateAccessToken(
+        user.id,
+        access_token,
+      );
+      return updatedUser;
+    } catch (error: any) {
+      throw new InternalServerError(error.message);
     }
   }
   async register(user: TRegisterUser): Promise<User> {
@@ -60,7 +65,6 @@ export class AuthService {
     }
 
     const hashedPassword = await argon2.hash(user.password);
-
     const savedUser: User = await this.userRepository.save({
       ...user,
       password: hashedPassword,
