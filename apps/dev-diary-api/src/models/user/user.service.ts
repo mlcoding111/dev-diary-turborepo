@@ -78,6 +78,7 @@ export class UserService extends BaseService<User> {
     return user;
   }
 
+  //#region INTEGRATIONS
   async upsertIntegration(user: User, integration: Record<string, any>) {
     if (!user || !integration.provider) {
       throw new Error('Missing user or provider info');
@@ -101,6 +102,32 @@ export class UserService extends BaseService<User> {
       data: integration.data,
     });
   }
+
+  async getActiveIntegration(user: User): Promise<Integration> {
+    const integration = await this.integrationRepository.findOneBy({
+      user_id: user.id,
+      is_active: true,
+    });
+
+    if (!integration) {
+      throw new NotFoundException('No active integration found');
+    }
+
+    return integration;
+  }
+
+  async getAllIntegrations(user: User): Promise<Integration[]> {
+    const integrations = await this.integrationRepository.findBy({
+      user_id: user.id,
+    });
+
+    if (!integrations || integrations.length === 0) {
+      throw new NotFoundException('No integrations found');
+    }
+
+    return integrations;
+  }
+  //#endregion
 
   //#region EVENTS
 
