@@ -118,7 +118,10 @@ export class IntegrationController {
   })
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<TSerializedIntegration> {
-    const integration = await this.getIntegration(id);
+    const integration = await this.integrationService.getIntegrationById(
+      this.requestContextService.get('user'),
+      id,
+    );
     return this.serializeIntegration(integration);
   }
 
@@ -134,6 +137,26 @@ export class IntegrationController {
   }
 
   @Validate({
+    bypass: true,
+  })
+  @Post('disconnect/:integrationId')
+  async disconnect(
+    @Param('integrationId') integrationId: string,
+  ): Promise<void> {
+    const user: User = this.requestContextService.get('user');
+    await this.userService.disconnectIntegration(user, integrationId);
+  }
+
+  @Validate({
+    bypass: true,
+  })
+  @Post('connect/:integrationId')
+  async connect(@Param('integrationId') integrationId: string): Promise<void> {
+    const user: User = this.requestContextService.get('user');
+    await this.userService.connectIntegration(user, integrationId);
+  }
+
+  @Validate({
     output: IntegrationController.serializedIntegrationSchema,
     input: updateIntegrationSchema,
   })
@@ -142,7 +165,11 @@ export class IntegrationController {
     @Param('id') id: string,
     @Body() integration: Integration,
   ): Promise<TSerializedIntegration> {
-    const integrationToUpdate = await this.getIntegration(id);
+    const integrationToUpdate =
+      await this.integrationService.getIntegrationById(
+        this.requestContextService.get('user'),
+        id,
+      );
     return await this.integrationRepository.mergeAndUpdate(
       integrationToUpdate,
       integration,
@@ -154,21 +181,17 @@ export class IntegrationController {
   })
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<TSerializedIntegration> {
-    const integration = await this.getIntegration(id);
-    return await this.integrationRepository.remove(integration);
+    const integration = await this.integrationService.getIntegrationById(
+      this.requestContextService.get('user'),
+      id,
+    );
+    return await this.userService.deleteIntegration(
+      this.requestContextService.get('user'),
+      id,
+    );
   }
 
   private serializeIntegration(entity: Integration): TSerializedIntegration {
     return new Integration(entity);
-  }
-
-  private async getIntegration(id: string): Promise<Integration> {
-    const integration = await this.integrationRepository.findOne({
-      where: { id },
-    });
-    if (!integration) {
-      throw new NotFoundException('Integration not found');
-    }
-    return integration;
   }
 }
