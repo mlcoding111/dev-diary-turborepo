@@ -9,7 +9,6 @@ import {
   Query,
   UseInterceptors,
   ClassSerializerInterceptor,
-  NotFoundException,
 } from '@nestjs/common';
 import { Integration } from '@/entities/integration.entity';
 import { IntegrationRepository } from './integration.repository';
