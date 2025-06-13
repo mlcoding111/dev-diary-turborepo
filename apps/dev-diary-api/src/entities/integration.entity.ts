@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { IBaseEntity } from '@/core/entity/base.entity';
 import { User } from './user.entity';
-import { OAuthProviderType } from '@/types/auth';
+import { OAuthIntegrationType, OAuthProviderType } from '@/types/auth';
 import { OAuthSettings } from '@/config/oauth.config';
 
 @Entity()
@@ -43,6 +43,9 @@ export class Integration implements IBaseEntity {
   // Integration type
   @Column({ type: 'enum', enum: OAuthProviderType })
   provider: OAuthProviderType;
+
+  @Column({ name: 'type', type: 'enum', enum: OAuthIntegrationType })
+  type: OAuthIntegrationType;
 
   @Column({ type: 'jsonb' })
   data: Record<string, any>;

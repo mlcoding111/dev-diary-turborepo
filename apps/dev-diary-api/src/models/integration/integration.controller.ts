@@ -95,6 +95,7 @@ export class IntegrationController {
         (withoutGoogle ? item.provider !== OAuthProviderType.GOOGLE : true),
     );
 
+    // TODO: Move this to a service
     const formattedList = availableProviders.map((item) => {
       const integration = integrations.find(
         (integration) => integration.provider === item.provider,

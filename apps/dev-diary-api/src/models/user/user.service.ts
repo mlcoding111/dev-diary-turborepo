@@ -7,6 +7,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { Integration } from '@/entities/integration.entity';
 import * as argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
+import { OAuthProviderType } from '@/types/auth';
 
 @Injectable()
 export class UserService extends BaseService<User> {
@@ -137,7 +138,8 @@ export class UserService extends BaseService<User> {
    */
   @OnEvent('entity.afterUpsert.integration')
   async handleIntegrationAfterUpsert(event: Integration) {
-    if (event.is_active) {
+    console.log('event', event);
+    if (event.is_active && event.provider !== OAuthProviderType.GOOGLE) {
       await this.userRepository.save({
         id: event.user_id,
         active_integration_id: event.id,

@@ -8,7 +8,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import * as argon2 from 'argon2';
-import { TNormalizedOAuthProfile, OAuthProviderType } from '@/types/auth';
+import { TNormalizedOAuthProfile, OAuthProviderType, OAuthIntegrationType } from '@/types/auth';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Integration } from '@/entities/integration.entity';
 import { omit } from 'lodash';
@@ -94,6 +94,11 @@ export class OAuthService {
         user_id: user.id,
       });
 
+      const integrationType =
+        provider === OAuthProviderType.GITHUB
+          ? OAuthIntegrationType.GIT
+          : OAuthIntegrationType.OTHER;
+
       if (existing) {
         integration = await this.integrationsRepo.save({
           ...existing,
@@ -101,6 +106,7 @@ export class OAuthService {
           refresh_token: refreshToken,
           data: profile,
           is_active: true,
+          type: integrationType,
           ...normalizedData,
         });
       } else {
@@ -110,6 +116,7 @@ export class OAuthService {
           access_token: accessToken,
           refresh_token: refreshToken,
           data: profile,
+          type: integrationType,
           ...normalizedData,
         });
       }
