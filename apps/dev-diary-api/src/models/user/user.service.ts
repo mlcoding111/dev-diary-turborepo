@@ -239,14 +239,10 @@ export class UserService extends BaseService<User> {
 
   // Delete an integration for a user
   async deleteIntegration(user: User, integrationId: string) {
-    const integration = await this.integrationRepository.findOneBy({
-      id: integrationId,
-      user_id: user.id,
-    });
-
-    if (!integration) {
-      throw new NotFoundException('Integration not found');
-    }
+    const integration = await this.integrationService.getIntegrationById(
+      user,
+      integrationId,
+    );
 
     const hasChanged = await this.changeActiveIntegrationIfPossible(
       user,
@@ -258,7 +254,7 @@ export class UserService extends BaseService<User> {
         'You must have at least one active integration',
       );
     }
-    await this.integrationRepository.remove(integration);
+    return await this.integrationRepository.remove(integration);
   }
 
   async changeActiveIntegrationIfPossible(
@@ -314,7 +310,6 @@ export class UserService extends BaseService<User> {
    */
   @OnEvent('entity.afterUpsert.integration')
   async handleIntegrationAfterUpsert(event: Integration) {
-    console.log('event', event);
     if (event.is_active && event.provider !== OAuthProviderType.GOOGLE) {
       await this.userRepository.save({
         id: event.user_id,

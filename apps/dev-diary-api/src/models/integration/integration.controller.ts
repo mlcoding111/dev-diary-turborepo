@@ -181,10 +181,6 @@ export class IntegrationController {
   })
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<TSerializedIntegration> {
-    const integration = await this.integrationService.getIntegrationById(
-      this.requestContextService.get('user'),
-      id,
-    );
     return await this.userService.deleteIntegration(
       this.requestContextService.get('user'),
       id,
