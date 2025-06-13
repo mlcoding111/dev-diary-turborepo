@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { baseSchema } from './base.schema';
-import { OAuthProviderType } from '../types/integrations';
+import { OAuthProviderType } from '@/types/auth';
 
 export const integrationSchema = baseSchema.extend({
   user_id: z.string(),
