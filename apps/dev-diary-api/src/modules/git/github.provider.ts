@@ -25,10 +25,11 @@ export class GithubProvider extends GitProvider {
   async getCommits(repo: string): Promise<any> {
     const client = await this.getClient();
     const { data } = await client.request(
-      `GET /repos/mlcoding111/${repo}/commits`,
-      // {
-      //   since: '2025-04-02T00:00:00Z',
-      // },
+      `GET /repos/${this.integration.username}/${repo}/commits`,
+      {
+        sort: 'committer-date',
+        direction: 'desc',
+      },
     );
     return data;
   }

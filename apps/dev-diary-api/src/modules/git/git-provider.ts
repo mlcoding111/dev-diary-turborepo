@@ -4,7 +4,7 @@ import { TSerializedUser } from '@repo/types/schema';
 
 export abstract class GitProvider {
   private readonly user: TSerializedUser;
-  private readonly integration: Integration;
+  public readonly integration: Integration;
   public readonly token: string;
   abstract provider: GitProviderType;
   abstract getUserProfile(): Promise<any>;
