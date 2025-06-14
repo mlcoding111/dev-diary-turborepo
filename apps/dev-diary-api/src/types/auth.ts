@@ -6,6 +6,11 @@ export enum OAuthProviderType {
   AZURE = 'azure',
 }
 
+export enum OAuthIntegrationType {
+  GIT = 'git',
+  OTHER = 'other',
+}
+
 export type TNormalizedOAuthProfile = {
   email: string;
   first_name: string;
